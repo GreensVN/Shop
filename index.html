@@ -156,5 +156,41 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.2.12/marked.min.js"></script>
   <script src="app.js"></script>
+
+  <div id="announcement-banner" style="display: none; padding: 10px; background-color: #ffeb3b; text-align: center;">
+    <span id="announcement-text"></span>
+    <button onclick="closeBanner()" style="margin-left: 10px;">×</button>
+</div>
+
+<script>
+fetch('https://raw.githubusercontent.com/GreensVN/Test/main/announcement.json')
+    .then(response => response.json())
+    .then(data => {
+        if (data.message && data.message.trim() !== '') {
+            const banner = document.getElementById('announcement-banner');
+            const text = document.getElementById('announcement-text');
+            
+            text.textContent = data.message;
+            banner.style.display = 'block';
+            
+            // Lưu trạng thái đóng vào localStorage
+            const lastUpdated = data.last_updated;
+            const closedTimestamp = localStorage.getItem('announcement_closed');
+            
+            if (closedTimestamp && new Date(closedTimestamp) > new Date(lastUpdated)) {
+                banner.style.display = 'none';
+            }
+        }
+    })
+    .catch(error => console.error('Lỗi khi lấy thông báo:', error));
+
+function closeBanner() {
+    const banner = document.getElementById('announcement-banner');
+    banner.style.display = 'none';
+    
+    // Lưu thời gian đóng vào localStorage
+    localStorage.setItem('announcement_closed', new Date().toISOString());
+}
+</script>
 </body>
 </html>
