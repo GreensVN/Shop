@@ -925,3 +925,55 @@ input:checked + .toggle-slider:before {
   }
   .bubble { max-width: 98vw; }
 }
+
+/* Global Notifications */
+.global-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    max-width: 350px;
+    background: var(--main-bg);
+    color: inherit;
+    padding: 15px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border-left: 4px solid;
+    z-index: 1000;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+}
+
+.global-notification.show {
+    transform: translateX(0);
+}
+
+.global-notification.info {
+    border-left-color: var(--info);
+}
+
+.global-notification.success {
+    border-left-color: var(--success);
+}
+
+.global-notification.warning {
+    border-left-color: var(--warning);
+}
+
+.global-notification.error {
+    border-left-color: var(--danger);
+}
+
+.global-notification .toast-close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.global-notification .toast-close:hover {
+    opacity: 1;
+}
