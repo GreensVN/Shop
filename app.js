@@ -1,3 +1,52 @@
+// Thêm vào phần đầu file
+const NOTIFICATION_API_URL = "http://your-api-url:5000/api/notifications";
+
+// Thêm hàm này vào phần hàm utility
+async function fetchNotifications() {
+    try {
+        const response = await fetch(NOTIFICATION_API_URL);
+        if (!response.ok) throw new Error("Failed to fetch notifications");
+        const data = await response.json();
+        return data.notifications.filter(n => n.is_active);
+    } catch (error) {
+        console.error("Error fetching notifications:", error);
+        return [];
+    }
+}
+
+// Thêm hàm hiển thị thông báo
+function showGlobalNotification(notification) {
+    const toast = document.createElement("div");
+    toast.className = `toast show ${notification.type}`;
+    toast.innerHTML = `
+        <div class="toast-content">${notification.message}</div>
+        <button class="toast-close"><i class="ri-close-line"></i></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remove after 10 seconds
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 300);
+    }, 10000);
+    
+    // Manual close
+    toast.querySelector(".toast-close").addEventListener("click", () => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 300);
+    });
+}
+
+// Thêm vào hàm init()
+async function init() {
+    // ... code hiện tại ...
+    
+    // Load and show notifications
+    const notifications = await fetchNotifications();
+    notifications.forEach(showGlobalNotification);
+    
+}
 
 const TOGETHER_API_KEY = "tgp_v1_pT4x-hwfC1iKtBcbAAJd9g_340-jQlYULxc71aB68VQ";
 const IMG_MODEL_ID = "black-forest-labs/FLUX.1-schnell-Free";
