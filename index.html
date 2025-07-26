@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Grow A Garden - Dịch Vụ & Giống Cây Chất Lượng</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-container">
+            <a href="index.html">
+                <img src="images/logo.png" alt="Shop Grow A Garden" class="logo">
+            </a>
+            
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link active">
+                    <i class="fas fa-home"></i>
+                    <span>Trang Chủ</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-seedling"></i>
+                    <span>Giống Cây</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-paw"></i>
+                    <span>Thú Cưng</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-gamepad"></i>
+                    <span>Tài Khoản Game</span>
+                </a>
+            </nav>
+            
+            <button class="btn btn-primary" id="loginButton">
+                <i class="fas fa-user"></i>
+                <span>Đăng Nhập</span>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-container">
+            <h1 class="hero-title">Dịch Vụ Grow A Garden</h1>
+            <p class="hero-subtitle">Khám phá các dịch vụ và sản phẩm chất lượng cao với giá cả hợp lý nhất thị trường</p>
+        </div>
+    </section>
+    
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Filter Section -->
+        <section class="filter-section">
+            <span class="filter-title">BỘ LỌC TÌM KIẾM</span>
+            
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Mã Số Tài Khoản</label>
+                    <input type="text" id="id" class="filter-input" placeholder="Nhập Mã Số Tài Khoản...">
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Giá Tiền</label>
+                    <select id="price" class="filter-input filter-select">
+                        <option value="">-- Chọn Giá Tiền --</option>
+                        <option value="duoi-50k">Dưới 50K</option>
+                        <option value="tu-50k-200k">Từ 50K - 200K</option>
+                        <option value="tu-200k-500k">Từ 200K - 500K</option>
+                        <option value="tu-500k-1-trieu">Từ 500K - 1 Triệu</option>
+                        <option value="tren-1-trieu">Trên 1 Triệu</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Ghi Chú</label>
+                    <input type="text" id="ghichu" class="filter-input" placeholder="Nhập ghi chú...">
+                </div>
+            </div>
+            
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="filterProducts()">
+                    <i class="fas fa-filter"></i>
+                    <span>Lọc</span>
+                </button>
+                <button class="btn btn-outline" onclick="resetFilters()">
+                    <i class="fas fa-times"></i>
+                    <span>Xóa Lọc</span>
+                </button>
+            </div>
+        </section>
+        
+        <!-- Products Grid -->
+        <section id="productsSection">
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be loaded here via JavaScript -->
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-logo">
+                    <img src="images/logo.png" alt="Shop Grow A Garden">
+                    <span>Shop Grow A Garden - Giống Cây - Thú Cưng</span>
+                </div>
+                
+                <div>
+                    <h3 class="footer-title">Về Chúng Tôi</h3>
+                    <p class="footer-text">Chuyên cung cấp dịch vụ, giống cây và thú cưng chất lượng. Giao dịch nhanh chóng, uy tín.</p>
+                </div>
+                
+                <div>
+                    <h3 class="footer-title">Liên Hệ</h3>
+                    <ul class="footer-links">
+                        <li class="footer-link">
+                            <a href="#">
+                                <i class="fas fa-envelope"></i>
+                                <span>Email: support@shopgrowgarden.com</span>
+                            </a>
+                        </li>
+                        <li class="footer-link">
+                            <a href="#">
+                                <i class="fas fa-phone"></i>
+                                <span>Hotline: 0123 456 789</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2023 Shop Grow A Garden. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <!-- Messenger Float Button -->
+    <a href="https://www.messenger.com/t/61562518661118" target="_blank" class="messenger-float">
+        <img src="images/messenger.png" alt="Messenger">
+    </a>
+    
+    <!-- JavaScript -->
+    <script src="js/script.js"></script>
+    <script>
+        // Load products on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+            
+            // Sample product data
+            const products = [
+                {
+                    id: 1,
+                    title: "Gói VIP 1 Tháng",
+                    description: "Tài khoản VIP Grow A Garden với đầy đủ đặc quyền",
+                    price: 150000,
+                    oldPrice: 200000,
+                    image: "images/product1.jpg",
+                    sales: 100,
+                    badge: "HOT",
+                    details: {
+                        features: ["Đầy đủ tính năng VIP", "Hỗ trợ 24/7", "Quà tặng hàng tháng"],
+                        description: "Gói VIP 1 tháng cung cấp cho bạn trải nghiệm tốt nhất với đầy đủ các tính năng cao cấp..."
+                    }
+                },
+                {
+                    id: 2,
+                    title: "Gói Premium 3 Tháng",
+                    description: "Tài khoản Premium Grow A Garden với nhiều ưu đãi",
+                    price: 400000,
+                    oldPrice: 450000,
+                    image: "images/product2.jpg",
+                    sales: 75,
+                    badge: null,
+                    details: {
+                        features: ["Tính năng Premium", "Hỗ trợ nhanh", "Quà tặng định kỳ"],
+                        description: "Gói Premium 3 tháng là lựa chọn tiết kiệm cho những ai muốn trải nghiệm lâu dài..."
+                    }
+                }
+            ];
+            
+            // Render products
+            function renderProducts() {
+                const productsGrid = document.getElementById('productsGrid');
+                productsGrid.innerHTML = '';
+                
+                products.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card fade-in';
+                    productCard.innerHTML = `
+                        <div class="product-image">
+                            <img src="${product.image}" alt="${product.title}" loading="lazy">
+                            ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">${product.title}</h3>
+                            <p class="product-description">${product.description}</p>
+                            
+                            <div class="product-price">
+                                <div>
+                                    <span class="product-current-price">${formatPrice(product.price)}đ</span>
+                                    ${product.oldPrice ? `<span class="product-old-price">${formatPrice(product.oldPrice)}đ</span>` : ''}
+                                </div>
+                                <span class="product-sales">
+                                    <i class="fas fa-user"></i>
+                                    ${product.sales}
+                                </span>
+                            </div>
+                            
+                            <div class="product-actions">
+                                <a href="product.html?id=${product.id}" class="btn-add-to-cart">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span>Mua Ngay</span>
+                                </a>
+                                <button class="btn-wishlist" onclick="addToWishlist(${product.id})">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    productsGrid.appendChild(productCard);
+                });
+            }
+            
+            function formatPrice(price) {
+                return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+            
+            function loadProducts() {
+                // Show loading
+                document.getElementById('productsGrid').innerHTML = `
+                    <div class="fade-in" style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                        <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary-color);"></i>
+                    </div>
+                `;
+                
+                // Simulate API call
+                setTimeout(renderProducts, 800);
+            }
+        });
+    </script>
+</body>
+</html>
