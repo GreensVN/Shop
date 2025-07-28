@@ -33,12 +33,35 @@
                     <span>Tài Khoản Game</span>
                 </a>
             </nav>
-            
+
+            <div class="user-dropdown" id="userDropdown" style="display: none;">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <span class="user-name" id="userName">User</span>
+                <div class="dropdown-menu">
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-user"></i>
+                        <span>Tài khoản</span>
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-heart"></i>
+                        <span>Yêu thích</span>
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Giỏ hàng</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" id="logoutButton">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Đăng xuất</span>
+                    </div>
+                </div>
+            </div>
+
             <button class="btn btn-primary" id="loginButton">
                 <i class="fas fa-user"></i>
                 <span>Đăng Nhập</span>
             </button>
-        </div>
     </header>
 
     <!-- Product Detail Section -->
@@ -273,7 +296,7 @@
     </a>
     
     <!-- JavaScript -->
-    <script src="js/script.js"></script>
+    <script src="script.js"></script>
     <script>
         // Get product ID from URL
         const urlParams = new URLSearchParams(window.location.search);
