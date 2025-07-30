@@ -1,5 +1,5 @@
 // script.js (Frontend)
-const API_BASE_URL = 'http://localhost:3000/api/v1';
+const API_BASE_URL = 'https://greensvn.github.io/Shop/api/v1';
 
 // Global variables
 let currentUser = null;
@@ -547,24 +547,27 @@ function initAuthModal() {
   }
   
   // Close modals
-  closeModal.addEventListener('click', function() {
-    authModal.classList.remove('show');
-    setTimeout(() => {
-      authModal.style.display = 'none';
-      document.body.style.overflow = 'auto';
-      loginForm.reset();
-      registerForm.reset();
-    }, 300);
-  });
-  
-  closeForgotModal.addEventListener('click', function() {
-    forgotModal.classList.remove('show');
-    setTimeout(() => {
-      forgotModal.style.display = 'none';
-      document.body.style.overflow = 'auto';
-      forgotPasswordForm.reset();
-    }, 300);
-  });
+  if (closeModal) {
+    closeModal.addEventListener('click', function() {
+      authModal.classList.remove('show');
+      setTimeout(() => {
+        authModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        loginForm.reset();
+        registerForm.reset();
+      }, 300);
+    });
+  }
+  if (closeForgotModal) {
+    closeForgotModal.addEventListener('click', function() {
+      forgotModal.classList.remove('show');
+      setTimeout(() => {
+        forgotModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        forgotPasswordForm.reset();
+      }, 300);
+    });
+  }
   
   // Close when clicking outside
   window.addEventListener('click', function(event) {
@@ -601,16 +604,6 @@ function initAuthModal() {
     });
   });
   
-  // Open forgot password modal
-  forgotPasswordLink.addEventListener('click', function(e) {
-    e.preventDefault();
-    authModal.style.display = 'none';
-    forgotModal.style.display = 'flex';
-    setTimeout(() => {
-      forgotModal.classList.add('show');
-    }, 10);
-  });
-  
   // Switch to login from forgot password
   document.querySelectorAll('.switch-to-login').forEach(link => {
     link.addEventListener('click', function(e) {
@@ -636,187 +629,193 @@ function initAuthModal() {
   });
   
   // Login form submission
-  loginForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    const rememberMe = document.getElementById('rememberMe').checked;
-    const submitBtn = this.querySelector('.btn-submit');
-    
-    // Validate form
-    let isValid = true;
-    if (!email) {
-      showError(document.getElementById('loginEmail'), 'Vui lòng nhập email');
-      isValid = false;
-    } else if (!validateEmail(email)) {
-      showError(document.getElementById('loginEmail'), 'Email không hợp lệ');
-      isValid = false;
-    }
-    
-    if (!password) {
-      showError(document.getElementById('loginPassword'), 'Vui lòng nhập mật khẩu');
-      isValid = false;
-    } else if (!validatePassword(password)) {
-      showError(document.getElementById('loginPassword'), 'Mật khẩu phải có ít nhất 6 ký tự');
-      isValid = false;
-    }
-    
-    if (!isValid) return;
-    
-    submitBtn.classList.add('loading');
-    submitBtn.disabled = true;
-    
-    try {
-      const user = await authenticate(email, password);
+  if (loginForm) {
+    loginForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+      const submitBtn = this.querySelector('.btn-submit');
       
-      if (!user) {
-        showError(document.getElementById('loginPassword'), 'Email hoặc mật khẩu không đúng');
+      // Validate form
+      let isValid = true;
+      if (!email) {
+        showError(document.getElementById('loginEmail'), 'Vui lòng nhập email');
+        isValid = false;
+      } else if (!validateEmail(email)) {
+        showError(document.getElementById('loginEmail'), 'Email không hợp lệ');
+        isValid = false;
+      }
+      
+      if (!password) {
+        showError(document.getElementById('loginPassword'), 'Vui lòng nhập mật khẩu');
+        isValid = false;
+      } else if (!validatePassword(password)) {
+        showError(document.getElementById('loginPassword'), 'Mật khẩu phải có ít nhất 6 ký tự');
+        isValid = false;
+      }
+      
+      if (!isValid) return;
+      
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+      
+      try {
+        const user = await authenticate(email, password);
+        
+        if (!user) {
+          showError(document.getElementById('loginPassword'), 'Email hoặc mật khẩu không đúng');
+          return;
+        }
+        
+        if (rememberMe) {
+          localStorage.setItem('rememberMe', 'true');
+        } else {
+          localStorage.removeItem('rememberMe');
+        }
+        
+        const successHTML = `
+          <div class="login-success">
+            <div class="login-success-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="login-success-message">Đăng nhập thành công!</h3>
+            <p>Chào mừng ${user.name} trở lại</p>
+          </div>
+        `;
+        
+        authModal.querySelector('.modal-content').insertAdjacentHTML('beforeend', successHTML);
+        document.querySelector('.modal-form.active').style.display = 'none';
+        document.querySelector('.social-login').style.display = 'none';
+        document.querySelector('.login-success').style.display = 'block';
+        
+        setTimeout(function() {
+          authModal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+          updateUIAfterLogin();
+          
+          const successElement = document.querySelector('.login-success');
+          if (successElement) {
+            successElement.remove();
+          }
+          
+          document.querySelector('.modal-form.active').style.display = 'block';
+          document.querySelector('.social-login').style.display = 'block';
+        }, 1500);
+        
+      } catch (error) {
+        showError(document.getElementById('loginPassword'), error.message || 'Đăng nhập thất bại');
+      } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      }
+    });
+  }
+  
+  // Register form submission
+  if (registerForm) {
+    registerForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('registerName').value;
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+      const confirmPassword = document.getElementById('registerConfirmPassword').value;
+      const submitBtn = this.querySelector('.btn-submit');
+
+      // Validate form
+      let isValid = true;
+      if (!name) {
+        showError(document.getElementById('registerName'), 'Vui lòng nhập họ tên');
+        isValid = false;
+      }
+      
+      if (!email) {
+        showError(document.getElementById('registerEmail'), 'Vui lòng nhập email');
+        isValid = false;
+      } else if (!validateEmail(email)) {
+        showError(document.getElementById('registerEmail'), 'Email không hợp lệ');
+        isValid = false;
+      }
+      
+      if (!password) {
+        showError(document.getElementById('registerPassword'), 'Vui lòng nhập mật khẩu');
+        isValid = false;
+      } else if (!validatePassword(password)) {
+        showError(document.getElementById('registerPassword'), 'Mật khẩu phải có ít nhất 6 ký tự');
+        isValid = false;
+      }
+      
+      if (!confirmPassword) {
+        showError(document.getElementById('registerConfirmPassword'), 'Vui lòng nhập lại mật khẩu');
+        isValid = false;
+      } else if (confirmPassword !== password) {
+        showError(document.getElementById('registerConfirmPassword'), 'Mật khẩu không khớp');
+        isValid = false;
+      }
+      
+      if (!isValid) return;
+      
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+      
+      try {
+        await registerUser(name, email, password, confirmPassword);
+        
+        showToast('Đăng ký thành công!', 'success');
+        
+        setTimeout(function() {
+          modalTabs.forEach(t => t.classList.remove('active'));
+          document.querySelector('.modal-tab[data-tab="login"]').classList.add('active');
+          
+          document.querySelectorAll('.modal-form').forEach(form => {
+            form.classList.remove('active');
+          });
+          loginForm.classList.add('active');
+          
+          document.getElementById('loginEmail').value = email;
+          registerForm.reset();
+        }, 1000);
+      } catch (error) {
+        showError(document.getElementById('registerEmail'), error.message || 'Đăng ký thất bại');
+      } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      }
+    });
+  }
+  
+  // Forgot password form submission
+  if (forgotPasswordForm) {
+    forgotPasswordForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('forgotEmail').value;
+      const submitBtn = this.querySelector('.btn-submit');
+      
+      if (!email) {
+        showError(document.getElementById('forgotEmail'), 'Vui lòng nhập email');
+        return;
+      } else if (!validateEmail(email)) {
+        showError(document.getElementById('forgotEmail'), 'Email không hợp lệ');
         return;
       }
       
-      if (rememberMe) {
-        localStorage.setItem('rememberMe', 'true');
-      } else {
-        localStorage.removeItem('rememberMe');
-      }
-      
-      const successHTML = `
-        <div class="login-success">
-          <div class="login-success-icon">
-            <i class="fas fa-check-circle"></i>
-          </div>
-          <h3 class="login-success-message">Đăng nhập thành công!</h3>
-          <p>Chào mừng ${user.name} trở lại</p>
-        </div>
-      `;
-      
-      authModal.querySelector('.modal-content').insertAdjacentHTML('beforeend', successHTML);
-      document.querySelector('.modal-form.active').style.display = 'none';
-      document.querySelector('.social-login').style.display = 'none';
-      document.querySelector('.login-success').style.display = 'block';
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
       
       setTimeout(function() {
-        authModal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        updateUIAfterLogin();
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
         
-        const successElement = document.querySelector('.login-success');
-        if (successElement) {
-          successElement.remove();
-        }
+        showToast('Yêu cầu đặt lại mật khẩu đã được gửi đến email của bạn!', 'success');
         
-        document.querySelector('.modal-form.active').style.display = 'block';
-        document.querySelector('.social-login').style.display = 'block';
+        setTimeout(function() {
+          forgotModal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+          forgotPasswordForm.reset();
+        }, 1000);
       }, 1500);
-      
-    } catch (error) {
-      showError(document.getElementById('loginPassword'), error.message || 'Đăng nhập thất bại');
-    } finally {
-      submitBtn.classList.remove('loading');
-      submitBtn.disabled = false;
-    }
-  });
-  
-  // Register form submission
-  registerForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const name = document.getElementById('registerName').value;
-    const email = document.getElementById('registerEmail').value;
-    const password = document.getElementById('registerPassword').value;
-    const confirmPassword = document.getElementById('registerConfirmPassword').value;
-    const submitBtn = this.querySelector('.btn-submit');
-
-    // Validate form
-    let isValid = true;
-    if (!name) {
-      showError(document.getElementById('registerName'), 'Vui lòng nhập họ tên');
-      isValid = false;
-    }
-    
-    if (!email) {
-      showError(document.getElementById('registerEmail'), 'Vui lòng nhập email');
-      isValid = false;
-    } else if (!validateEmail(email)) {
-      showError(document.getElementById('registerEmail'), 'Email không hợp lệ');
-      isValid = false;
-    }
-    
-    if (!password) {
-      showError(document.getElementById('registerPassword'), 'Vui lòng nhập mật khẩu');
-      isValid = false;
-    } else if (!validatePassword(password)) {
-      showError(document.getElementById('registerPassword'), 'Mật khẩu phải có ít nhất 6 ký tự');
-      isValid = false;
-    }
-    
-    if (!confirmPassword) {
-      showError(document.getElementById('registerConfirmPassword'), 'Vui lòng nhập lại mật khẩu');
-      isValid = false;
-    } else if (confirmPassword !== password) {
-      showError(document.getElementById('registerConfirmPassword'), 'Mật khẩu không khớp');
-      isValid = false;
-    }
-    
-    if (!isValid) return;
-    
-    submitBtn.classList.add('loading');
-    submitBtn.disabled = true;
-    
-    try {
-      await registerUser(name, email, password, confirmPassword);
-      
-      showToast('Đăng ký thành công!', 'success');
-      
-      setTimeout(function() {
-        modalTabs.forEach(t => t.classList.remove('active'));
-        document.querySelector('.modal-tab[data-tab="login"]').classList.add('active');
-        
-        document.querySelectorAll('.modal-form').forEach(form => {
-          form.classList.remove('active');
-        });
-        loginForm.classList.add('active');
-        
-        document.getElementById('loginEmail').value = email;
-        registerForm.reset();
-      }, 1000);
-    } catch (error) {
-      showError(document.getElementById('registerEmail'), error.message || 'Đăng ký thất bại');
-    } finally {
-      submitBtn.classList.remove('loading');
-      submitBtn.disabled = false;
-    }
-  });
-  
-  // Forgot password form submission
-  forgotPasswordForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const email = document.getElementById('forgotEmail').value;
-    const submitBtn = this.querySelector('.btn-submit');
-    
-    if (!email) {
-      showError(document.getElementById('forgotEmail'), 'Vui lòng nhập email');
-      return;
-    } else if (!validateEmail(email)) {
-      showError(document.getElementById('forgotEmail'), 'Email không hợp lệ');
-      return;
-    }
-    
-    submitBtn.classList.add('loading');
-    submitBtn.disabled = true;
-    
-    setTimeout(function() {
-      submitBtn.classList.remove('loading');
-      submitBtn.disabled = false;
-      
-      showToast('Yêu cầu đặt lại mật khẩu đã được gửi đến email của bạn!', 'success');
-      
-      setTimeout(function() {
-        forgotModal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        forgotPasswordForm.reset();
-      }, 1000);
-    }, 1500);
-  });
+    });
+  }
   
   // Social login buttons
   document.querySelectorAll('.social-button').forEach(button => {
@@ -861,30 +860,34 @@ function initAccountModal() {
   const logoutAccountBtn = document.getElementById('logoutAccountBtn');
   const changePasswordBtn = document.getElementById('changePasswordBtn');
   
-  closeAccountModal.addEventListener('click', function() {
-    accountModal.classList.remove('show');
-    setTimeout(() => {
-      accountModal.style.display = 'none';
-      document.body.style.overflow = 'auto';
-    }, 300);
-  });
-  
-  depositAction.addEventListener('click', function() {
-    accountModal.classList.remove('show');
-    setTimeout(() => {
-      accountModal.style.display = 'none';
-      showDepositModal();
-    }, 300);
-  });
-  
-  logoutAccountBtn.addEventListener('click', function() {
-    accountModal.classList.remove('show');
-    setTimeout(() => {
-      accountModal.style.display = 'none';
-      document.body.style.overflow = 'auto';
-      logoutUser();
-    }, 300);
-  });
+  if (closeAccountModal) {
+    closeAccountModal.addEventListener('click', function() {
+      accountModal.classList.remove('show');
+      setTimeout(() => {
+        accountModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }, 300);
+    });
+  }
+  if (depositAction) {
+    depositAction.addEventListener('click', function() {
+      accountModal.classList.remove('show');
+      setTimeout(() => {
+        accountModal.style.display = 'none';
+        showDepositModal();
+      }, 300);
+    });
+  }
+  if (logoutAccountBtn) {
+    logoutAccountBtn.addEventListener('click', function() {
+      accountModal.classList.remove('show');
+      setTimeout(() => {
+        accountModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        logoutUser();
+      }, 300);
+    });
+  }
   
   if (changePasswordBtn) {
     changePasswordBtn.addEventListener('click', function() {
@@ -892,159 +895,188 @@ function initAccountModal() {
     });
   }
   
-  accountModal.addEventListener('click', function(e) {
-    if (e.target === accountModal) {
-      accountModal.classList.remove('show');
-      setTimeout(() => {
-        accountModal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-      }, 300);
-    }
-  });
+  if (accountModal) {
+    accountModal.addEventListener('click', function(e) {
+      if (e.target === accountModal) {
+        accountModal.classList.remove('show');
+        setTimeout(() => {
+          accountModal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }, 300);
+      }
+    });
+  }
 }
 
 // Hiển thị modal nạp tiền
 function showDepositModal() {
   const depositModal = document.getElementById('depositModal');
   
-  depositModal.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  
-  setTimeout(() => {
-    depositModal.classList.add('show');
-  }, 10);
-  
-  document.querySelectorAll('.card-type').forEach(card => {
-    card.addEventListener('click', function() {
-      document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
-      this.classList.add('selected');
-    });
-  });
-  
-  document.getElementById('depositForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    processDeposit();
-  });
-  
-  document.getElementById('closeDepositModal').addEventListener('click', function() {
-    depositModal.classList.remove('show');
+  if (depositModal) {
+    depositModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
     setTimeout(() => {
-      depositModal.style.display = 'none';
-      document.body.style.overflow = 'auto';
-      document.getElementById('depositForm').reset();
-    }, 300);
-  });
-  
-  depositModal.addEventListener('click', function(e) {
-    if (e.target === depositModal) {
-      depositModal.classList.remove('show');
-      setTimeout(() => {
-        depositModal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        document.getElementById('depositForm').reset();
-      }, 300);
+      depositModal.classList.add('show');
+    }, 10);
+    
+    document.querySelectorAll('.card-type').forEach(card => {
+      card.addEventListener('click', function() {
+        document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+      });
+    });
+    
+    const depositForm = document.getElementById('depositForm');
+    if (depositForm) {
+      depositForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        processDeposit();
+      });
     }
-  });
+    
+    const closeDepositModal = document.getElementById('closeDepositModal');
+    if (closeDepositModal) {
+      closeDepositModal.addEventListener('click', function() {
+        depositModal.classList.remove('show');
+        setTimeout(() => {
+          depositModal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+          document.getElementById('depositForm').reset();
+        }, 300);
+      });
+    }
+    
+    if (depositModal) {
+      depositModal.addEventListener('click', function(e) {
+        if (e.target === depositModal) {
+          depositModal.classList.remove('show');
+          setTimeout(() => {
+            depositModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.getElementById('depositForm').reset();
+          }, 300);
+        }
+      });
+    }
+  }
 }
 
 // Hiển thị modal đổi mật khẩu
 function showChangePasswordModal() {
   const modal = document.getElementById('changePasswordModal');
-  modal.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  
-  setTimeout(() => {
-    modal.classList.add('show');
-  }, 10);
-  
-  document.getElementById('changePasswordForm').onsubmit = async function(e) {
-    e.preventDefault();
+  if (modal) {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
     
-    const currentPassword = document.getElementById('currentPassword').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+    setTimeout(() => {
+      modal.classList.add('show');
+    }, 10);
     
-    if (newPassword !== confirmNewPassword) {
-      showToast("Mật khẩu mới không khớp", "error");
-      return;
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    if (changePasswordForm) {
+      changePasswordForm.onsubmit = async function(e) {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+        
+        if (newPassword !== confirmNewPassword) {
+          showToast("Mật khẩu mới không khớp", "error");
+          return;
+        }
+        
+        if (newPassword.length < 6) {
+          showToast("Mật khẩu phải có ít nhất 6 ký tự", "error");
+          return;
+        }
+        
+        try {
+          const response = await callApi('/users/updateMyPassword', 'PATCH', {
+            passwordCurrent: currentPassword,
+            password: newPassword,
+            passwordConfirm: confirmNewPassword
+          });
+          
+          showToast("Đổi mật khẩu thành công", "success");
+          
+          setTimeout(() => {
+            modal.classList.remove('show');
+            setTimeout(() => {
+              modal.style.display = 'none';
+              document.body.style.overflow = 'auto';
+              this.reset();
+            }, 300);
+          }, 1000);
+        } catch (error) {
+          showToast(error.message || "Đổi mật khẩu thất bại", "error");
+        }
+      };
     }
     
-    if (newPassword.length < 6) {
-      showToast("Mật khẩu phải có ít nhất 6 ký tự", "error");
-      return;
-    }
-    
-    try {
-      const response = await callApi('/users/updateMyPassword', 'PATCH', {
-        passwordCurrent: currentPassword,
-        password: newPassword,
-        passwordConfirm: confirmNewPassword
-      });
-      
-      showToast("Đổi mật khẩu thành công", "success");
-      
-      setTimeout(() => {
+    const closeChangePasswordModal = document.getElementById('closeChangePasswordModal');
+    if (closeChangePasswordModal) {
+      closeChangePasswordModal.addEventListener('click', function() {
         modal.classList.remove('show');
         setTimeout(() => {
           modal.style.display = 'none';
           document.body.style.overflow = 'auto';
-          this.reset();
+          document.getElementById('changePasswordForm').reset();
         }, 300);
-      }, 1000);
-    } catch (error) {
-      showToast(error.message || "Đổi mật khẩu thất bại", "error");
+      });
     }
-  };
-  
-  document.getElementById('closeChangePasswordModal').addEventListener('click', function() {
-    modal.classList.remove('show');
-    setTimeout(() => {
-      modal.style.display = 'none';
-      document.body.style.overflow = 'auto';
-      document.getElementById('changePasswordForm').reset();
-    }, 300);
-  });
-  
-  modal.addEventListener('click', function(e) {
-    if (e.target === modal) {
-      modal.classList.remove('show');
-      setTimeout(() => {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        document.getElementById('changePasswordForm').reset();
-      }, 300);
+    
+    if (modal) {
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          modal.classList.remove('show');
+          setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.getElementById('changePasswordForm').reset();
+          }, 300);
+        }
+      });
     }
-  });
+  }
 }
 
 // Hiển thị modal coming soon
 function showComingSoonModal() {
   const comingSoonModal = document.getElementById('comingSoonModal');
   
-  comingSoonModal.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  
-  setTimeout(() => {
-    comingSoonModal.classList.add('show');
-  }, 10);
-  
-  document.getElementById('closeComingSoonModal').addEventListener('click', function() {
-    comingSoonModal.classList.remove('show');
+  if (comingSoonModal) {
+    comingSoonModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
     setTimeout(() => {
-      comingSoonModal.style.display = 'none';
-      document.body.style.overflow = 'auto';
-    }, 300);
-  });
-  
-  comingSoonModal.addEventListener('click', function(e) {
-    if (e.target === comingSoonModal) {
-      comingSoonModal.classList.remove('show');
-      setTimeout(() => {
-        comingSoonModal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-      }, 300);
+      comingSoonModal.classList.add('show');
+    }, 10);
+    
+    const closeComingSoonModal = document.getElementById('closeComingSoonModal');
+    if (closeComingSoonModal) {
+      closeComingSoonModal.addEventListener('click', function() {
+        comingSoonModal.classList.remove('show');
+        setTimeout(() => {
+          comingSoonModal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }, 300);
+      });
     }
-  });
+    
+    if (comingSoonModal) {
+      comingSoonModal.addEventListener('click', function(e) {
+        if (e.target === comingSoonModal) {
+          comingSoonModal.classList.remove('show');
+          setTimeout(() => {
+            comingSoonModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+          }, 300);
+        }
+      });
+    }
+  }
 }
 
 // Back to Top Button
