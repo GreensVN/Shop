@@ -6,6 +6,11 @@
     <title>Tài khoản - Shop Grow A Garden</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Thêm style tạm thời cho demo */
+        .modal { display: none; position: fixed; z-index: 100; }
+        .modal.show { display: flex; }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -34,11 +39,11 @@
                 </a>
             </nav>
 
-            <div class="user-dropdown" id="userDropdown" style="display: none;">
+            <div class="user-dropdown" id="userDropdown">
                 <div class="user-avatar" id="userAvatar">U</div>
                 <span class="user-name" id="userName">User</span>
                 <div class="dropdown-menu">
-                    <a href="#" class="dropdown-item">
+                    <a href="account.html" class="dropdown-item">
                         <i class="fas fa-user"></i>
                         <span>Tài khoản</span>
                     </a>
@@ -62,7 +67,9 @@
                 <i class="fas fa-user"></i>
                 <span>Đăng Nhập</span>
             </button>
+        </div>
     </header>
+    
     <!-- Account Detail Section -->
     <main class="container account-detail-container">
         <div class="breadcrumb">
@@ -102,211 +109,213 @@
                 </button>
             </div>
             
-<div class="account-content">
-  <!-- Thông tin tài khoản -->
-  <div class="account-tab active" id="info">
-    <h2>Thông tin tài khoản</h2>
-    <div class="account-info-grid">
-      <div class="info-item">
-        <label>Họ và tên</label>
-        <div class="info-value" id="userFullName">Nguyễn Văn A</div>
-      </div>
-      <div class="info-item">
-        <label>Email</label>
-        <div class="info-value" id="userEmail">user@example.com</div>
-      </div>
-      <div class="info-item">
-        <label>Số điện thoại</label>
-        <div class="info-value" id="userPhone">Chưa cập nhật</div>
-      </div>
-      <div class="info-item">
-        <label>Ngày đăng ký</label>
-        <div class="info-value" id="userRegisterDate">01/01/2023</div>
-      </div>
-      <div class="info-item">
-        <label>ID tài khoản</label>
-        <div class="info-value" id="userAccountId">123456</div>
-      </div>
-    </div>
-    
-    <button class="btn btn-outline" id="editProfileBtn">
-      <i class="fas fa-edit"></i>
-      Chỉnh sửa thông tin
-    </button>
-  </div>
-  
-  <!-- Số dư & Nạp tiền -->
-  <div class="account-tab" id="balance">
-    <h2>Số dư tài khoản</h2>
-    <div class="account-balance-card">
-      <div class="balance-amount" id="balanceAmount">0đ</div>
-      <div class="balance-actions">
-        <button class="btn btn-primary" id="depositBtn">
-          <i class="fas fa-money-bill-wave"></i>
-          Nạp tiền
-        </button>
-        <button class="btn btn-outline" id="withdrawBtn" disabled>
-          <i class="fas fa-hand-holding-usd"></i>
-          Rút tiền (sắp ra mắt)
-        </button>
-      </div>
-    </div>
-    
-    <div class="deposit-methods">
-      <h3>Phương thức nạp tiền</h3>
-      <div class="methods-grid">
-        <div class="method-card active" data-method="card">
-          <i class="fas fa-credit-card"></i>
-          <span>Thẻ cào</span>
+            <div class="account-content">
+                <!-- Thông tin tài khoản -->
+                <div class="account-tab active" id="info">
+                    <h2>Thông tin tài khoản</h2>
+                    <div class="account-info-grid">
+                        <div class="info-item">
+                            <label>Họ và tên</label>
+                            <div class="info-value" id="userFullName">Nguyễn Văn A</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Email</label>
+                            <div class="info-value" id="userEmail">user@example.com</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Số điện thoại</label>
+                            <div class="info-value" id="userPhone">Chưa cập nhật</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Ngày đăng ký</label>
+                            <div class="info-value" id="userRegisterDate">01/01/2023</div>
+                        </div>
+                        <div class="info-item">
+                            <label>ID tài khoản</label>
+                            <div class="info-value" id="userAccountId">123456</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-outline" id="editProfileBtn">
+                        <i class="fas fa-edit"></i>
+                        Chỉnh sửa thông tin
+                    </button>
+                </div>
+                
+                <!-- Số dư & Nạp tiền -->
+                <div class="account-tab" id="balance">
+                    <h2>Số dư tài khoản</h2>
+                    <div class="account-balance-card">
+                        <div class="balance-amount" id="balanceAmount">0đ</div>
+                        <div class="balance-actions">
+                            <button class="btn btn-primary" id="depositBtn">
+                                <i class="fas fa-money-bill-wave"></i>
+                                Nạp tiền
+                            </button>
+                            <button class="btn btn-outline" id="withdrawBtn" disabled>
+                                <i class="fas fa-hand-holding-usd"></i>
+                                Rút tiền (sắp ra mắt)
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="deposit-methods">
+                        <h3>Phương thức nạp tiền</h3>
+                        <div class="methods-grid">
+                            <div class="method-card active" data-method="card">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Thẻ cào</span>
+                            </div>
+                            <div class="method-card coming-soon" data-method="bank">
+                                <i class="fas fa-university"></i>
+                                <span>Chuyển khoản</span>
+                                <small>Coming Soon</small>
+                            </div>
+                            <div class="method-card coming-soon" data-method="momo">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>Ví MoMo</span>
+                                <small>Coming Soon</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-deposit">
+                        <h3>Nạp nhanh theo mệnh giá</h3>
+                        <div class="quick-amounts">
+                            <button class="quick-amount" data-amount="10000">10,000đ</button>
+                            <button class="quick-amount" data-amount="20000">20,000đ</button>
+                            <button class="quick-amount" data-amount="50000">50,000đ</button>
+                            <button class="quick-amount" data-amount="100000">100,000đ</button>
+                            <button class="quick-amount" data-amount="200000">200,000đ</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lịch sử giao dịch -->
+                <div class="account-tab" id="history">
+                    <div class="history-header">
+                        <h2>Lịch sử giao dịch</h2>
+                        <div class="history-export">
+                            <button class="btn btn-outline">
+                                <i class="fas fa-download"></i>
+                                Xuất báo cáo
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="history-filters">
+                        <select class="filter-select" id="historyTypeFilter">
+                            <option value="all">Tất cả giao dịch</option>
+                            <option value="deposit">Nạp tiền</option>
+                            <option value="purchase">Mua hàng</option>
+                            <option value="withdraw">Rút tiền</option>
+                        </select>
+                        
+                        <div class="date-range">
+                            <input type="date" id="historyStartDate">
+                            <span>đến</span>
+                            <input type="date" id="historyEndDate">
+                        </div>
+                    </div>
+                    
+                    <div class="history-list" id="historyList">
+                        <div class="history-item">
+                            <div class="history-icon success">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            <div class="history-details">
+                                <div class="history-title">Nạp tiền từ thẻ Viettel</div>
+                                <div class="history-date">10/10/2023 15:30</div>
+                                <div class="history-info">••••1234</div>
+                            </div>
+                            <div class="history-amount success">+50,000đ</div>
+                        </div>
+                        
+                        <div class="history-item">
+                            <div class="history-icon purchase">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="history-details">
+                                <div class="history-title">Mua gói VIP 1 tháng</div>
+                                <div class="history-date">09/10/2023 10:15</div>
+                                <div class="history-info">ID đơn hàng: #12345</div>
+                            </div>
+                            <div class="history-amount purchase">-150,000đ</div>
+                        </div>
+                    </div>
+                    
+                    <div class="history-pagination">
+                        <button class="btn btn-outline" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span>Trang 1/1</span>
+                        <button class="btn btn-outline" disabled>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Bảo mật -->
+                <div class="account-tab" id="security">
+                    <h2>Bảo mật tài khoản</h2>
+                    
+                    <div class="security-settings">
+                        <div class="security-item">
+                            <div class="security-info">
+                                <i class="fas fa-lock"></i>
+                                <div>
+                                    <h4>Mật khẩu</h4>
+                                    <p>••••••••••</p>
+                                    <small>Lần thay đổi cuối: 01/10/2023</small>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline" id="changePasswordBtn">
+                                <i class="fas fa-edit"></i>
+                                Đổi mật khẩu
+                            </button>
+                        </div>
+                        
+                        <div class="security-item">
+                            <div class="security-info">
+                                <i class="fas fa-shield-alt"></i>
+                                <div>
+                                    <h4>Xác thực 2 bước</h4>
+                                    <p>Chưa bật</p>
+                                    <small>Tăng cường bảo mật cho tài khoản</small>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline" id="enable2FABtn">
+                                <i class="fas fa-toggle-off"></i>
+                                Bật
+                            </button>
+                        </div>
+                        
+                        <div class="security-item">
+                            <div class="security-info">
+                                <i class="fas fa-laptop"></i>
+                                <div>
+                                    <h4>Thiết bị đã đăng nhập</h4>
+                                    <p>1 thiết bị</p>
+                                    <small>Trình duyệt Chrome trên Windows</small>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline" id="manageDevicesBtn">
+                                <i class="fas fa-cog"></i>
+                                Quản lý
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="security-actions">
+                        <button class="btn btn-danger" id="logoutAllBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Đăng xuất tất cả thiết bị
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="method-card coming-soon" data-method="bank">
-          <i class="fas fa-university"></i>
-          <span>Chuyển khoản</span>
-          <small>Coming Soon</small>
-        </div>
-        <div class="method-card coming-soon" data-method="momo">
-          <i class="fas fa-mobile-alt"></i>
-          <span>Ví MoMo</span>
-          <small>Coming Soon</small>
-        </div>
-      </div>
-    </div>
-    
-    <div class="quick-deposit">
-      <h3>Nạp nhanh theo mệnh giá</h3>
-      <div class="quick-amounts">
-        <button class="quick-amount" data-amount="10000">10,000đ</button>
-        <button class="quick-amount" data-amount="20000">20,000đ</button>
-        <button class="quick-amount" data-amount="50000">50,000đ</button>
-        <button class="quick-amount" data-amount="100000">100,000đ</button>
-        <button class="quick-amount" data-amount="200000">200,000đ</button>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Lịch sử giao dịch -->
-  <div class="account-tab" id="history">
-    <div class="history-header">
-      <h2>Lịch sử giao dịch</h2>
-      <div class="history-export">
-        <button class="btn btn-outline">
-          <i class="fas fa-download"></i>
-          Xuất báo cáo
-        </button>
-      </div>
-    </div>
-    
-    <div class="history-filters">
-      <select class="filter-select" id="historyTypeFilter">
-        <option value="all">Tất cả giao dịch</option>
-        <option value="deposit">Nạp tiền</option>
-        <option value="purchase">Mua hàng</option>
-        <option value="withdraw">Rút tiền</option>
-      </select>
-      
-      <div class="date-range">
-        <input type="date" id="historyStartDate">
-        <span>đến</span>
-        <input type="date" id="historyEndDate">
-      </div>
-    </div>
-    
-    <div class="history-list" id="historyList">
-      <div class="history-item">
-        <div class="history-icon success">
-          <i class="fas fa-arrow-down"></i>
-        </div>
-        <div class="history-details">
-          <div class="history-title">Nạp tiền từ thẻ Viettel</div>
-          <div class="history-date">10/10/2023 15:30</div>
-          <div class="history-info">••••1234</div>
-        </div>
-        <div class="history-amount success">+50,000đ</div>
-      </div>
-      
-      <div class="history-item">
-        <div class="history-icon purchase">
-          <i class="fas fa-shopping-cart"></i>
-        </div>
-        <div class="history-details">
-          <div class="history-title">Mua gói VIP 1 tháng</div>
-          <div class="history-date">09/10/2023 10:15</div>
-          <div class="history-info">ID đơn hàng: #12345</div>
-        </div>
-        <div class="history-amount purchase">-150,000đ</div>
-      </div>
-    </div>
-    
-    <div class="history-pagination">
-      <button class="btn btn-outline" disabled>
-        <i class="fas fa-chevron-left"></i>
-      </button>
-      <span>Trang 1/1</span>
-      <button class="btn btn-outline" disabled>
-        <i class="fas fa-chevron-right"></i>
-      </button>
-    </div>
-  </div>
-  
-  <!-- Bảo mật -->
-  <div class="account-tab" id="security">
-    <h2>Bảo mật tài khoản</h2>
-    
-    <div class="security-settings">
-      <div class="security-item">
-        <div class="security-info">
-          <i class="fas fa-lock"></i>
-          <div>
-            <h4>Mật khẩu</h4>
-            <p>••••••••••</p>
-            <small>Lần thay đổi cuối: 01/10/2023</small>
-          </div>
-        </div>
-        <button class="btn btn-outline" id="changePasswordBtn">
-          <i class="fas fa-edit"></i>
-          Đổi mật khẩu
-        </button>
-      </div>
-      
-      <div class="security-item">
-        <div class="security-info">
-          <i class="fas fa-shield-alt"></i>
-          <div>
-            <h4>Xác thực 2 bước</h4>
-            <p>Chưa bật</p>
-            <small>Tăng cường bảo mật cho tài khoản</small>
-          </div>
-        </div>
-        <button class="btn btn-outline" id="enable2FABtn">
-          <i class="fas fa-toggle-off"></i>
-          Bật
-        </button>
-      </div>
-      
-      <div class="security-item">
-        <div class="security-info">
-          <i class="fas fa-device"></i>
-          <div>
-            <h4>Thiết bị đã đăng nhập</h4>
-            <p>1 thiết bị</p>
-            <small>Trình duyệt Chrome trên Windows</small>
-          </div>
-        </div>
-        <button class="btn btn-outline" id="manageDevicesBtn">
-          <i class="fas fa-cog"></i>
-          Quản lý
-        </button>
-      </div>
-    </div>
-    
-    <div class="security-actions">
-      <button class="btn btn-danger" id="logoutAllBtn">
-        <i class="fas fa-sign-out-alt"></i>
-        Đăng xuất tất cả thiết bị
-      </button>
-    </div>
-  </div>
-</div>
+    </main>
     
     <!-- Footer -->
     <footer class="footer">
@@ -556,10 +565,26 @@
     </div>
     
     <!-- JavaScript -->
-    <script src="script.js"></script>
     <script>
+        // Hàm định dạng tiền tệ
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Hàm đăng xuất
+        function logoutUser() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        // Hàm hiển thị ngày tháng
+        function formatDate(date) {
+            const d = new Date(date);
+            return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Lấy thông tin user từ localStorage
+            // Kiểm tra trạng thái đăng nhập
             const currentUser = JSON.parse(localStorage.getItem('currentUser'));
             const users = JSON.parse(localStorage.getItem('users')) || [];
             
@@ -573,16 +598,35 @@
             
             // Hiển thị thông tin user
             if (user) {
-                document.getElementById('accountAvatar').textContent = user.avatarText || user.name.charAt(0).toUpperCase();
+                // Header
+                document.getElementById('userDropdown').style.display = 'flex';
+                document.getElementById('loginButton').style.display = 'none';
+                document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+                document.getElementById('userName').textContent = user.name;
+                
+                // Sidebar
+                document.getElementById('accountAvatar').textContent = user.name.charAt(0).toUpperCase();
                 document.getElementById('accountName').textContent = user.name;
                 document.getElementById('accountId').textContent = `ID: ${user.id || '123456'}`;
+                
+                // Thông tin tài khoản
                 document.getElementById('userFullName').textContent = user.name;
                 document.getElementById('userEmail').textContent = user.email;
+                document.getElementById('userRegisterDate').textContent = user.registerDate ? formatDate(user.registerDate) : formatDate(new Date());
+                document.getElementById('userAccountId').textContent = user.id || '123456';
+                
+                // Số dư
                 document.getElementById('balanceAmount').textContent = formatPrice(user.balance || 0) + 'đ';
                 
-                // Nếu user chưa có ID, tạo ID ngẫu nhiên và lưu lại
+                // Tạo ID nếu chưa có
                 if (!user.id) {
                     user.id = Math.floor(100000 + Math.random() * 900000);
+                    localStorage.setItem('users', JSON.stringify(users));
+                }
+                
+                // Tạo ngày đăng ký nếu chưa có
+                if (!user.registerDate) {
+                    user.registerDate = new Date().toISOString();
                     localStorage.setItem('users', JSON.stringify(users));
                 }
             }
@@ -610,21 +654,58 @@
             document.getElementById('depositBtn').addEventListener('click', function() {
                 const depositModal = document.getElementById('depositModal');
                 depositModal.style.display = 'flex';
-                
                 setTimeout(() => {
                     depositModal.classList.add('show');
                 }, 10);
             });
             
             // Nút đăng xuất
-            document.getElementById('logoutBtn').addEventListener('click', function() {
-                logoutUser();
+            const logoutButtons = [
+                document.getElementById('logoutBtn'),
+                document.getElementById('logoutButton'),
+                document.getElementById('logoutAllBtn')
+            ];
+            
+            logoutButtons.forEach(btn => {
+                if(btn) btn.addEventListener('click', logoutUser);
             });
             
-            // Định dạng giá tiền
-            function formatPrice(price) {
-                return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            }
+            // Nút đổi mật khẩu
+            document.getElementById('changePasswordBtn').addEventListener('click', function() {
+                const modal = document.getElementById('changePasswordModal');
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 10);
+            });
+            
+            // Đóng modal
+            const closeButtons = [
+                document.getElementById('closeModal'),
+                document.getElementById('closeDepositModal'),
+                document.getElementById('closeChangePasswordModal')
+            ];
+            
+            closeButtons.forEach(btn => {
+                if(btn) btn.addEventListener('click', function() {
+                    const modal = this.closest('.modal');
+                    modal.classList.remove('show');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                    }, 300);
+                });
+            });
+            
+            // Toggle hiển thị mật khẩu
+            document.querySelectorAll('.password-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    const input = this.previousElementSibling;
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+                    this.querySelector('i').classList.toggle('fa-eye');
+                    this.querySelector('i').classList.toggle('fa-eye-slash');
+                });
+            });
         });
     </script>
 </body>
