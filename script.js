@@ -1,5 +1,5 @@
 // script.js (Frontend)
-const API_BASE_URL = 'http://localhost:3000/api/v1';
+const API_BASE_URL = 'http://194.62.248.81:2296/api/v1';
 
 // Global variables
 let currentUser = null;
