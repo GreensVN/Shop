@@ -5,7 +5,7 @@
 // =================================================================
 
 // Dữ liệu sản phẩm mẫu (cục bộ cho trang index)
-const sampleProducts = [
+const localSampleProducts = [
     {
         id: 1,
         title: "Gói VIP 1 Tháng",
@@ -37,16 +37,16 @@ const sampleProducts = [
 ];
 
 // Hàm render (vẽ) các sản phẩm mẫu ra màn hình
-function renderProducts() {
+function renderLocalProducts() {
     const productsGrid = document.getElementById('productsGrid');
     if (!productsGrid) return; // Kiểm tra an toàn
     productsGrid.innerHTML = '';
     
-    sampleProducts.forEach(product => {
+    localSampleProducts.forEach(product => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card fade-in';
         
-        // Đoạn code HTML bên trong thẻ sản phẩm (giữ nguyên logic của bạn)
+        // Sử dụng window.formatPrice từ main.js
         productCard.innerHTML = `
             <div class="product-image">
                 <img src="${product.image}" alt="${product.title}" loading="lazy">
@@ -57,8 +57,8 @@ function renderProducts() {
                 <p class="product-description">${product.description}</p>
                 <div class="product-price">
                     <div>
-                        <span class="product-current-price">${formatPrice(product.price)}đ</span>
-                        ${product.oldPrice ? `<span class="product-old-price">${formatPrice(product.oldPrice)}đ</span>` : ''}
+                        <span class="product-current-price">${window.formatPrice(product.price)}đ</span>
+                        ${product.oldPrice ? `<span class="product-old-price">${window.formatPrice(product.oldPrice)}đ</span>` : ''}
                     </div>
                     <span class="product-sales"><i class="fas fa-user"></i> ${product.sales}</span>
                 </div>
@@ -77,7 +77,7 @@ function renderProducts() {
 }
 
 // Hàm tải sản phẩm (phiên bản cục bộ, dùng dữ liệu mẫu)
-function loadProducts() {
+function loadLocalProducts() {
     const productsGrid = document.getElementById('productsGrid');
     if (!productsGrid) return; // Kiểm tra an toàn
 
@@ -85,12 +85,7 @@ function loadProducts() {
     productsGrid.innerHTML = `<div class="fade-in" style="grid-column: 1/-1; text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary-color);"></i></div>`;
     
     // Giả lập gọi API và render sau 800ms
-    setTimeout(renderProducts, 800);
-}
-
-// Hàm định dạng giá tiền
-function formatPrice(price) {
-    return price.toLocaleString('vi-VN');
+    setTimeout(renderLocalProducts, 800);
 }
 
 // Hàm lọc sản phẩm
@@ -108,7 +103,7 @@ function resetFilters() {
     if (idInput) idInput.value = '';
     if (priceInput) priceInput.value = '';
     if (ghichuInput) ghichuInput.value = '';
-    loadProducts();
+    loadLocalProducts();
 }
 
 // Hàm thêm vào yêu thích
@@ -125,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Chỉ chạy các hành động này nếu đang ở trang chủ (có các phần tử tương ứng)
     if (document.getElementById('productsGrid') && document.getElementById('filterButton')) {
         // 1. Tải sản phẩm
-        loadProducts();
+        loadLocalProducts();
 
         // 2. Đăng ký sự kiện cho các nút lọc
         document.getElementById('filterButton').addEventListener('click', filterProducts);
