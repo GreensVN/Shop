@@ -17,39 +17,35 @@ dotenv.config({ path: './config.env' });
 // Initialize app
 const app = express();
 
-// Middleware
-app.use(express.json());
-app.use(cookieParser());
-
-// --- BẮT ĐẦU CẤU HÌNH CORS CHÍNH XÁC ---
+// --- BẮT ĐẦU CẤU HÌNH CORS NÂNG CẤP ---
 
 // 1. Định nghĩa các tên miền (origins) mà bạn cho phép truy cập
 const allowedOrigins = [
-  'https://greensvn.github.io/Shop/', // URL của frontend trên GitHub Pages
-  // Thêm các URL khác nếu bạn cần test ở máy, ví dụ:
-  // 'http://127.0.0.1:5500',
-  // 'http://localhost:8000'
+  'https://greensvn.github.io' // Không cần dấu / ở cuối
 ];
 
 // 2. Tạo các tùy chọn cho CORS
 const corsOptions = {
   origin: function (origin, callback) {
-    // Cho phép các yêu cầu từ các tên miền trong danh sách `allowedOrigins`
-    // Hoặc các yêu cầu không có origin (ví dụ: dùng Postman, ứng dụng di động)
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    // In ra origin thực tế mà trình duyệt gửi đến để debug
+    console.log('REQUEST ORIGIN:', origin);
+
+    // Cho phép các yêu cầu không có origin (ví dụ: Postman)
+    // hoặc các yêu cầu từ các tên miền trong danh sách
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Origin này không được phép bởi chính sách CORS'));
     }
   },
-  credentials: true, // Cho phép trình duyệt gửi kèm cookie và thông tin xác thực
+  credentials: true,
 };
 
-// 3. Sử dụng CORS với các tùy chọn đã tạo
+// 3. Sử dụng CORS
+app.options('*', cors(corsOptions)); // Xử lý các yêu cầu "pre-flight"
 app.use(cors(corsOptions));
 
-// --- KẾT THÚC CẤU HÌNH CORS ---
-
+// --- KẾT THÚC CẤU HÌNH CORS NÂNG CẤP ---
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
