@@ -599,6 +599,17 @@ const userController = {
     });
   }),
 
+  getMyBalance: catchAsync(async (req, res, next) => {
+  // Không cần tìm lại user vì thông tin đã có sẵn trong req.user
+  res.status(200).json({
+    status: 'success',
+    data: {
+      balance: req.user.balance,
+    },
+  });
+}),
+
+
   // Đã sửa: Xóa hàm getUser không cần thiết vì getMe đã xử lý
   // Đã sửa: Xóa dấu phẩy thừa ở đầu
   updateMe: catchAsync(async (req, res, next) => {
@@ -983,6 +994,7 @@ app.use(authController.protect);
 
 app.patch('/api/v1/users/updateMyPassword', authController.updatePassword);
 app.get('/api/v1/users/me', userController.getMe);
+app.get('/api/v1/users/me/balance', userController.getMyBalance);
 app.patch('/api/v1/users/updateMe', userController.updateMe);
 app.delete('/api/v1/users/deleteMe', userController.deleteMe);
 app.post('/api/v1/users/deposit', userController.deposit);
