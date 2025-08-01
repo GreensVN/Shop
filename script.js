@@ -1,5 +1,5 @@
 // script.js (Frontend)
-const API_BASE_URL = 'https://server-s6nn.onrender.com/';
+const API_BASE_URL = '194.62.248.81:2296/';
 
 // Global variables
 let currentUser = null;
