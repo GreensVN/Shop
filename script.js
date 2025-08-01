@@ -1,5 +1,5 @@
 // script.js (Frontend)
-const API_BASE_URL = 'https://shop-4mlk.onrender.com//api/v1';
+const API_BASE_URL = 'https://shop-4mlk.onrender.com/api/v1';
 
 // Global variables
 let currentUser = null;
