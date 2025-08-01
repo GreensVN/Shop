@@ -1,11 +1,11 @@
-// script.js (Frontend)
+// main.js (Frontend)
 const API_BASE_URL = 'https://shop-4mlk.onrender.com/api/v1';
 
 // Global variables
 let currentUser = null;
 let userBalance = 0;
 
-// Hàm gọi API chung
+// Hàm gọi API chung - SỬA LỖI CORS VÀ 403
 async function callApi(endpoint, method = 'GET', body = null, requiresAuth = true) {
   const headers = {
     'Content-Type': 'application/json',
@@ -21,6 +21,7 @@ async function callApi(endpoint, method = 'GET', body = null, requiresAuth = tru
   const options = {
     method,
     headers,
+    credentials: 'include' // THÊM DÒNG NÀY ĐỂ FIX LỖI CORS VÀ 403
   };
   
   if (body) {
@@ -42,9 +43,11 @@ async function callApi(endpoint, method = 'GET', body = null, requiresAuth = tru
   }
 }
 
-// Format price function
+// Format price function - SỬA LỖI ĐỊNH DẠNG
 window.formatPrice = function(price) {
-  return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  // Xử lý cả số và chuỗi
+  const num = typeof price === 'string' ? parseInt(price) : price;
+  return num.toLocaleString('vi-VN');
 };
 
 // Show toast notification
@@ -104,14 +107,19 @@ async function registerUser(name, email, password, passwordConfirm) {
   }
 }
 
-// Product functions
+// Product functions - SỬA LỖI LOAD SẢN PHẨM
 async function loadProducts() {
   try {
-    const data = await callApi('/products');
-    return data.data.products;
+    const data = await callApi('/products', 'GET', null, false); // requiresAuth=false
+    
+    // Kiểm tra cấu trúc response
+    if (data && data.data && Array.isArray(data.data.products)) {
+      return data.data.products;
+    }
+    throw new Error('Invalid response structure');
   } catch (error) {
     console.error('Failed to load products:', error);
-    return [];
+    return []; // Trả về mảng rỗng
   }
 }
 
@@ -265,7 +273,7 @@ async function processDeposit() {
     
     userBalance = response.data.user.balance;
     
-    showToast(`Nạp thành công ${formatPrice(cardAmount)}đ vào tài khoản`, 'success');
+    showToast(`Nạp thành công ${window.formatPrice(cardAmount)}đ vào tài khoản`, 'success');
     
     setTimeout(() => {
       const depositModal = document.getElementById('depositModal');
@@ -290,12 +298,12 @@ async function processDeposit() {
 function updateBalanceDisplays(balance) {
   const accountBalanceElement = document.getElementById('accountBalance');
   if (accountBalanceElement) {
-    accountBalanceElement.textContent = formatPrice(balance);
+    accountBalanceElement.textContent = window.formatPrice(balance);
   }
   
   const balanceAmountElement = document.getElementById('balanceAmount');
   if (balanceAmountElement) {
-    balanceAmountElement.textContent = formatPrice(balance) + 'đ';
+    balanceAmountElement.textContent = window.formatPrice(balance) + 'đ';
   }
   
   updateDepositHistory();
@@ -318,7 +326,7 @@ async function updateDepositHistory() {
     depositHistoryElement.innerHTML = transactions.filter(t => t.type === 'deposit').map(transaction => `
       <div class="deposit-item">
         <div>
-          <div class="deposit-amount">+${formatPrice(transaction.amount)}đ</div>
+          <div class="deposit-amount">+${window.formatPrice(transaction.amount)}đ</div>
           <div class="deposit-date">${new Date(transaction.createdAt).toLocaleString('vi-VN')}</div>
           <div class="deposit-info">
             <span>Thẻ ${transaction.cardType}</span>
@@ -355,7 +363,7 @@ async function showAccountModal() {
     accountAvatar.textContent = currentUser.avatarText || currentUser.name.charAt(0).toUpperCase();
     accountName.textContent = currentUser.name;
     accountEmail.textContent = currentUser.email;
-    accountBalance.textContent = formatPrice(userBalance);
+    accountBalance.textContent = window.formatPrice(userBalance);
     
     if (accountId) {
       accountId.textContent = `ID: ${currentUser._id}`;
