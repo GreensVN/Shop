@@ -578,13 +578,18 @@ const authController = {
 
 // User Controller
 const userController = {
-  getMe: (req, res, next) => {
-    req.params.id = req.user.id;
-    next();
-  },
+  // Đã sửa: getMe bây giờ nằm BÊN TRONG userController
+  getMe: catchAsync(async (req, res, next) => {
+    // Lấy thông tin user trực tiếp từ req.user đã được middleware protect thêm vào
+    const user = await User.findById(req.user.id);
 
-  getUser: catchAsync(async (req, res, next) => {
-    const user = await User.findById(req.params.id);
+    if (!user) {
+      // Thêm kiểm tra phòng trường hợp user bị xóa sau khi token được tạo
+      return res.status(404).json({
+        status: 'fail',
+        message: 'User not found'
+      });
+    }
 
     res.status(200).json({
       status: 'success',
@@ -594,6 +599,8 @@ const userController = {
     });
   }),
 
+  // Đã sửa: Xóa hàm getUser không cần thiết vì getMe đã xử lý
+  // Đã sửa: Xóa dấu phẩy thừa ở đầu
   updateMe: catchAsync(async (req, res, next) => {
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
@@ -674,6 +681,7 @@ const userController = {
     });
   }),
 
+  // CÁC HÀM DÀNH CHO ADMIN
   getAllUsers: catchAsync(async (req, res, next) => {
     const users = await User.find();
 
@@ -682,6 +690,25 @@ const userController = {
       results: users.length,
       data: {
         users,
+      },
+    });
+  }),
+  
+  // Thêm lại hàm getUser để route của admin hoạt động
+  getUser: catchAsync(async (req, res, next) => {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No user found with that ID'
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        user,
       },
     });
   }),
@@ -955,7 +982,7 @@ app.patch('/api/v1/users/resetPassword/:token', authController.resetPassword);
 app.use(authController.protect);
 
 app.patch('/api/v1/users/updateMyPassword', authController.updatePassword);
-app.get('/api/v1/users/me', userController.getMe, userController.getUser);
+app.get('/api/v1/users/me', userController.getMe);
 app.patch('/api/v1/users/updateMe', userController.updateMe);
 app.delete('/api/v1/users/deleteMe', userController.deleteMe);
 app.post('/api/v1/users/deposit', userController.deposit);
