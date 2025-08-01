@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết sản phẩm - Shop Grow A Garden</title>
+    <title>Gói VIP 1 Tháng - Shop Grow A Garden</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Reset CSS */
         * {
@@ -17,6 +18,7 @@
             background-color: #f8f9fa;
             color: #333;
             line-height: 1.6;
+            scroll-behavior: smooth;
         }
         
         .container {
@@ -34,17 +36,23 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
         }
         
         .header-container {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: relative;
         }
         
         .logo {
             height: 50px;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
         }
         
         .nav-menu {
@@ -60,10 +68,12 @@
             align-items: center;
             font-size: 14px;
             transition: all 0.3s ease;
+            padding: 8px 12px;
+            border-radius: 4px;
         }
         
         .nav-link:hover {
-            color: #c8e6c9;
+            background-color: rgba(255,255,255,0.1);
         }
         
         .nav-link i {
@@ -90,6 +100,8 @@
         
         .btn-primary:hover {
             background-color: #f57c00;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
         .btn-outline {
@@ -100,6 +112,8 @@
         
         .btn-outline:hover {
             background-color: #fff3e0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
         }
         
         /* Breadcrumb */
@@ -109,11 +123,18 @@
             align-items: center;
             color: #666;
             font-size: 14px;
+            flex-wrap: wrap;
         }
         
         .breadcrumb a {
             color: #2e7d32;
             text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .breadcrumb a:hover {
+            color: #1b5e20;
+            text-decoration: underline;
         }
         
         .breadcrumb i {
@@ -124,6 +145,12 @@
         /* Product Detail */
         .product-detail-container {
             padding: 30px 0;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .product-detail {
@@ -144,6 +171,7 @@
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: relative;
         }
         
         .main-image {
@@ -156,12 +184,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: zoom-in;
+            transition: transform 0.3s ease;
+        }
+        
+        .main-image.zoomed {
+            cursor: zoom-out;
+            transform: scale(1.8);
+            z-index: 100;
+            position: relative;
         }
         
         .main-image img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            transition: transform 0.3s ease;
         }
         
         .thumbnail-images {
@@ -179,6 +217,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .thumbnail:hover, .thumbnail.active {
+            border-color: #ff9800;
         }
         
         .thumbnail img {
@@ -192,12 +236,26 @@
             border-radius: 8px;
             padding: 25px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 90px;
         }
         
         .product-title {
-            font-size: 24px;
+            font-size: 28px;
             margin-bottom: 15px;
             color: #333;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .product-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #2e7d32, #ff9800);
         }
         
         .product-meta {
@@ -206,16 +264,23 @@
             margin-bottom: 15px;
             align-items: center;
             font-size: 14px;
+            flex-wrap: wrap;
         }
         
         .product-rating {
             color: #ff9800;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
         .product-status {
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
         
         .in-stock {
@@ -228,10 +293,14 @@
             align-items: center;
             gap: 15px;
             margin-bottom: 20px;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #ff9800;
         }
         
         .current-price {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: bold;
             color: #e53935;
         }
@@ -245,7 +314,7 @@
         .discount-badge {
             background-color: #e53935;
             color: white;
-            padding: 3px 8px;
+            padding: 5px 10px;
             border-radius: 4px;
             font-size: 14px;
             font-weight: bold;
@@ -254,11 +323,13 @@
         .product-description {
             margin-bottom: 20px;
             color: #555;
+            line-height: 1.8;
         }
         
         .product-features h3 {
             margin-bottom: 10px;
             font-size: 18px;
+            color: #2e7d32;
         }
         
         .product-features ul {
@@ -268,6 +339,17 @@
         
         .product-features li {
             margin-bottom: 8px;
+            position: relative;
+            padding-left: 25px;
+        }
+        
+        .product-features li::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: #2e7d32;
         }
         
         .product-actions {
@@ -283,6 +365,7 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         
         .quantity-btn {
@@ -295,6 +378,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background-color 0.3s;
         }
         
         .quantity-btn:hover {
@@ -309,6 +393,7 @@
             border-left: 1px solid #ddd;
             border-right: 1px solid #ddd;
             outline: none;
+            font-weight: bold;
         }
         
         .btn-add-to-cart {
@@ -340,11 +425,22 @@
         .meta-item a {
             color: #2e7d32;
             text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .meta-item a:hover {
+            color: #ff9800;
+            text-decoration: underline;
         }
         
         .meta-item .fab {
             font-size: 20px;
             margin: 0 5px;
+            transition: transform 0.3s;
+        }
+        
+        .meta-item .fab:hover {
+            transform: translateY(-3px);
         }
         
         .fa-facebook { color: #3b5998; }
@@ -364,17 +460,38 @@
             display: flex;
             list-style: none;
             border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
         }
         
         .tabs-nav li {
             padding: 15px 25px;
             cursor: pointer;
             font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .tabs-nav li::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background-color: #2e7d32;
+            transition: width 0.3s;
+        }
+        
+        .tabs-nav li:hover::after {
+            width: 100%;
         }
         
         .tabs-nav li.active {
             color: #2e7d32;
-            border-bottom: 3px solid #2e7d32;
+        }
+        
+        .tabs-nav li.active::after {
+            width: 100%;
         }
         
         .tabs-content {
@@ -383,6 +500,7 @@
         
         .tab-pane {
             display: none;
+            animation: fadeIn 0.5s ease;
         }
         
         .tab-pane.active {
@@ -394,10 +512,12 @@
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 30px;
+            border: 1px solid #eee;
         }
         
         .review-form h4 {
             margin-bottom: 15px;
+            color: #2e7d32;
         }
         
         .form-group {
@@ -413,10 +533,18 @@
         .form-group input, 
         .form-group textarea {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, 
+        .form-group textarea:focus {
+            border-color: #2e7d32;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
         }
         
         .form-group textarea {
@@ -427,6 +555,7 @@
         .rating-input {
             display: flex;
             gap: 5px;
+            flex-direction: row-reverse;
         }
         
         .rating-input input {
@@ -437,6 +566,7 @@
             font-size: 24px;
             color: #ddd;
             cursor: pointer;
+            transition: color 0.3s;
         }
         
         .rating-input input:checked ~ label {
@@ -457,12 +587,15 @@
         .review-item {
             border-bottom: 1px solid #eee;
             padding-bottom: 20px;
+            animation: fadeIn 0.5s ease;
         }
         
         .review-header {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .review-author {
@@ -478,12 +611,28 @@
             color: #ff9800;
         }
         
+        .load-more-reviews {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
         /* Related Products */
         .section-title {
-            font-size: 22px;
+            font-size: 24px;
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 2px solid #2e7d32;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, #2e7d32, #ff9800);
         }
         
         .products-grid {
@@ -497,12 +646,13 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
+            position: relative;
         }
         
         .product-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
         
         .product-image {
@@ -518,6 +668,11 @@
             max-width: 90%;
             max-height: 90%;
             object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
         }
         
         .product-badge {
@@ -530,6 +685,7 @@
             border-radius: 4px;
             font-size: 12px;
             font-weight: bold;
+            z-index: 2;
         }
         
         .product-info-card {
@@ -541,6 +697,11 @@
             margin-bottom: 8px;
             height: 40px;
             overflow: hidden;
+            transition: color 0.3s;
+        }
+        
+        .product-card:hover .product-title-card {
+            color: #2e7d32;
         }
         
         .product-description-card {
@@ -694,6 +855,13 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
             z-index: 99;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: all;
         }
         
         .back-to-top:hover {
@@ -716,6 +884,13 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
             z-index: 99;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 132, 255, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 132, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 132, 255, 0); }
         }
         
         .messenger-float img {
@@ -725,10 +900,140 @@
         
         .messenger-float:hover {
             transform: translateY(-5px);
+            animation: none;
+        }
+        
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .toast {
+            padding: 15px 25px;
+            border-radius: 4px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            animation: slideIn 0.5s, fadeOut 0.5s 2.5s;
+            transform: translateX(-100px);
+            opacity: 0;
+        }
+        
+        @keyframes slideIn {
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+            }
+        }
+        
+        .toast.success {
+            background-color: #2e7d32;
+        }
+        
+        .toast.error {
+            background-color: #e53935;
+        }
+        
+        .toast i {
+            font-size: 24px;
+        }
+        
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .nav-menu {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                width: 100%;
+                background: #2e7d32;
+                flex-direction: column;
+                padding: 20px;
+                gap: 15px;
+                transform: translateY(-100%);
+                opacity: 0;
+                pointer-events: none;
+                transition: all 0.3s ease;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                z-index: 999;
+            }
+            
+            .nav-menu.active {
+                transform: translateY(0);
+                opacity: 1;
+                pointer-events: all;
+            }
+        }
+        
+        /* Progress bar */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            z-index: 1000;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: linear-gradient(90deg, #2e7d32, #ff9800);
+            width: 0%;
+            transition: width 0.2s ease;
+        }
+        
+        /* Featured badge */
+        .featured-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(45deg, #ff9800, #ff5722);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 2;
         }
     </style>
 </head>
 <body>
+    <!-- Progress bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <!-- Toast container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
     <!-- Header -->
     <header class="header">
         <div class="container header-container">
@@ -736,7 +1041,11 @@
                 <img src="https://via.placeholder.com/150x50?text=Grow+A+Garden" alt="Shop Grow A Garden" class="logo">
             </a>
             
-            <nav class="nav-menu">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav class="nav-menu" id="navMenu">
                 <a href="index.html" class="nav-link">
                     <i class="fas fa-home"></i>
                     <span>Trang Chủ</span>
@@ -791,16 +1100,19 @@
         <div class="breadcrumb">
             <a href="index.html">Trang chủ</a>
             <i class="fas fa-chevron-right"></i>
+            <a href="#">Dịch vụ</a>
+            <i class="fas fa-chevron-right"></i>
             <span id="productTitleBreadcrumb">Gói VIP 1 Tháng</span>
         </div>
         
         <div class="product-detail">
             <div class="product-gallery">
-                <div class="main-image">
+                <span class="featured-badge">NỔI BẬT</span>
+                <div class="main-image" id="mainImage">
                     <img id="mainProductImage" src="https://via.placeholder.com/600x400?text=Gói+VIP+1+Tháng" alt="Product Image" loading="lazy">
                 </div>
                 <div class="thumbnail-images" id="thumbnailImages">
-                    <div class="thumbnail">
+                    <div class="thumbnail active">
                         <img src="https://via.placeholder.com/100x80?text=Thumb+1" alt="Thumbnail 1">
                     </div>
                     <div class="thumbnail">
@@ -830,6 +1142,10 @@
                         <i class="fas fa-check-circle"></i>
                         Còn hàng
                     </span>
+                    <span class="product-sales">
+                        <i class="fas fa-user"></i>
+                        125 lượt mua
+                    </span>
                 </div>
                 
                 <div class="product-price-container">
@@ -839,17 +1155,18 @@
                 </div>
                 
                 <div class="product-description" id="productDescription">
-                    <p>Tài khoản VIP Grow A Garden với đầy đủ đặc quyền, hỗ trợ 24/7 và nhiều ưu đãi hấp dẫn dành cho người dùng.</p>
+                    <p>Tài khoản VIP Grow A Garden với đầy đủ đặc quyền, hỗ trợ 24/7 và nhiều ưu đãi hấp dẫn dành cho người dùng. Nâng cấp trải nghiệm của bạn ngay hôm nay!</p>
                 </div>
                 
                 <div class="product-features" id="productFeatures">
                     <h3>Tính năng nổi bật:</h3>
                     <ul>
-                        <li>Đầy đủ tính năng VIP</li>
-                        <li>Hỗ trợ khách hàng 24/7</li>
-                        <li>Quà tặng hàng tháng</li>
-                        <li>Ưu tiên giao dịch</li>
-                        <li>Không quảng cáo</li>
+                        <li>Đầy đủ tính năng VIP không giới hạn</li>
+                        <li>Hỗ trợ khách hàng 24/7 qua nhiều kênh</li>
+                        <li>Quà tặng hàng tháng giá trị cao</li>
+                        <li>Ưu tiên giao dịch và xử lý yêu cầu</li>
+                        <li>Trải nghiệm không quảng cáo phiền phức</li>
+                        <li>Truy cập sớm các tính năng mới</li>
                     </ul>
                 </div>
                 
@@ -892,34 +1209,61 @@
         <div class="product-tabs">
             <ul class="tabs-nav">
                 <li class="active" data-tab="description">Mô tả chi tiết</li>
-                <li data-tab="reviews">Đánh giá</li>
-                <li data-tab="shipping">Vận chuyển</li>
+                <li data-tab="reviews">Đánh giá (42)</li>
+                <li data-tab="shipping">Vận chuyển & Bảo hành</li>
             </ul>
             
             <div class="tabs-content">
                 <div class="tab-pane active" id="description">
                     <div id="detailedDescription">
-                        <p>Gói VIP 1 tháng cung cấp cho bạn trải nghiệm tốt nhất với đầy đủ các tính năng cao cấp của Grow A Garden.</p>
+                        <p>Gói VIP 1 tháng cung cấp cho bạn trải nghiệm tốt nhất với đầy đủ các tính năng cao cấp của Grow A Garden. Đây là giải pháp hoàn hảo cho những người đam mê làm vườn muốn nâng cao hiệu quả và trải nghiệm.</p>
+                        
+                        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 3px solid #2e7d32;">
+                            <h3 style="margin-bottom: 15px; color: #2e7d32;">Lợi ích khi sử dụng gói VIP</h3>
+                            <ul style="list-style: none;">
+                                <li style="margin-bottom: 10px; padding-left: 25px; position: relative;">
+                                    <i class="fas fa-check-circle" style="position: absolute; left: 0; top: 3px; color: #2e7d32;"></i>
+                                    <strong>Tăng năng suất:</strong> Công cụ quản lý vườn thông minh giúp bạn tiết kiệm thời gian
+                                </li>
+                                <li style="margin-bottom: 10px; padding-left: 25px; position: relative;">
+                                    <i class="fas fa-check-circle" style="position: absolute; left: 0; top: 3px; color: #2e7d32;"></i>
+                                    <strong>Hỗ trợ chuyên gia:</strong> Tư vấn từ các chuyên gia làm vườn hàng đầu
+                                </li>
+                                <li style="margin-bottom: 10px; padding-left: 25px; position: relative;">
+                                    <i class="fas fa-check-circle" style="position: absolute; left: 0; top: 3px; color: #2e7d32;"></i>
+                                    <strong>Quà tặng độc quyền:</strong> Nhận hạt giống và dụng cụ làm vườn cao cấp hàng tháng
+                                </li>
+                            </ul>
+                        </div>
+                        
                         <p><strong>Đặc quyền VIP bao gồm:</strong></p>
                         <ul>
-                            <li>Truy cập không giới hạn tất cả tính năng</li>
-                            <li>Hỗ trợ khách hàng ưu tiên 24/7</li>
-                            <li>Nhận quà tặng đặc biệt hàng tháng</li>
-                            <li>Tốc độ xử lý giao dịch nhanh hơn</li>
-                            <li>Không có quảng cáo làm phiền</li>
+                            <li>Truy cập không giới hạn tất cả tính năng cao cấp</li>
+                            <li>Hỗ trợ khách hàng ưu tiên 24/7 qua chat, email và điện thoại</li>
+                            <li>Nhận quà tặng đặc biệt hàng tháng trị giá lên đến 100.000đ</li>
+                            <li>Tốc độ xử lý giao dịch nhanh hơn 50%</li>
+                            <li>Không có quảng cáo làm phiền trong trải nghiệm</li>
+                            <li>Truy cập sớm các tính năng mới trước người dùng thường</li>
+                            <li>Giảm giá 10% cho tất cả đơn hàng trong thời gian sử dụng VIP</li>
                         </ul>
                         <p><strong>Hướng dẫn sử dụng:</strong></p>
                         <ol>
                             <li>Mua gói VIP từ cửa hàng</li>
-                            <li>Nhận mã kích hoạt qua email</li>
-                            <li>Nhập mã vào phần Cài đặt tài khoản</li>
-                            <li>Tận hưởng các đặc quyền VIP</li>
+                            <li>Nhận mã kích hoạt qua email ngay sau khi thanh toán</li>
+                            <li>Đăng nhập tài khoản Grow A Garden và vào phần Cài đặt</li>
+                            <li>Nhập mã kích hoạt vào mục "Nâng cấp tài khoản"</li>
+                            <li>Tận hưởng các đặc quyền VIP ngay lập tức</li>
                         </ol>
+                        
+                        <div style="margin-top: 30px; background: #e8f5e9; padding: 20px; border-radius: 8px; text-align: center;">
+                            <h3 style="color: #2e7d32; margin-bottom: 15px;">Đảm bảo hài lòng 100%</h3>
+                            <p>Nếu không hài lòng với gói VIP, chúng tôi hoàn tiền trong vòng 7 ngày!</p>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="tab-pane" id="reviews">
-                    <h3>Đánh giá sản phẩm</h3>
+                    <h3>Đánh giá sản phẩm (4.5/5)</h3>
                     <div class="review-form">
                         <h4>Viết đánh giá</h4>
                         <form id="reviewForm">
@@ -948,13 +1292,13 @@
                             </div>
                             <div class="form-group">
                                 <label for="reviewText">Nội dung đánh giá</label>
-                                <textarea id="reviewText" rows="5" required></textarea>
+                                <textarea id="reviewText" rows="5" required placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."></textarea>
                             </div>
                             <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
                         </form>
                     </div>
                     
-                    <div class="review-list">
+                    <div class="review-list" id="reviewList">
                         <div class="review-item">
                             <div class="review-header">
                                 <span class="review-author">Nguyễn Văn A</span>
@@ -968,7 +1312,7 @@
                                 </div>
                             </div>
                             <div class="review-content">
-                                <p>Sản phẩm rất tốt, tôi rất hài lòng với dịch vụ này. Sẽ ủng hộ shop dài dài.</p>
+                                <p>Sản phẩm rất tốt, tôi rất hài lòng với dịch vụ này. Hỗ trợ khách hàng rất nhanh chóng và nhiệt tình. Sẽ ủng hộ shop dài dài.</p>
                             </div>
                         </div>
                         <div class="review-item">
@@ -984,7 +1328,7 @@
                                 </div>
                             </div>
                             <div class="review-content">
-                                <p>Dịch vụ tốt, hỗ trợ nhanh chóng. Giá cả hợp lý so với những gì nhận được.</p>
+                                <p>Dịch vụ tốt, hỗ trợ nhanh chóng. Giá cả hợp lý so với những gì nhận được. Tuy nhiên giao diện có thể cải thiện thêm.</p>
                             </div>
                         </div>
                         <div class="review-item">
@@ -1000,9 +1344,16 @@
                                 </div>
                             </div>
                             <div class="review-content">
-                                <p>Mua gói VIP và rất hài lòng. Tốc độ xử lý nhanh, không gặp quảng cáo phiền phức.</p>
+                                <p>Mua gói VIP và rất hài lòng. Tốc độ xử lý nhanh, không gặp quảng cáo phiền phức. Quà tặng hàng tháng rất có giá trị.</p>
                             </div>
                         </div>
+                    </div>
+                    
+                    <div class="load-more-reviews">
+                        <button class="btn btn-outline" id="loadMoreReviews">
+                            <i class="fas fa-plus"></i>
+                            Xem thêm đánh giá
+                        </button>
                     </div>
                 </div>
                 
@@ -1010,12 +1361,25 @@
                     <h3>Chính sách vận chuyển</h3>
                     <p>Chúng tôi giao hàng toàn quốc với các phương thức sau:</p>
                     <ul>
-                        <li>Giao hàng nhanh trong 2-4 giờ (nội thành Hà Nội, TP.HCM)</li>
-                        <li>Giao hàng tiêu chuẩn 1-3 ngày (toàn quốc)</li>
-                        <li>Nhận hàng tại cửa hàng</li>
+                        <li><strong>Giao hàng nhanh:</strong> Trong 2-4 giờ (nội thành Hà Nội, TP.HCM) - Phí 20.000đ</li>
+                        <li><strong>Giao hàng tiêu chuẩn:</strong> 1-3 ngày (toàn quốc) - Phí 15.000đ</li>
+                        <li><strong>Nhận hàng tại cửa hàng:</strong> Miễn phí</li>
                     </ul>
-                    <p>Phí vận chuyển từ 15.000đ - 30.000đ tùy khu vực.</p>
                     <p><strong>Lưu ý:</strong> Đối với sản phẩm là dịch vụ, mã kích hoạt sẽ được gửi qua email ngay sau khi thanh toán thành công.</p>
+                    
+                    <h3 style="margin-top: 30px;">Chính sách bảo hành</h3>
+                    <p>Chúng tôi cam kết:</p>
+                    <ul>
+                        <li><strong>Bảo hành 7 ngày:</strong> Hoàn tiền 100% nếu không hài lòng với dịch vụ</li>
+                        <li><strong>Hỗ trợ kỹ thuật:</strong> 24/7 qua nhiều kênh: hotline, chat, email</li>
+                        <li><strong>Đổi trả miễn phí:</strong> Trong trường hợp mã kích hoạt không hoạt động</li>
+                        <li><strong>Tư vấn trọn đời:</strong> Cho khách hàng đã sử dụng dịch vụ</li>
+                    </ul>
+                    
+                    <div style="margin-top: 30px; background: #fff8e1; padding: 20px; border-radius: 8px; border-left: 3px solid #ff9800;">
+                        <h3 style="color: #ff9800; margin-bottom: 15px;">Cam kết chất lượng</h3>
+                        <p>Chúng tôi tự hào mang đến dịch vụ tốt nhất với sự hỗ trợ tận tâm từ đội ngũ chuyên gia. Mọi vấn đề phát sinh sẽ được giải quyết trong vòng 24 giờ.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1085,6 +1449,7 @@
                 <div class="product-card fade-in">
                     <div class="product-image">
                         <img src="https://via.placeholder.com/300x200?text=Gói+Basic+1+Tháng" alt="Gói Basic 1 Tháng">
+                        <span class="product-badge">GIẢM 15%</span>
                     </div>
                     <div class="product-info-card">
                         <h3 class="product-title-card">Gói Basic 1 Tháng</h3>
@@ -1092,6 +1457,7 @@
                         <div class="product-price">
                             <div>
                                 <span class="product-current-price">80.000đ</span>
+                                <span class="product-old-price">94.000đ</span>
                             </div>
                             <span class="product-sales">
                                 <i class="fas fa-user"></i>
@@ -1147,11 +1513,54 @@
                 <div class="footer-logo">
                     <img src="https://via.placeholder.com/150x50?text=Grow+A+Garden" alt="Shop Grow A Garden">
                     <span>Shop Grow A Garden - Giống Cây - Thú Cưng</span>
+                    <div style="display: flex; gap: 15px; margin-top: 10px;">
+                        <a href="#" style="color: white; font-size: 20px;"><i class="fab fa-facebook"></i></a>
+                        <a href="#" style="color: white; font-size: 20px;"><i class="fab fa-instagram"></i></a>
+                        <a href="#" style="color: white; font-size: 20px;"><i class="fab fa-youtube"></i></a>
+                    </div>
                 </div>
                 
                 <div>
                     <h3 class="footer-title">Về Chúng Tôi</h3>
                     <p class="footer-text">Chuyên cung cấp dịch vụ, giống cây và thú cưng chất lượng. Giao dịch nhanh chóng, uy tín.</p>
+                    <div class="footer-links">
+                        <li class="footer-link">
+                            <a href="#">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Giới thiệu</span>
+                            </a>
+                        </li>
+                        <li class="footer-link">
+                            <a href="#">
+                                <i class="fas fa-newspaper"></i>
+                                <span>Tin tức</span>
+                            </a>
+                        </li>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="footer-title">Chính sách</h3>
+                    <ul class="footer-links">
+                        <li class="footer-link">
+                            <a href="#">
+                                <i class="fas fa-shipping-fast"></i>
+                                <span>Chính sách vận chuyển</span>
+                            </a>
+                        </li>
+                        <li class="footer-link">
+                            <a href="#">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Chính sách bảo hành</span>
+                            </a>
+                        </li>
+                        <li class="footer-link">
+                            <a href="#">
+                                <i class="fas fa-lock"></i>
+                                <span>Chính sách bảo mật</span>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
                 
                 <div>
@@ -1167,6 +1576,12 @@
                             <a href="#">
                                 <i class="fas fa-phone"></i>
                                 <span>Hotline: 0123 456 789</span>
+                            </a>
+                        </li>
+                        <li class="footer-link">
+                            <a href="#">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Địa chỉ: Số 123, Đường ABC, Hà Nội</span>
                             </a>
                         </li>
                     </ul>
@@ -1231,12 +1646,27 @@
             // Add to cart function
             document.getElementById('addToCartBtn').addEventListener('click', function() {
                 const quantity = parseInt(document.getElementById('productQty').value);
-                alert(`Đã thêm ${quantity} sản phẩm vào giỏ hàng`);
+                showToast(`Đã thêm ${quantity} sản phẩm vào giỏ hàng`, 'success');
             });
             
             // Add to wishlist function
             document.getElementById('addToWishlistBtn').addEventListener('click', function() {
-                alert('Đã thêm sản phẩm vào danh sách yêu thích');
+                const btn = this;
+                const icon = btn.querySelector('i');
+                
+                if (icon.classList.contains('far')) {
+                    icon.classList.replace('far', 'fas');
+                    btn.style.backgroundColor = '#fff3e0';
+                    btn.style.borderColor = '#e53935';
+                    btn.style.color = '#e53935';
+                    showToast('Đã thêm sản phẩm vào danh sách yêu thích', 'success');
+                } else {
+                    icon.classList.replace('fas', 'far');
+                    btn.style.backgroundColor = '';
+                    btn.style.borderColor = '#ff9800';
+                    btn.style.color = '#ff9800';
+                    showToast('Đã xóa sản phẩm khỏi danh sách yêu thích', 'success');
+                }
             });
             
             // Review form submission
@@ -1245,10 +1675,45 @@
                 // Check if a rating is selected
                 const rating = document.querySelector('input[name="rating"]:checked');
                 if (!rating) {
-                    alert('Vui lòng chọn số sao đánh giá');
+                    showToast('Vui lòng chọn số sao đánh giá', 'error');
                     return;
                 }
-                alert('Cảm ơn bạn đã đánh giá sản phẩm!');
+                
+                const name = document.getElementById('reviewName').value;
+                const reviewContent = document.getElementById('reviewText').value;
+                
+                // Create new review element
+                const reviewList = document.getElementById('reviewList');
+                const reviewItem = document.createElement('div');
+                reviewItem.classList.add('review-item');
+                
+                const stars = '';
+                for (let i = 0; i < 5; i++) {
+                    if (i < parseInt(rating.value)) {
+                        stars += '<i class="fas fa-star"></i>';
+                    } else {
+                        stars += '<i class="far fa-star"></i>';
+                    }
+                }
+                
+                const now = new Date();
+                const dateStr = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+                
+                reviewItem.innerHTML = `
+                    <div class="review-header">
+                        <span class="review-author">${name}</span>
+                        <span class="review-date">${dateStr}</span>
+                        <div class="review-rating">
+                            ${stars}
+                        </div>
+                    </div>
+                    <div class="review-content">
+                        <p>${reviewContent}</p>
+                    </div>
+                `;
+                
+                reviewList.prepend(reviewItem);
+                showToast('Cảm ơn bạn đã đánh giá sản phẩm!', 'success');
                 this.reset();
             });
             
@@ -1257,10 +1722,16 @@
             
             window.addEventListener('scroll', function() {
                 if (window.pageYOffset > 300) {
-                    backToTopBtn.style.display = 'flex';
+                    backToTopBtn.classList.add('visible');
                 } else {
-                    backToTopBtn.style.display = 'none';
+                    backToTopBtn.classList.remove('visible');
                 }
+                
+                // Update progress bar
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (winScroll / height) * 100;
+                document.getElementById("progressBar").style.width = scrolled + "%";
             });
             
             backToTopBtn.addEventListener('click', function() {
@@ -1273,16 +1744,112 @@
             // Thumbnail click functionality
             const thumbnails = document.querySelectorAll('.thumbnail');
             const mainImage = document.getElementById('mainProductImage');
+            const mainImageContainer = document.getElementById('mainImage');
             
             thumbnails.forEach(thumbnail => {
                 thumbnail.addEventListener('click', function() {
+                    // Remove active class from all thumbnails
+                    thumbnails.forEach(t => t.classList.remove('active'));
+                    
+                    // Add active class to clicked thumbnail
+                    this.classList.add('active');
+                    
                     const img = this.querySelector('img');
                     mainImage.src = img.src;
                 });
             });
+            
+            // Image zoom functionality
+            mainImageContainer.addEventListener('click', function() {
+                this.classList.toggle('zoomed');
+            });
+            
+            // Mobile menu toggle
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const navMenu = document.getElementById('navMenu');
+            
+            mobileMenuBtn.addEventListener('click', function() {
+                navMenu.classList.toggle('active');
+            });
+            
+            // Load more reviews
+            document.getElementById('loadMoreReviews').addEventListener('click', function() {
+                const reviewList = document.getElementById('reviewList');
+                
+                // Simulate loading
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...';
+                
+                setTimeout(() => {
+                    // Add more reviews
+                    for (let i = 0; i < 2; i++) {
+                        const reviewItem = document.createElement('div');
+                        reviewItem.classList.add('review-item');
+                        
+                        const names = ['Phạm Thị D', 'Hoàng Văn E', 'Lý Thị F'];
+                        const ratings = [4, 5, 4];
+                        const dates = ['05/06/2023', '01/06/2023', '28/05/2023'];
+                        const contents = [
+                            'Gói VIP giúp tôi quản lý vườn hiệu quả hơn nhiều. Đặc biệt thích tính năng nhắc lịch tưới nước và bón phân.',
+                            'Tuyệt vời! Hỗ trợ khách hàng rất chuyên nghiệp. Quà tặng hàng tháng là điểm cộng lớn.',
+                            'Sau 1 tháng sử dụng thấy rất hài lòng. Giao diện thân thiện, dễ sử dụng.'
+                        ];
+                        
+                        const randomIndex = Math.floor(Math.random() * names.length);
+                        
+                        let stars = '';
+                        for (let j = 0; j < 5; j++) {
+                            if (j < ratings[randomIndex]) {
+                                stars += '<i class="fas fa-star"></i>';
+                            } else {
+                                stars += '<i class="far fa-star"></i>';
+                            }
+                        }
+                        
+                        reviewItem.innerHTML = `
+                            <div class="review-header">
+                                <span class="review-author">${names[randomIndex]}</span>
+                                <span class="review-date">${dates[randomIndex]}</span>
+                                <div class="review-rating">
+                                    ${stars}
+                                </div>
+                            </div>
+                            <div class="review-content">
+                                <p>${contents[randomIndex]}</p>
+                            </div>
+                        `;
+                        
+                        reviewList.appendChild(reviewItem);
+                    }
+                    
+                    this.innerHTML = '<i class="fas fa-plus"></i> Xem thêm đánh giá';
+                    showToast('Đã tải thêm đánh giá', 'success');
+                }, 800);
+            });
+            
+            // Toast notification function
+            function showToast(message, type) {
+                const toastContainer = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.classList.add('toast', type);
+                
+                toast.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                    <span>${message}</span>
+                `;
+                
+                toastContainer.appendChild(toast);
+                
+                // Remove toast after animation completes
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }
+            
+            // Initialize with a featured badge
+            setTimeout(() => {
+                showToast('🔥 Gói VIP đang được giảm giá 25%!', 'success');
+            }, 1000);
         });
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-<script src="main.js"></script>   <!-- Nạp "bộ não" chung trước -->
 </body>
 </html>
