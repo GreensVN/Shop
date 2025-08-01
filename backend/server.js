@@ -17,36 +17,15 @@ dotenv.config({ path: './config.env' });
 // Initialize app
 const app = express();
 
-const allowedOrigins = [
-  'https://greensvn.github.io/Shop/', // CÓ CẢ ĐƯỜNG DẪN /Shop/
-];```
-
-Tuy nhiên, khái niệm **"Origin"** trong bảo mật web chỉ bao gồm 3 phần: **Giao thức + Tên miền + Cổng (nếu có)**. Nó **KHÔNG** bao gồm đường dẫn (path) phía sau.
-
-*   URL đầy đủ của bạn là: `https://greensvn.github.io/Shop/`
-*   Nhưng **Origin** mà trình duyệt sẽ gửi đi chỉ là: `https://greensvn.github.io`
-
-Vì `'https://greensvn.github.io'` không bằng `'https://greensvn.github.io/Shop/'`, nên phép so sánh của bạn luôn trả về `false`, dẫn đến lỗi CORS.
-
----
-
-### **Cách Sửa Chính Xác**
-
-Bạn cần xóa bỏ phần đường dẫn (`/Shop/`) ra khỏi chuỗi định nghĩa trong `allowedOrigins`.
-
-**Đây là đoạn code đúng, hãy copy và thay thế toàn bộ khối CORS của bạn bằng khối này:**
-
-```javascript
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
 
-// --- BẮT ĐẦU CẤU HÌNH CORS CHÍNH XÁC ---
+// --- BẮT ĐẦU CẤU HÌNH CORS ---
 
-// 1. Định nghĩa các tên miền (origins) mà bạn cho phép truy cập
-// QUAN TRỌNG: Origin KHÔNG bao gồm đường dẫn (path)
+// 1. Định nghĩa origin được phép (KHÔNG bao gồm đường dẫn /Shop/)
 const allowedOrigins = [
-  'https://greensvn.github.io' // Xóa bỏ /Shop/ ở cuối
+  'https://greensvn.github.io'
 ];
 
 // 2. Tạo các tùy chọn cho CORS
@@ -55,7 +34,7 @@ const corsOptions = {
     // In ra origin thực tế để debug trong log của Render
     console.log('REQUEST ORIGIN:', origin);
 
-    // Cho phép các yêu cầu không có origin (như Postman) hoặc từ các tên miền trong danh sách
+    // Cho phép các yêu cầu từ tên miền trong danh sách hoặc các yêu cầu không có origin (như Postman)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -65,8 +44,8 @@ const corsOptions = {
   credentials: true,
 };
 
-// 3. Sử dụng CORS với các tùy chọn đã tạo
-app.use(cors(corsOptions)); // Sẽ áp dụng cho tất cả các request
+// 3. Sử dụng CORS để xử lý tất cả các request, bao gồm cả OPTIONS (pre-flight)
+app.use(cors(corsOptions));
 
 // --- KẾT THÚC CẤU HÌNH CORS ---
 
