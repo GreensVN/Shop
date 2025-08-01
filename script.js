@@ -1,174 +1,134 @@
-// Load products on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadProducts();
-            
-            // Sample product data
-            const products = [
-                {
-                    id: 1,
-                    title: "Gói VIP 1 Tháng",
-                    description: "Tài khoản VIP Grow A Garden với đầy đủ đặc quyền",
-                    price: 150000,
-                    oldPrice: 200000,
-                    image: "images/product1.jpg",
-                    sales: 100,
-                    badge: "HOT",
-                    details: {
-                        features: ["Đầy đủ tính năng VIP", "Hỗ trợ 24/7", "Quà tặng hàng tháng"],
-                        description: "Gói VIP 1 tháng cung cấp cho bạn trải nghiệm tốt nhất với đầy đủ các tính năng cao cấp..."
-                    }
-                },
-                {
-                    id: 2,
-                    title: "Gói Premium 3 Tháng",
-                    description: "Tài khoản Premium Grow A Garden với nhiều ưu đãi",
-                    price: 400000,
-                    oldPrice: 450000,
-                    image: "images/product2.jpg",
-                    sales: 75,
-                    badge: null,
-                    details: {
-                        features: ["Tính năng Premium", "Hỗ trợ nhanh", "Quà tặng định kỳ"],
-                        description: "Gói Premium 3 tháng là lựa chọn tiết kiệm cho những ai muốn trải nghiệm lâu dài..."
-                    }
-                }
-            ];
-            
-            // Render products safely
-            function renderProducts() {
-                const productsGrid = document.getElementById('productsGrid');
-                productsGrid.innerHTML = '';
-                
-                products.forEach(product => {
-                    const productCard = document.createElement('div');
-                    productCard.className = 'product-card fade-in';
-                    
-                    // Create DOM elements safely
-                    const imageDiv = document.createElement('div');
-                    imageDiv.className = 'product-image';
-                    
-                    const img = document.createElement('img');
-                    img.src = product.image;
-                    img.alt = product.title;
-                    img.loading = 'lazy';
-                    imageDiv.appendChild(img);
-                    
-                    if (product.badge) {
-                        const badge = document.createElement('span');
-                        badge.className = 'product-badge';
-                        badge.textContent = product.badge;
-                        imageDiv.appendChild(badge);
-                    }
-                    
-                    const infoDiv = document.createElement('div');
-                    infoDiv.className = 'product-info';
-                    
-                    const title = document.createElement('h3');
-                    title.className = 'product-title';
-                    title.textContent = product.title;
-                    infoDiv.appendChild(title);
-                    
-                    const desc = document.createElement('p');
-                    desc.className = 'product-description';
-                    desc.textContent = product.description;
-                    infoDiv.appendChild(desc);
-                    
-                    const priceDiv = document.createElement('div');
-                    priceDiv.className = 'product-price';
-                    
-                    const priceContainer = document.createElement('div');
-                    const currentPrice = document.createElement('span');
-                    currentPrice.className = 'product-current-price';
-                    currentPrice.textContent = formatPrice(product.price) + 'đ';
-                    priceContainer.appendChild(currentPrice);
-                    
-                    if (product.oldPrice) {
-                        const oldPrice = document.createElement('span');
-                        oldPrice.className = 'product-old-price';
-                        oldPrice.textContent = formatPrice(product.oldPrice) + 'đ';
-                        priceContainer.appendChild(oldPrice);
-                    }
-                    
-                    priceDiv.appendChild(priceContainer);
-                    
-                    const sales = document.createElement('span');
-                    sales.className = 'product-sales';
-                    sales.innerHTML = '<i class="fas fa-user"></i> ' + product.sales;
-                    priceDiv.appendChild(sales);
-                    
-                    infoDiv.appendChild(priceDiv);
-                    
-                    const actionsDiv = document.createElement('div');
-                    actionsDiv.className = 'product-actions';
-                    
-                    const buyBtn = document.createElement('a');
-                    buyBtn.href = 'product.html?id=' + encodeURIComponent(product.id);
-                    buyBtn.className = 'btn-add-to-cart';
-                    buyBtn.innerHTML = '<i class="fas fa-shopping-cart"></i><span>Mua Ngay</span>';
-                    actionsDiv.appendChild(buyBtn);
-                    
-                    const wishBtn = document.createElement('button');
-                    wishBtn.className = 'btn-wishlist';
-                    wishBtn.setAttribute('aria-label', 'Thêm vào yêu thích');
-                    wishBtn.innerHTML = '<i class="far fa-heart"></i>';
-                    wishBtn.addEventListener('click', function() {
-                        addToWishlist(product.id);
-                    });
-                    actionsDiv.appendChild(wishBtn);
-                    
-                    infoDiv.appendChild(actionsDiv);
-                    
-                    productCard.appendChild(imageDiv);
-                    productCard.appendChild(infoDiv);
-                    
-                    productsGrid.appendChild(productCard);
-                });
-            }
-            
-            function formatPrice(price) {
-                return price.toLocaleString('vi-VN');
-            }
-            
-            function loadProducts() {
-                // Show loading
-                const loadingDiv = document.createElement('div');
-                loadingDiv.className = 'fade-in';
-                loadingDiv.style.gridColumn = '1/-1';
-                loadingDiv.style.textAlign = 'center';
-                loadingDiv.style.padding = '40px';
-                
-                const spinner = document.createElement('i');
-                spinner.className = 'fas fa-spinner fa-spin fa-2x';
-                spinner.style.color = 'var(--primary-color)';
-                
-                loadingDiv.appendChild(spinner);
-                document.getElementById('productsGrid').appendChild(loadingDiv);
-                
-                // Simulate API call
-                setTimeout(renderProducts, 800);
-            }
+// script.js (CHỈ DÀNH CHO TRANG INDEX.HTML)
 
-            // Đăng ký sự kiện cho nút lọc
-            document.getElementById('filterButton').addEventListener('click', filterProducts);
-            document.getElementById('resetButton').addEventListener('click', resetFilters);
-            
-            // Hàm lọc sản phẩm
-            window.filterProducts = function() {
-                console.log("Filter function called");
-                // Logic lọc sản phẩm thực tế
-            }
-            
-            // Hàm reset bộ lọc
-            window.resetFilters = function() {
-                document.getElementById('id').value = '';
-                document.getElementById('price').value = '';
-                document.getElementById('ghichu').value = '';
-                loadProducts();
-            }
-            
-            // Hàm thêm vào yêu thích
-            window.addToWishlist = function(productId) {
-                console.log("Add to wishlist:", productId);
-                // Logic thêm vào yêu thích
-            }
-        });
+// =================================================================
+// BƯỚC 1: ĐỊNH NGHĨA TẤT CẢ BIẾN VÀ HÀM TRƯỚC
+// =================================================================
+
+// Dữ liệu sản phẩm mẫu (cục bộ cho trang index)
+const sampleProducts = [
+    {
+        id: 1,
+        title: "Gói VIP 1 Tháng",
+        description: "Tài khoản VIP Grow A Garden với đầy đủ đặc quyền",
+        price: 150000,
+        oldPrice: 200000,
+        image: "images/product1.jpg",
+        sales: 100,
+        badge: "HOT",
+        details: {
+            features: ["Đầy đủ tính năng VIP", "Hỗ trợ 24/7", "Quà tặng hàng tháng"],
+            description: "Gói VIP 1 tháng cung cấp cho bạn trải nghiệm tốt nhất với đầy đủ các tính năng cao cấp..."
+        }
+    },
+    {
+        id: 2,
+        title: "Gói Premium 3 Tháng",
+        description: "Tài khoản Premium Grow A Garden với nhiều ưu đãi",
+        price: 400000,
+        oldPrice: 450000,
+        image: "images/product2.jpg",
+        sales: 75,
+        badge: null,
+        details: {
+            features: ["Tính năng Premium", "Hỗ trợ nhanh", "Quà tặng định kỳ"],
+            description: "Gói Premium 3 tháng là lựa chọn tiết kiệm cho những ai muốn trải nghiệm lâu dài..."
+        }
+    }
+];
+
+// Hàm render (vẽ) các sản phẩm mẫu ra màn hình
+function renderProducts() {
+    const productsGrid = document.getElementById('productsGrid');
+    if (!productsGrid) return; // Kiểm tra an toàn
+    productsGrid.innerHTML = '';
+    
+    sampleProducts.forEach(product => {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card fade-in';
+        
+        // Đoạn code HTML bên trong thẻ sản phẩm (giữ nguyên logic của bạn)
+        productCard.innerHTML = `
+            <div class="product-image">
+                <img src="${product.image}" alt="${product.title}" loading="lazy">
+                ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
+            </div>
+            <div class="product-info">
+                <h3 class="product-title">${product.title}</h3>
+                <p class="product-description">${product.description}</p>
+                <div class="product-price">
+                    <div>
+                        <span class="product-current-price">${formatPrice(product.price)}đ</span>
+                        ${product.oldPrice ? `<span class="product-old-price">${formatPrice(product.oldPrice)}đ</span>` : ''}
+                    </div>
+                    <span class="product-sales"><i class="fas fa-user"></i> ${product.sales}</span>
+                </div>
+                <div class="product-actions">
+                    <a href="product.html?id=${encodeURIComponent(product.id)}" class="btn-add-to-cart">
+                        <i class="fas fa-shopping-cart"></i><span>Mua Ngay</span>
+                    </a>
+                    <button class="btn-wishlist" aria-label="Thêm vào yêu thích" onclick="addToWishlist(${product.id})">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        productsGrid.appendChild(productCard);
+    });
+}
+
+// Hàm tải sản phẩm (phiên bản cục bộ, dùng dữ liệu mẫu)
+function loadProducts() {
+    const productsGrid = document.getElementById('productsGrid');
+    if (!productsGrid) return; // Kiểm tra an toàn
+
+    // Hiển thị loading spinner
+    productsGrid.innerHTML = `<div class="fade-in" style="grid-column: 1/-1; text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary-color);"></i></div>`;
+    
+    // Giả lập gọi API và render sau 800ms
+    setTimeout(renderProducts, 800);
+}
+
+// Hàm định dạng giá tiền
+function formatPrice(price) {
+    return price.toLocaleString('vi-VN');
+}
+
+// Hàm lọc sản phẩm
+function filterProducts() {
+    console.log("Filter function called");
+    // Logic lọc sản phẩm thực tế sẽ được thêm vào đây
+}
+
+// Hàm reset bộ lọc
+function resetFilters() {
+    const idInput = document.getElementById('id');
+    const priceInput = document.getElementById('price');
+    const ghichuInput = document.getElementById('ghichu');
+
+    if (idInput) idInput.value = '';
+    if (priceInput) priceInput.value = '';
+    if (ghichuInput) ghichuInput.value = '';
+    loadProducts();
+}
+
+// Hàm thêm vào yêu thích
+function addToWishlist(productId) {
+    console.log("Add to wishlist:", productId);
+    // Logic thêm vào yêu thích thực tế sẽ được thêm vào đây
+}
+
+// =================================================================
+// BƯỚC 2: KHỞI CHẠY CODE SAU KHI TRANG ĐÃ TẢI XONG
+// =================================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Chỉ chạy các hành động này nếu đang ở trang chủ (có các phần tử tương ứng)
+    if (document.getElementById('productsGrid') && document.getElementById('filterButton')) {
+        // 1. Tải sản phẩm
+        loadProducts();
+
+        // 2. Đăng ký sự kiện cho các nút lọc
+        document.getElementById('filterButton').addEventListener('click', filterProducts);
+        document.getElementById('resetButton').addEventListener('click', resetFilters);
+    }
+});
