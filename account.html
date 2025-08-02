@@ -1,722 +1,10 @@
-<!-- JavaScript -->
-    <script>
-        // Prevent resource loading errors
-        window.addEventListener('error', function(e) {
-            if (e.target.tagName === 'IMG' && e.target.src.includes('placeholder')) {
-                e.target.style.display = 'none';
-            }
-        });
-
-        // Utility Functions
-        const Utils = {
-            formatPrice: (price) => {
-                return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
-            },
-            
-            formatDate: (date) => {
-                return new Date(date).toLocaleDateString('vi-VN');
-            },
-            
-            formatDateTime: (date) => {
-                return new Date(date).toLocaleString('vi-VN');
-            },
-            
-            showToast: (message, type = 'success', duration = 3000) => {
-                // Remove existing toasts
-                document.querySelectorAll('.toast').forEach(toast => toast.remove());
-                
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.innerHTML = `
-                    <span>${message}</span>
-                    <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 10px; cursor: pointer; font-size: 16px;">&times;</button>
-                `;
-                
-                document.body.appendChild(toast);
-                
-                // Show toast
-                setTimeout(() => toast.classList.add('show'), 100);
-                
-                // Auto hide
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    toast.classList.add('hide');
-                    setTimeout(() => toast.remove(), 300);
-                }, duration);
-            },
-            
-            generateId: () => {
-                return Math.floor(100000 + Math.random() * 900000);
-            },
-            
-            validateCard: (number, serial) => {
-                const cardRegex = /^[0-9]{10,15}$/;
-                const serialRegex = /^[0-9]{5,12}$/;
-                return cardRegex.test(number) && serialRegex.test(serial);
-            },
-            
-            validatePassword: (password) => {
-                return password && password.length >= 6;
-            }
-        };
-
-        // Local Storage Manager
-        const StorageManager = {
-            getUsers: () => {
-                try {
-                    return JSON.parse(localStorage.getItem('users')) || [];
-                } catch (e) {
-                    return [];
-                }
-            },
-            
-            saveUsers: (users) => {
-                localStorage.setItem('users', JSON.stringify(users));
-            },
-            
-            getCurrentUser: () => {
-                try {
-                    return JSON.parse(localStorage.getItem('currentUser'));
-                } catch (e) {
-                    return null;
-                }
-            },
-            
-            saveCurrentUser: (user) => {
-                localStorage.setItem('currentUser', JSON.stringify(user));
-            },
-            
-            updateUser: (updatedUser) => {
-                const users = StorageManager.getUsers();
-                const index = users.findIndex(u => u.email === updatedUser.email);
-                if (index !== -1) {
-                    users[index] = updatedUser;
-                    StorageManager.saveUsers(users);
-                    StorageManager.saveCurrentUser(updatedUser);
-                }
-            },
-            
-            addTransaction: (transaction) => {
-                const user = StorageManager.getCurrentUser();
-                if (!user) return;
-                
-                if (!user.transactions) user.transactions = [];
-                user.transactions.unshift({
-                    ...transaction,
-                    id: Utils.generateId(),
-                    date: new Date().toISOString()
-                });
-                
-                StorageManager.updateUser(user);
-            }
-        };
-
-        // Modal Manager
-        class ModalManager {
-            static show(modalId) {
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.style.display = 'flex';
-                    setTimeout(() => modal.classList.add('show'), 10);
-                }
-            }
-            
-            static hide(modalId) {
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.classList.remove('show');
-                    setTimeout(() => modal.style.display = 'none', 300);
-                }
-            }
-            
-            static setupCloseHandlers() {
-                document.querySelectorAll('.modal-close').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const modal = e.target.closest('.modal');
-                        if (modal) {
-                            modal.classList.remove('show');
-                            setTimeout(() => modal.style.display = 'none', 300);
-                        }
-                    });
-                });
-                
-                // Close on backdrop click
-                document.querySelectorAll('.modal').forEach(modal => {
-                    modal.addEventListener('click', (e) => {
-                        if (e.target === modal) {
-                            modal.classList.remove('show');
-                            setTimeout(() => modal.style.display = 'none', 300);
-                        }
-                    });
-                });
-            }
-        }
-
-        // Deposit Manager
-        class DepositManager {
-            constructor() {
-                this.selectedCardType = 'viettel';
-                this.setupEventListeners();
-            }
-            
-            setupEventListeners() {
-                // Card type selection
-                document.querySelectorAll('.card-type').forEach(card => {
-                    card.addEventListener('click', () => {
-                        document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
-                        card.classList.add('selected');
-                        this.selectedCardType = card.dataset.type;
-                    });
-                });
-                
-                // Deposit form
-                const depositForm = document.getElementById('depositForm');
-                if (depositForm) {
-                    depositForm.addEventListener('submit', (e) => this.handleDeposit(e));
-                }
-                
-                // Input validation
-                const cardNumber = document.getElementById('cardNumber');
-                const cardSerial = document.getElementById('cardSerial');
-                
-                if (cardNumber) {
-                    cardNumber.addEventListener('input', (e) => {
-                        e.target.value = e.target.value.replace(/[^0-9]/g, '');
-                    });
-                }
-                
-                if (cardSerial) {
-                    cardSerial.addEventListener('input', (e) => {
-                        e.target.value = e.target.value.replace(/[^0-9]/g, '');
-                    });
-                }
-            }
-            
-            async handleDeposit(e) {
-                e.preventDefault();
-                
-                const cardNumber = document.getElementById('cardNumber').value;
-                const cardSerial = document.getElementById('cardSerial').value;
-                const cardAmount = document.getElementById('cardAmount').value;
-                const submitBtn = e.target.querySelector('.btn-submit');
-                
-                // Validation
-                if (!Utils.validateCard(cardNumber, cardSerial)) {
-                    Utils.showToast('Mã thẻ hoặc số serial không hợp lệ', 'error');
-                    return;
-                }
-                
-                if (!cardAmount) {
-                    Utils.showToast('Vui lòng chọn mệnh giá', 'error');
-                    return;
-                }
-                
-                // Show loading
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-                
-                try {
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    // Process deposit
-                    const success = Math.random() > 0.3; // 70% success rate
-                    
-                    if (success) {
-                        await this.processSuccessfulDeposit(cardAmount, cardNumber, cardSerial);
-                    } else {
-                        throw new Error('Thẻ không hợp lệ hoặc đã được sử dụng');
-                    }
-                    
-                } catch (error) {
-                    Utils.showToast(error.message || 'Có lỗi xảy ra, vui lòng thử lại', 'error');
-                } finally {
-                    submitBtn.classList.remove('loading');
-                    submitBtn.disabled = false;
-                }
-            }
-            
-            async processSuccessfulDeposit(amount, cardNumber, cardSerial) {
-                const user = StorageManager.getCurrentUser();
-                const numAmount = parseInt(amount);
-                
-                // Update user balance
-                user.balance = (user.balance || 0) + numAmount;
-                
-                // Add transaction
-                StorageManager.addTransaction({
-                    type: 'deposit',
-                    amount: numAmount,
-                    method: 'card',
-                    cardType: this.selectedCardType,
-                    cardNumber: `****${cardNumber.slice(-4)}`,
-                    status: 'success',
-                    description: `Nạp tiền từ thẻ ${this.selectedCardType.toUpperCase()}`
-                });
-                
-                // Update UI
-                document.getElementById('balanceAmount').textContent = Utils.formatPrice(user.balance);
-                
-                // Update recent deposits
-                this.updateRecentDeposits();
-                
-                // Reset form
-                document.getElementById('depositForm').reset();
-                document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
-                document.querySelector('.card-type[data-type="viettel"]').classList.add('selected');
-                
-                Utils.showToast(`Nạp tiền thành công ${Utils.formatPrice(numAmount)}`, 'success');
-                
-                // Close modal after 2 seconds
-                setTimeout(() => {
-                    ModalManager.hide('depositModal');
-                }, 2000);
-            }
-            
-            updateRecentDeposits() {
-                const user = StorageManager.getCurrentUser();
-                const recentDeposits = document.getElementById('recentDeposits');
-                
-                if (!user.transactions || user.transactions.length === 0) {
-                    recentDeposits.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-history"></i>
-                            <h3>Chưa có giao dịch nào</h3>
-                            <p>Lịch sử nạp tiền sẽ hiển thị tại đây</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                const deposits = user.transactions.filter(t => t.type === 'deposit').slice(0, 5);
-                
-                recentDeposits.innerHTML = deposits.map(deposit => `
-                    <div class="history-item">
-                        <div class="history-icon ${deposit.status}">
-                            <i class="fas fa-arrow-down"></i>
-                        </div>
-                        <div class="history-details">
-                            <div class="history-title">${deposit.description}</div>
-                            <div class="history-date">${Utils.formatDateTime(deposit.date)}</div>
-                            <div class="history-info">${deposit.cardNumber || ''}</div>
-                        </div>
-                        <div class="history-amount ${deposit.status}">+${Utils.formatPrice(deposit.amount)}</div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        // Password Manager
-        class PasswordManager {
-            constructor() {
-                this.setupEventListeners();
-            }
-            
-            setupEventListeners() {
-                // Password visibility toggles
-                document.querySelectorAll('.password-toggle').forEach(toggle => {
-                    toggle.addEventListener('click', () => {
-                        const targetId = toggle.dataset.target;
-                        const input = document.getElementById(targetId);
-                        const icon = toggle.querySelector('i');
-                        
-                        if (input.type === 'password') {
-                            input.type = 'text';
-                            icon.classList.remove('fa-eye');
-                            icon.classList.add('fa-eye-slash');
-                        } else {
-                            input.type = 'password';
-                            icon.classList.remove('fa-eye-slash');
-                            icon.classList.add('fa-eye');
-                        }
-                    });
-                });
-                
-                // Change password form
-                const changePasswordForm = document.getElementById('changePasswordForm');
-                if (changePasswordForm) {
-                    changePasswordForm.addEventListener('submit', (e) => this.handlePasswordChange(e));
-                }
-                
-                // Password confirmation validation
-                const newPassword = document.getElementById('newPassword');
-                const confirmPassword = document.getElementById('confirmNewPassword');
-                
-                if (confirmPassword) {
-                    confirmPassword.addEventListener('input', () => {
-                        if (newPassword.value !== confirmPassword.value) {
-                            confirmPassword.setCustomValidity('Mật khẩu không khớp');
-                        } else {
-                            confirmPassword.setCustomValidity('');
-                        }
-                    });
-                }
-            }
-            
-            async handlePasswordChange(e) {
-                e.preventDefault();
-                
-                const currentPassword = document.getElementById('currentPassword').value;
-                const newPassword = document.getElementById('newPassword').value;
-                const confirmPassword = document.getElementById('confirmNewPassword').value;
-                const submitBtn = e.target.querySelector('.btn-submit');
-                
-                // Validation
-                if (!Utils.validatePassword(newPassword)) {
-                    Utils.showToast('Mật khẩu mới phải có ít nhất 6 ký tự', 'error');
-                    return;
-                }
-                
-                if (newPassword !== confirmPassword) {
-                    Utils.showToast('Mật khẩu xác nhận không khớp', 'error');
-                    return;
-                }
-                
-                if (currentPassword === newPassword) {
-                    Utils.showToast('Mật khẩu mới phải khác mật khẩu hiện tại', 'error');
-                    return;
-                }
-                
-                // Show loading
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-                
-                try {
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    
-                    const user = StorageManager.getCurrentUser();
-                    
-                    // In real app, you would verify current password
-                    // For demo, we'll assume it's correct
-                    user.password = newPassword;
-                    user.lastPasswordChange = new Date().toISOString();
-                    
-                    StorageManager.updateUser(user);
-                    
-                    // Reset form
-                    e.target.reset();
-                    
-                    Utils.showToast('Đổi mật khẩu thành công', 'success');
-                    
-                    // Close modal
-                    setTimeout(() => {
-                        ModalManager.hide('changePasswordModal');
-                    }, 1500);
-                    
-                } catch (error) {
-                    Utils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
-                } finally {
-                    submitBtn.classList.remove('loading');
-                    submitBtn.disabled = false;
-                }
-            }
-        }
-
-        // Profile Manager
-        class ProfileManager {
-            constructor() {
-                this.setupEventListeners();
-            }
-            
-            setupEventListeners() {
-                const editProfileForm = document.getElementById('editProfileForm');
-                if (editProfileForm) {
-                    editProfileForm.addEventListener('submit', (e) => this.handleProfileUpdate(e));
-                }
-            }
-            
-            openEditModal() {
-                const user = StorageManager.getCurrentUser();
-                
-                // Pre-fill form with current data
-                document.getElementById('editName').value = user.name || '';
-                document.getElementById('editPhone').value = user.phone || '';
-                document.getElementById('editAddress').value = user.address || '';
-                
-                ModalManager.show('editProfileModal');
-            }
-            
-            async handleProfileUpdate(e) {
-                e.preventDefault();
-                
-                const name = document.getElementById('editName').value.trim();
-                const phone = document.getElementById('editPhone').value.trim();
-                const address = document.getElementById('editAddress').value.trim();
-                const submitBtn = e.target.querySelector('.btn-submit');
-                
-                // Validation
-                if (!name) {
-                    Utils.showToast('Họ và tên không được để trống', 'error');
-                    return;
-                }
-                
-                if (phone && !/^[0-9]{10,11}$/.test(phone)) {
-                    Utils.showToast('Số điện thoại không hợp lệ', 'error');
-                    return;
-                }
-                
-                // Show loading
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-                
-                try {
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    
-                    const user = StorageManager.getCurrentUser();
-                    
-                    // Update user data
-                    user.name = name;
-                    user.phone = phone;
-                    user.address = address;
-                    
-                    StorageManager.updateUser(user);
-                    
-                    // Update UI
-                    document.getElementById('userFullName').textContent = name;
-                    document.getElementById('userPhone').textContent = phone || 'Chưa cập nhật';
-                    document.getElementById('accountName').textContent = name;
-                    document.getElementById('userName').textContent = name;
-                    document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-                    document.getElementById('accountAvatar').textContent = name.charAt(0).toUpperCase();
-                    
-                    Utils.showToast('Cập nhật thông tin thành công', 'success');
-                    
-                    // Close modal
-                    setTimeout(() => {
-                        ModalManager.hide('editProfileModal');
-                    }, 1500);
-                    
-                } catch (error) {
-                    Utils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
-                } finally {
-                    submitBtn.classList.remove('loading');
-                    submitBtn.disabled = false;
-                }
-            }
-        }
-
-        // Account Manager
-        class AccountManager {
-            constructor() {
-                this.currentUser = StorageManager.getCurrentUser();
-                this.init();
-            }
-
-            init() {
-                if (!this.currentUser) {
-                    window.location.href = 'index.html';
-                    return;
-                }
-
-                this.setupUserData();
-                this.setupEventListeners();
-                this.setupTabs();
-                this.updateTransactionHistory();
-            }
-
-            setupUserData() {
-                const user = this.currentUser;
-                
-                // Ensure user has required fields
-                if (!user.id) {
-                    user.id = Utils.generateId();
-                    StorageManager.updateUser(user);
-                }
-                
-                if (!user.registerDate) {
-                    user.registerDate = new Date().toISOString();
-                    StorageManager.updateUser(user);
-                }
-                
-                // Header user info
-                const userDropdown = document.getElementById('userDropdown');
-                const loginButton = document.getElementById('loginButton');
-                
-                if (userDropdown && loginButton) {
-                    userDropdown.style.display = 'flex';
-                    loginButton.style.display = 'none';
-                    
-                    document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
-                    document.getElementById('userName').textContent = user.name;
-                }
-
-                // Sidebar user info
-                document.getElementById('accountAvatar').textContent = user.name.charAt(0).toUpperCase();
-                document.getElementById('accountName').textContent = user.name;
-                document.getElementById('accountId').textContent = `ID: ${user.id}`;
-
-                // Account info
-                document.getElementById('userFullName').textContent = user.name;
-                document.getElementById('userEmail').textContent = user.email;
-                document.getElementById('userPhone').textContent = user.phone || 'Chưa cập nhật';
-                document.getElementById('userRegisterDate').textContent = Utils.formatDate(user.registerDate);
-                document.getElementById('userAccountId').textContent = user.id;
-
-                // Balance
-                document.getElementById('balanceAmount').textContent = Utils.formatPrice(user.balance || 0);
-            }
-
-            setupEventListeners() {
-                // Logout buttons
-                const logoutButtons = ['logoutBtn', 'logoutButton', 'logoutAllBtn'];
-                logoutButtons.forEach(id => {
-                    const btn = document.getElementById(id);
-                    if (btn) {
-                        btn.addEventListener('click', () => this.logout());
-                    }
-                });
-
-                // Deposit button
-                const depositBtn = document.getElementById('depositBtn');
-                if (depositBtn) {
-                    depositBtn.addEventListener('click', () => {
-                        ModalManager.show('depositModal');
-                        this.depositManager.updateRecentDeposits();
-                    });
-                }
-
-                // Quick amount buttons
-                document.querySelectorAll('.quick-amount').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const amount = btn.dataset.amount;
-                        document.getElementById('cardAmount').value = amount;
-                        ModalManager.show('depositModal');
-                    });
-                });
-
-                // Edit profile button
-                const editBtn = document.getElementById('editProfileBtn');
-                if (editBtn) {
-                    editBtn.addEventListener('click', () => {
-                        this.profileManager.openEditModal();
-                    });
-                }
-
-                // Change password button
-                const changePasswordBtn = document.getElementById('changePasswordBtn');
-                if (changePasswordBtn) {
-                    changePasswordBtn.addEventListener('click', () => {
-                        ModalManager.show('changePasswordModal');
-                    });
-                }
-
-                // 2FA button
-                const enable2FABtn = document.getElementById('enable2FABtn');
-                if (enable2FABtn) {
-                    enable2FABtn.addEventListener('click', () => {
-                        Utils.showToast('Tính năng xác thực 2 bước đang phát triển', 'info');
-                    });
-                }
-
-                // Initialize managers
-                this.depositManager = new DepositManager();
-                this.passwordManager = new PasswordManager();
-                this.profileManager = new ProfileManager();
-            }
-
-            setupTabs() {
-                const tabLinks = document.querySelectorAll('.account-menu-item');
-                const tabPanes = document.querySelectorAll('.account-tab');
-
-                tabLinks.forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const tabId = link.dataset.tab;
-
-                        // Remove active class from all
-                        tabLinks.forEach(l => l.classList.remove('active'));
-                        tabPanes.forEach(p => p.classList.remove('active'));
-
-                        // Add active class to clicked
-                        link.classList.add('active');
-                        const targetTab = document.getElementById(tabId);
-                        if (targetTab) {
-                            targetTab.classList.add('active');
-                            
-                            // Update history when switching to history tab
-                            if (tabId === 'history') {
-                                this.updateTransactionHistory();
-                            }
-                        }
-                    });
-                });
-            }
-
-            updateTransactionHistory() {
-                const user = StorageManager.getCurrentUser();
-                const historyList = document.getElementById('historyList');
-                
-                if (!user.transactions || user.transactions.length === 0) {
-                    historyList.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-history"></i>
-                            <h3>Chưa có giao dịch nào</h3>
-                            <p>Lịch sử giao dịch sẽ hiển thị tại đây</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                historyList.innerHTML = user.transactions.map(transaction => `
-                    <div class="history-item">
-                        <div class="history-icon ${transaction.status}">
-                            <i class="fas fa-${transaction.type === 'deposit' ? 'arrow-down' : 'shopping-cart'}"></i>
-                        </div>
-                        <div class="history-details">
-                            <div class="history-title">${transaction.description}</div>
-                            <div class="history-date">${Utils.formatDateTime(transaction.date)}</div>
-                            <div class="history-info">${transaction.cardNumber || `ID: #${transaction.id}`}</div>
-                        </div>
-                        <div class="history-amount ${transaction.status}">
-                            ${transaction.type === 'deposit' ? '+' : '-'}${Utils.formatPrice(transaction.amount)}
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            logout() {
-                if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-                    localStorage.removeItem('currentUser');
-                    Utils.showToast('Đã đăng xuất thành công');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
-                }
-            }
-        }
-
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            // Setup modal handlers
-            ModalManager.setupCloseHandlers();
-            
-            // Initialize account manager
-            new AccountManager();
-            
-            // Setup form validation styles
-            document.querySelectorAll('input[required]').forEach(input => {
-                input.addEventListener('invalid', (e) => {
-                    e.target.style.borderColor = 'var(--danger-color)';
-                });
-                
-                input.addEventListener('input', (e) => {
-                    if (e.target.checkValidity()) {
-                        e.target.style.borderColor = 'var(--border-color)';
-                    }
-                });
-            });
-        });
-    </script>
-</body>
-</html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tài khoản - Shop Grow A Garden</title>
-    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVFiFtZc9aBRBFMd/M7ubTWI0GoM2NmIhFlYWYmVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVh">
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVFiFtZc9aBRBFMd/M7ubTWI0GoM2NmIhFlYWYmVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVh">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -870,6 +158,10 @@
             color: var(--dark-color);
             text-decoration: none;
             transition: var(--transition);
+            background: none;
+            border: none;
+            width: 100%;
+            cursor: pointer;
         }
 
         .dropdown-item:hover {
@@ -894,6 +186,7 @@
             cursor: pointer;
             transition: var(--transition);
             text-decoration: none;
+            background: none;
         }
 
         .btn-primary {
@@ -994,6 +287,10 @@
             margin-bottom: 8px;
             transition: var(--transition);
             font-weight: 500;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 100%;
         }
 
         .account-menu-item:hover {
@@ -1033,6 +330,7 @@
 
         .account-tab.active {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
         /* Account Info */
@@ -1364,96 +662,6 @@
             color: #999;
         }
 
-        /* Responsive */
-        @media (max-width: 992px) {
-            .account-detail {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .account-sidebar {
-                display: flex;
-                align-items: center;
-                text-align: left;
-                padding: 20px;
-            }
-
-            .account-avatar {
-                margin: 0 20px 0 0;
-            }
-
-            .account-menu {
-                display: flex;
-                gap: 10px;
-                margin: 0;
-                flex-wrap: wrap;
-            }
-
-            .account-menu-item {
-                margin: 0;
-                padding: 8px 12px;
-                border-radius: 20px;
-                white-space: nowrap;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header-container {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .nav-menu {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .account-info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .methods-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .history-filters {
-                flex-direction: column;
-            }
-
-            .date-range {
-                flex-wrap: wrap;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .balance-actions {
-                flex-direction: column;
-            }
-
-            .methods-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .quick-amounts {
-                justify-content: center;
-            }
-
-            .history-item {
-                flex-direction: column;
-                align-items: flex-start;
-                text-align: left;
-            }
-
-            .history-icon {
-                margin-bottom: 10px;
-            }
-
-            .history-amount {
-                align-self: flex-end;
-                margin-top: 10px;
-            }
-        }
-
         /* Modal Styles */
         .modal {
             display: none;
@@ -1704,7 +912,7 @@
             background: var(--warning-color);
         }
 
-        /* Change Password Modal */
+        /* Password Toggle */
         .password-group {
             position: relative;
         }
@@ -1723,22 +931,29 @@
             color: var(--primary-color);
         }
 
-        /* Loading States */
-        .loading {
-            position: relative;
-            pointer-events: none;
-        }
-
-        .loading::after {
-            content: '';
-            position: absolute;
+        /* Login Prompt */
+        .login-prompt-overlay {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: inherit;
-            z-index: 1;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .login-prompt {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 20px 25px rgba(0,0,0,0.1);
+            animation: slideUp 0.3s ease;
         }
 
         /* Empty States */
@@ -1759,7 +974,97 @@
             color: var(--secondary-color);
         }
 
-        /* Animation */
+        /* Responsive */
+        @media (max-width: 992px) {
+            .account-detail {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .account-sidebar {
+                display: flex;
+                align-items: center;
+                text-align: left;
+                padding: 20px;
+            }
+
+            .account-avatar {
+                margin: 0 20px 0 0;
+            }
+
+            .account-menu {
+                display: flex;
+                gap: 10px;
+                margin: 0;
+                flex-wrap: wrap;
+            }
+
+            .account-menu-item {
+                margin: 0;
+                padding: 8px 12px;
+                border-radius: 20px;
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .account-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .methods-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .history-filters {
+                flex-direction: column;
+            }
+
+            .date-range {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .balance-actions {
+                flex-direction: column;
+            }
+
+            .methods-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-amounts {
+                justify-content: center;
+            }
+
+            .history-item {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .history-icon {
+                margin-bottom: 10px;
+            }
+
+            .history-amount {
+                align-self: flex-end;
+                margin-top: 10px;
+            }
+        }
+
+        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -1767,6 +1072,11 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         @keyframes slideInRight {
@@ -1777,10 +1087,6 @@
         @keyframes slideOutRight {
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
-        }
-
-        .account-tab.active {
-            animation: fadeIn 0.3s ease;
         }
 
         .toast {
@@ -1797,7 +1103,7 @@
     <header class="header">
         <div class="container header-container">
             <a href="index.html">
-                <img src="https://via.placeholder.com/150x44/e63946/ffffff?text=LOGO" alt="Shop Grow A Garden" class="logo">
+                <img src="https://i.ibb.co/q3r1hTft/8574d186247eba75669b7d50d42bd650-png.png" alt="Shop Grow A Garden" class="logo">
             </a>
             
             <nav class="nav-menu">
@@ -1820,8 +1126,8 @@
             </nav>
 
             <div class="user-dropdown" id="userDropdown" style="display: none;">
-                <div class="user-avatar" id="userAvatar">C</div>
-                <span class="user-name" id="userName">chi</span>
+                <div class="user-avatar" id="userAvatar">U</div>
+                <span class="user-name" id="userName">User</span>
                 <div class="dropdown-menu">
                     <a href="account.html" class="dropdown-item">
                         <i class="fas fa-user"></i>
@@ -1836,10 +1142,10 @@
                         <span>Giỏ hàng</span>
                     </a>
                     <div class="dropdown-divider"></div>
-                    <div class="dropdown-item" id="logoutButton">
+                    <button class="dropdown-item" id="logoutButton">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Đăng xuất</span>
-                    </div>
+                    </button>
                 </div>
             </div>
 
@@ -1860,29 +1166,29 @@
         
         <div class="account-detail">
             <div class="account-sidebar">
-                <div class="account-avatar" id="accountAvatar">C</div>
+                <div class="account-avatar" id="accountAvatar">U</div>
                 <div>
-                    <h2 class="account-name" id="accountName">chi</h2>
-                    <div class="account-id" id="accountId">ID: 911301</div>
+                    <h2 class="account-name" id="accountName">User</h2>
+                    <div class="account-id" id="accountId">ID: 000000</div>
                 </div>
                 
                 <div class="account-menu">
-                    <a href="#" class="account-menu-item active" data-tab="info">
+                    <button class="account-menu-item active" data-tab="info">
                         <i class="fas fa-user"></i>
                         Thông tin tài khoản
-                    </a>
-                    <a href="#" class="account-menu-item" data-tab="balance">
+                    </button>
+                    <button class="account-menu-item" data-tab="balance">
                         <i class="fas fa-wallet"></i>
                         Số dư & Nạp tiền
-                    </a>
-                    <a href="#" class="account-menu-item" data-tab="history">
+                    </button>
+                    <button class="account-menu-item" data-tab="history">
                         <i class="fas fa-history"></i>
                         Lịch sử giao dịch
-                    </a>
-                    <a href="#" class="account-menu-item" data-tab="security">
+                    </button>
+                    <button class="account-menu-item" data-tab="security">
                         <i class="fas fa-shield-alt"></i>
                         Bảo mật
-                    </a>
+                    </button>
                 </div>
                 
                 <button class="btn btn-outline" id="logoutBtn">
@@ -1898,11 +1204,11 @@
                     <div class="account-info-grid">
                         <div class="info-item">
                             <label>Họ và tên</label>
-                            <div class="info-value" id="userFullName">chi</div>
+                            <div class="info-value" id="userFullName">User</div>
                         </div>
                         <div class="info-item">
                             <label>Email</label>
-                            <div class="info-value" id="userEmail">chinhan20917976549@gmail.com</div>
+                            <div class="info-value" id="userEmail">user@example.com</div>
                         </div>
                         <div class="info-item">
                             <label>Số điện thoại</label>
@@ -1910,11 +1216,11 @@
                         </div>
                         <div class="info-item">
                             <label>Ngày đăng ký</label>
-                            <div class="info-value" id="userRegisterDate">01/08/2025</div>
+                            <div class="info-value" id="userRegisterDate">02/08/2025</div>
                         </div>
                         <div class="info-item">
                             <label>ID tài khoản</label>
-                            <div class="info-value" id="userAccountId">911301</div>
+                            <div class="info-value" id="userAccountId">000000</div>
                         </div>
                     </div>
                     
@@ -1999,28 +1305,10 @@
                     </div>
                     
                     <div class="history-list" id="historyList">
-                        <div class="history-item">
-                            <div class="history-icon success">
-                                <i class="fas fa-arrow-down"></i>
-                            </div>
-                            <div class="history-details">
-                                <div class="history-title">Nạp tiền từ thẻ Viettel</div>
-                                <div class="history-date">10/10/2023 15:30</div>
-                                <div class="history-info">••••1234</div>
-                            </div>
-                            <div class="history-amount success">+50,000đ</div>
-                        </div>
-                        
-                        <div class="history-item">
-                            <div class="history-icon purchase">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                            <div class="history-details">
-                                <div class="history-title">Mua gói VIP 1 tháng</div>
-                                <div class="history-date">09/10/2023 10:15</div>
-                                <div class="history-info">ID đơn hàng: #12345</div>
-                            </div>
-                            <div class="history-amount purchase">-150,000đ</div>
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <h3>Chưa có giao dịch nào</h3>
+                            <p>Lịch sử giao dịch sẽ hiển thị tại đây</p>
                         </div>
                     </div>
                 </div>
@@ -2036,7 +1324,7 @@
                                 <div>
                                     <h4>Mật khẩu</h4>
                                     <p>••••••••••</p>
-                                    <small>Lần thay đổi cuối: 01/10/2023</small>
+                                    <small>Lần thay đổi cuối: 02/08/2025</small>
                                 </div>
                             </div>
                             <button class="btn btn-outline" id="changePasswordBtn">
@@ -2092,7 +1380,7 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-logo">
-                    <img src="https://via.placeholder.com/150x50/e63946/ffffff?text=LOGO" alt="Shop Grow A Garden">
+                    <img src="https://i.ibb.co/k6BvctRR/t-i-xu-ng.jpg" alt="Shop Grow A Garden">
                     <span>Shop Grow A Garden - Giống Cây - Thú Cưng</span>
                 </div>
                 
@@ -2105,13 +1393,13 @@
                     <h3 class="footer-title">Liên Hệ</h3>
                     <ul class="footer-links">
                         <li class="footer-link">
-                            <a href="#">
+                            <a href="mailto:support@shopgrowgarden.com">
                                 <i class="fas fa-envelope"></i>
                                 <span>Email: support@shopgrowgarden.com</span>
                             </a>
                         </li>
                         <li class="footer-link">
-                            <a href="#">
+                            <a href="tel:0123456789">
                                 <i class="fas fa-phone"></i>
                                 <span>Hotline: 0123 456 789</span>
                             </a>
@@ -2277,7 +1565,6 @@
         </div>
     </div>
 
-    <!-- JavaScript -->
     <script>
         // Utility Functions
         const Utils = {
@@ -2289,195 +1576,122 @@
                 return new Date(date).toLocaleDateString('vi-VN');
             },
             
-            showToast: (message, type = 'success') => {
-                // Simple toast notification
+            formatDateTime: (date) => {
+                return new Date(date).toLocaleString('vi-VN');
+            },
+            
+            showToast: (message, type = 'success', duration = 3000) => {
+                // Remove existing toasts
+                document.querySelectorAll('.toast').forEach(toast => toast.remove());
+                
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
-                toast.innerHTML = `<span>${message}</span>`;
-                toast.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: ${type === 'success' ? 'var(--success-color)' : 'var(--danger-color)'};
-                    color: white;
-                    padding: 15px 20px;
-                    border-radius: 8px;
-                    box-shadow: var(--shadow-lg);
-                    z-index: 9999;
-                    animation: slideIn 0.3s ease;
+                toast.innerHTML = `
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 10px; cursor: pointer; font-size: 16px;">&times;</button>
                 `;
+                
                 document.body.appendChild(toast);
                 
+                // Show toast
+                setTimeout(() => toast.classList.add('show'), 100);
+                
+                // Auto hide
                 setTimeout(() => {
-                    toast.style.animation = 'slideOut 0.3s ease';
+                    toast.classList.remove('show');
+                    toast.classList.add('hide');
                     setTimeout(() => toast.remove(), 300);
-                }, 3000);
+                }, duration);
+            },
+            
+            generateId: () => {
+                return Math.floor(100000 + Math.random() * 900000);
+            },
+            
+            validateCard: (number, serial) => {
+                const cardRegex = /^[0-9]{10,15}$/;
+                const serialRegex = /^[0-9]{5,12}$/;
+                return cardRegex.test(number) && serialRegex.test(serial);
+            },
+            
+            validatePassword: (password) => {
+                return password && password.length >= 6;
             }
         };
 
-        // Account Manager
-        class AccountManager {
-            constructor() {
-                this.currentUser = this.getCurrentUser();
-                this.init();
-            }
-
-            getCurrentUser() {
+        // Storage Manager
+        const StorageManager = {
+            getUsers: () => {
                 try {
-                    return JSON.parse(localStorage.getItem('currentUser')) || null;
+                    return JSON.parse(localStorage.getItem('users')) || [];
+                } catch (e) {
+                    return [];
+                }
+            },
+            
+            saveUsers: (users) => {
+                localStorage.setItem('users', JSON.stringify(users));
+            },
+            
+            getCurrentUser: () => {
+                try {
+                    return JSON.parse(localStorage.getItem('currentUser'));
                 } catch (e) {
                     return null;
                 }
-            }
-
-            init() {
-                if (!this.currentUser) {
-                    window.location.href = 'index.html';
-                    return;
+            },
+            
+            saveCurrentUser: (user) => {
+                localStorage.setItem('currentUser', JSON.stringify(user));
+            },
+            
+            updateUser: (updatedUser) => {
+                const users = StorageManager.getUsers();
+                const index = users.findIndex(u => u.email === updatedUser.email);
+                if (index !== -1) {
+                    users[index] = updatedUser;
+                    StorageManager.saveUsers(users);
+                    StorageManager.saveCurrentUser(updatedUser);
                 }
-
-                this.setupUserData();
-                this.setupEventListeners();
-                this.setupTabs();
-            }
-
-            setupUserData() {
-                const user = this.currentUser;
+            },
+            
+            addTransaction: (transaction) => {
+                const user = StorageManager.getCurrentUser();
+                if (!user) return;
                 
-                // Header user info
-                const userDropdown = document.getElementById('userDropdown');
-                const loginButton = document.getElementById('loginButton');
+                if (!user.transactions) user.transactions = [];
+                user.transactions.unshift({
+                    ...transaction,
+                    id: Utils.generateId(),
+                    date: new Date().toISOString()
+                });
                 
-                if (userDropdown && loginButton) {
-                    userDropdown.style.display = 'flex';
-                    loginButton.style.display = 'none';
-                    
-                    document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
-                    document.getElementById('userName').textContent = user.name;
-                }
-
-                // Sidebar user info
-                document.getElementById('accountAvatar').textContent = user.name.charAt(0).toUpperCase();
-                document.getElementById('accountName').textContent = user.name;
-                document.getElementById('accountId').textContent = `ID: ${user.id || '911301'}`;
-
-                // Account info
-                document.getElementById('userFullName').textContent = user.name;
-                document.getElementById('userEmail').textContent = user.email;
-                document.getElementById('userRegisterDate').textContent = user.registerDate ? 
-                    Utils.formatDate(user.registerDate) : Utils.formatDate(new Date());
-                document.getElementById('userAccountId').textContent = user.id || '911301';
-
-                // Balance
-                document.getElementById('balanceAmount').textContent = Utils.formatPrice(user.balance || 0);
+                StorageManager.updateUser(user);
             }
+        };
 
-            setupEventListeners() {
-                // Logout buttons
-                const logoutButtons = ['logoutBtn', 'logoutButton', 'logoutAllBtn'];
-                logoutButtons.forEach(id => {
-                    const btn = document.getElementById(id);
-                    if (btn) {
-                        btn.addEventListener('click', () => this.logout());
-                    }
-                });
-
-                // Deposit button
-                const depositBtn = document.getElementById('depositBtn');
-                if (depositBtn) {
-                    depositBtn.addEventListener('click', () => this.openDepositModal());
-                }
-
-                // Quick amount buttons
-                document.querySelectorAll('.quick-amount').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const amount = btn.dataset.amount;
-                        this.quickDeposit(amount);
-                    });
-                });
-
-                // Edit profile button
-                const editBtn = document.getElementById('editProfileBtn');
-                if (editBtn) {
-                    editBtn.addEventListener('click', () => {
-                        Utils.showToast('Tính năng đang phát triển', 'info');
-                    });
-                }
-            }
-
-            setupTabs() {
-                const tabLinks = document.querySelectorAll('.account-menu-item');
-                const tabPanes = document.querySelectorAll('.account-tab');
-
-                tabLinks.forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const tabId = link.dataset.tab;
-
-                        // Remove active class from all
-                        tabLinks.forEach(l => l.classList.remove('active'));
-                        tabPanes.forEach(p => p.classList.remove('active'));
-
-                        // Add active class to clicked
-                        link.classList.add('active');
-                        const targetTab = document.getElementById(tabId);
-                        if (targetTab) {
-                            targetTab.classList.add('active');
-                        }
-                    });
-                });
-            }
-
-            logout() {
-                if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-                    localStorage.removeItem('currentUser');
-                    Utils.showToast('Đã đăng xuất thành công');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
-                }
-            }
-
-            openDepositModal() {
-                Utils.showToast('Tính năng nạp tiền đang phát triển', 'info');
-            }
-
-            quickDeposit(amount) {
-                Utils.showToast(`Nạp ${Utils.formatPrice(amount)} - Tính năng đang phát triển`, 'info');
-            }
-        }
-
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            new AccountManager();
-        });
-
-        // Add CSS animations
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
+        // Modal Manager
+        class ModalManager {
+            static show(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'flex';
+                    setTimeout(() => modal.classList.add('show'), 10);
                 }
             }
             
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
+            static hide(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('show');
+                    setTimeout(() => modal.style.display = 'none', 300);
                 }
             }
-        `;
-        document.head.appendChild(style);
-    </script>
-</body>
-</html>
+            
+            static setupCloseHandlers() {
+                document.querySelectorAll('.modal-close').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const modal = e.target.closest('.modal');
+                        if (modal) {
+                            modal.classList.remove('show');
+                            setTimeout(() => modal.style.display = 'none', 300
