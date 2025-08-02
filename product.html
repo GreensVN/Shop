@@ -137,10 +137,21 @@
             justify-content: center;
             font-weight: bold;
             color: white;
+            transition: all 0.3s ease;
+        }
+
+        .user-dropdown:hover .user-avatar {
+            background-color: #f57c00;
+            transform: scale(1.05);
         }
         
         .user-name {
             font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .user-dropdown:hover .user-name {
+            color: #ff9800;
         }
         
         .dropdown-menu {
@@ -148,47 +159,124 @@
             top: 100%;
             right: 0;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            padding: 10px 0;
-            min-width: 200px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            padding: 15px 0;
+            min-width: 220px;
             opacity: 0;
             visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
+            transform: translateY(-15px) scale(0.95);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 1000;
-            margin-top: 10px;
+            margin-top: 15px;
+            border: 1px solid rgba(0,0,0,0.05);
         }
-        
+
+        /* Hiệu ứng mở dropdown mượt mà */
+        .user-dropdown.active .dropdown-menu,
         .user-dropdown:hover .dropdown-menu {
             opacity: 1;
             visibility: visible;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
+        }
+
+        /* Giữ dropdown mở khi click */
+        .user-dropdown.clicked .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
+
+        /* Thêm arrow pointer */
+        .dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 20px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid white;
+            filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.1));
         }
         
         .dropdown-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px 20px;
+            gap: 12px;
+            padding: 14px 20px;
             color: #333;
             text-decoration: none;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: none;
             background: none;
             width: 100%;
             text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dropdown-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #2e7d32, #ff9800);
+            transition: width 0.4s ease;
+            z-index: 0;
         }
         
+        .dropdown-item:hover::before {
+            width: 4px;
+        }
+
         .dropdown-item:hover {
-            background-color: #f5f5f5;
+            background: linear-gradient(90deg, rgba(46, 125, 50, 0.05), rgba(255, 152, 0, 0.05));
+            color: #2e7d32;
+            transform: translateX(5px);
+            padding-left: 25px;
+        }
+
+        .dropdown-item i {
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item span {
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover i {
+            color: #ff9800;
+            transform: scale(1.2);
         }
         
         .dropdown-divider {
             height: 1px;
-            background-color: #eee;
-            margin: 5px 0;
+            background: linear-gradient(90deg, transparent, #eee, transparent);
+            margin: 8px 15px;
+            position: relative;
+        }
+
+        .dropdown-divider::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: #ff9800;
+            border-radius: 50%;
+            opacity: 0.3;
         }
 
         /* Coming Soon Styles */
@@ -2323,7 +2411,90 @@
     <script>
         // Product page specific JavaScript - NO GLOBAL VARIABLE REDECLARATION
         document.addEventListener('DOMContentLoaded', function() {
-            // ===== PRODUCT PAGE FUNCTIONALITY =====
+            // ===== ENHANCED USER DROPDOWN FUNCTIONALITY =====
+            
+            // Improved dropdown behavior with click to stay open
+            const userDropdown = document.getElementById('userDropdown');
+            if (userDropdown) {
+                let dropdownTimeout;
+                let isClicked = false;
+
+                // Click to toggle dropdown
+                userDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    isClicked = !isClicked;
+                    
+                    if (isClicked) {
+                        this.classList.add('clicked');
+                        clearTimeout(dropdownTimeout);
+                    } else {
+                        this.classList.remove('clicked');
+                    }
+                });
+
+                // Hover to show dropdown
+                userDropdown.addEventListener('mouseenter', function() {
+                    if (!isClicked) {
+                        clearTimeout(dropdownTimeout);
+                        this.classList.add('active');
+                    }
+                });
+
+                // Delay hide when mouse leaves
+                userDropdown.addEventListener('mouseleave', function() {
+                    if (!isClicked) {
+                        dropdownTimeout = setTimeout(() => {
+                            this.classList.remove('active');
+                        }, 300);
+                    }
+                });
+
+                // Keep dropdown open when hovering over menu
+                const dropdownMenu = userDropdown.querySelector('.dropdown-menu');
+                if (dropdownMenu) {
+                    dropdownMenu.addEventListener('mouseenter', function() {
+                        clearTimeout(dropdownTimeout);
+                    });
+
+                    dropdownMenu.addEventListener('mouseleave', function() {
+                        if (!isClicked) {
+                            dropdownTimeout = setTimeout(() => {
+                                userDropdown.classList.remove('active');
+                            }, 200);
+                        }
+                    });
+                }
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userDropdown.contains(e.target)) {
+                        isClicked = false;
+                        userDropdown.classList.remove('clicked', 'active');
+                    }
+                });
+
+                // Close dropdown when pressing Escape
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        isClicked = false;
+                        userDropdown.classList.remove('clicked', 'active');
+                    }
+                });
+
+                // Add smooth animations to dropdown items
+                const dropdownItems = userDropdown.querySelectorAll('.dropdown-item');
+                dropdownItems.forEach((item, index) => {
+                    item.style.animationDelay = `${index * 50}ms`;
+                    
+                    item.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateX(8px) scale(1.02)';
+                    });
+                    
+                    item.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateX(0) scale(1)';
+                    });
+                });
+            }
             
             // Tab switching
             const tabNavs = document.querySelectorAll('.tabs-nav li');
@@ -2761,7 +2932,5 @@
             }, 1000);
         });
     </script>
-<script src="main.js"></script>   <!-- Nạp "bộ não" chung trước -->
 </body>
 </html>
-
