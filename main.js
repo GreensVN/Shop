@@ -169,6 +169,144 @@ async function processDeposit(cardNumber, cardSerial, cardType, amount) {
   }
 }
 
+// Cart functions
+async function addToCart(productId, quantity = 1) {
+  try {
+    await callApi('/cart', 'POST', { productId, quantity });
+    showToast('Đã thêm vào giỏ hàng', 'success');
+    updateCartCount();
+  } catch (error) {
+    showToast('Thêm vào giỏ hàng thất bại', 'error');
+  }
+}
+
+async function getCart() {
+  try {
+    const data = await callApi('/cart');
+    return data.data.cart;
+  } catch (error) {
+    console.error('Failed to get cart:', error);
+    return [];
+  }
+}
+
+async function updateCartItemQuantity(productId, quantity) {
+  try {
+    const cart = await getCart();
+    const updatedCart = cart.map(item => 
+      item.product._id === productId ? { ...item, quantity } : item
+    );
+    
+    await callApi('/cart', 'PATCH', { cart: updatedCart });
+    
+    if (window.location.pathname.includes('cart.html')) {
+      loadCart();
+    }
+    
+    return true;
+  } catch (error) {
+    showToast('Cập nhật số lượng thất bại', 'error');
+    return false;
+  }
+}
+
+async function removeFromCart(productId) {
+  try {
+    await callApi(`/cart/${productId}`, 'DELETE');
+    showToast('Đã xóa sản phẩm khỏi giỏ hàng', 'success');
+    
+    if (window.location.pathname.includes('cart.html')) {
+      loadCart();
+    } else {
+      updateCartCount();
+    }
+    
+    return true;
+  } catch (error) {
+    showToast('Xóa sản phẩm thất bại', 'error');
+    return false;
+  }
+}
+
+async function updateCartCount() {
+  try {
+    const cart = await getCart();
+    const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+    
+    const cartCountElements = document.querySelectorAll('.cart-count');
+    cartCountElements.forEach(el => {
+      el.textContent = cartCount;
+      el.style.display = cartCount > 0 ? 'inline-block' : 'none';
+    });
+    
+    return cartCount;
+  } catch (error) {
+    console.error('Failed to update cart count:', error);
+    return 0;
+  }
+}
+
+// Favorite functions
+async function addToFavorites(productId) {
+  try {
+    await callApi('/favorites', 'POST', { productId });
+    showToast('Đã thêm vào yêu thích', 'success');
+    
+    const favoriteBtn = document.querySelector(`.favorite-btn[data-id="${productId}"]`);
+    if (favoriteBtn) {
+      favoriteBtn.classList.add('active');
+      favoriteBtn.innerHTML = '<i class="fas fa-heart"></i>';
+    }
+    
+    return true;
+  } catch (error) {
+    showToast('Thêm vào yêu thích thất bại', 'error');
+    return false;
+  }
+}
+
+async function removeFromFavorites(productId) {
+  try {
+    await callApi(`/favorites/${productId}`, 'DELETE');
+    showToast('Đã xóa khỏi yêu thích', 'success');
+    
+    const favoriteBtn = document.querySelector(`.favorite-btn[data-id="${productId}"]`);
+    if (favoriteBtn) {
+      favoriteBtn.classList.remove('active');
+      favoriteBtn.innerHTML = '<i class="far fa-heart"></i>';
+    }
+    
+    if (window.location.pathname.includes('favorite.html')) {
+      loadFavorites();
+    }
+    
+    return true;
+  } catch (error) {
+    showToast('Xóa khỏi yêu thích thất bại', 'error');
+    return false;
+  }
+}
+
+async function getFavorites() {
+  try {
+    const data = await callApi('/favorites');
+    return data.data.favorites;
+  } catch (error) {
+    console.error('Failed to get favorites:', error);
+    return [];
+  }
+}
+
+async function checkFavorite(productId) {
+  try {
+    const response = await callApi(`/favorites/check/${productId}`);
+    return response.data.isFavorite;
+  } catch (error) {
+    console.error('Failed to check favorite status:', error);
+    return false;
+  }
+}
+
 // Cập nhật UI sau khi đăng nhập
 async function updateUIAfterLogin() {
   try {
@@ -190,14 +328,14 @@ async function updateUIAfterLogin() {
             <i class="fas fa-user"></i>
             <span>Tài khoản</span>
           </a>
-          <div class="dropdown-item coming-soon-action">
+          <a href="favorite.html" class="dropdown-item" id="favoriteButton">
             <i class="fas fa-heart"></i>
             <span>Yêu thích</span>
-          </div>
-          <div class="dropdown-item coming-soon-action">
+          </a>
+          <a href="cart.html" class="dropdown-item" id="cartButton">
             <i class="fas fa-shopping-cart"></i>
             <span>Giỏ hàng</span>
-          </div>
+          </a>
           <div class="dropdown-divider"></div>
           <div class="dropdown-item" id="logoutButton">
             <i class="fas fa-sign-out-alt"></i>
@@ -210,8 +348,21 @@ async function updateUIAfterLogin() {
     document.getElementById('logoutButton').addEventListener('click', logoutUser);
     document.getElementById('accountButton').addEventListener('click', showAccountModal);
     
-    document.querySelectorAll('.coming-soon-action').forEach(item => {
-      item.addEventListener('click', showComingSoonModal);
+    // Cập nhật giỏ hàng và yêu thích
+    await updateCartCount();
+    
+    // Cập nhật nút yêu thích cho các sản phẩm
+    document.querySelectorAll('.favorite-btn').forEach(async btn => {
+      const productId = btn.getAttribute('data-id');
+      const isFavorite = await checkFavorite(productId);
+      
+      if (isFavorite) {
+        btn.classList.add('active');
+        btn.innerHTML = '<i class="fas fa-heart"></i>';
+      } else {
+        btn.classList.remove('active');
+        btn.innerHTML = '<i class="far fa-heart"></i>';
+      }
     });
     
   } catch (error) {
@@ -1113,6 +1264,28 @@ document.addEventListener('DOMContentLoaded', function() {
       resetFilterBtn.addEventListener('click', resetFilters);
     }
   }
+  
+  // Khởi tạo sự kiện cho các nút giỏ hàng và yêu thích
+  document.addEventListener('click', function(e) {
+    // Xử lý nút thêm vào giỏ hàng
+    if (e.target.closest('.add-to-cart')) {
+      const button = e.target.closest('.add-to-cart');
+      const productId = button.getAttribute('data-id');
+      addToCart(productId);
+    }
+    
+    // Xử lý nút yêu thích
+    if (e.target.closest('.favorite-btn')) {
+      const button = e.target.closest('.favorite-btn');
+      const productId = button.getAttribute('data-id');
+      
+      if (button.classList.contains('active')) {
+        removeFromFavorites(productId);
+      } else {
+        addToFavorites(productId);
+      }
+    }
+  });
 });
 
 // Hàm lọc sản phẩm (giữ nguyên từ code gốc)
