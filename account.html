@@ -717,6 +717,7 @@
                 align-items: center;
                 text-align: left;
                 padding: 20px;
+                flex-wrap: wrap;
             }
 
             .sidebar-header {
@@ -724,18 +725,31 @@
                 align-items: center;
                 margin: 0 20px 0 0;
                 text-align: left;
+                min-width: 250px;
             }
 
             .account-avatar {
                 margin: 0 15px 0 0;
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+
+            .account-name {
+                font-size: 18px;
+            }
+
+            .account-id {
+                font-size: 13px;
             }
 
             .sidebar-menu {
                 display: flex;
-                gap: 10px;
+                gap: 8px;
                 margin: 0;
                 flex-wrap: wrap;
                 flex: 1;
+                justify-content: flex-start;
             }
 
             .menu-item {
@@ -743,6 +757,12 @@
                 padding: 8px 12px;
                 border-radius: 20px;
                 white-space: nowrap;
+                font-size: 13px;
+                min-width: auto;
+            }
+
+            .menu-item i {
+                display: none;
             }
         }
 
@@ -768,20 +788,102 @@
             .login-actions {
                 flex-direction: column;
             }
+
+            .account-sidebar {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .sidebar-header {
+                flex-direction: column;
+                margin: 0;
+                min-width: auto;
+            }
+
+            .account-avatar {
+                margin: 0 0 10px 0;
+            }
+
+            .sidebar-menu {
+                width: 100%;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .menu-item {
+                flex: 1;
+                min-width: 100px;
+                justify-content: center;
+                text-align: center;
+            }
         }
 
         @media (max-width: 576px) {
+            .container {
+                padding: 0 10px;
+            }
+
+            .main-content {
+                padding: 20px 0;
+            }
+
+            .account-content {
+                padding: 20px;
+            }
+
             .sidebar-header {
-                flex-direction: column;
                 text-align: center;
             }
 
             .account-avatar {
                 margin: 0 0 15px 0;
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .account-name {
+                font-size: 16px;
+                margin-bottom: 3px;
+            }
+
+            .account-id {
+                font-size: 12px;
             }
 
             .sidebar-menu {
                 justify-content: center;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .menu-item {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 12px 16px;
+            }
+
+            .menu-item i {
+                display: inline-block;
+                margin-right: 8px;
+            }
+
+            .content-title {
+                font-size: 20px;
+            }
+
+            .info-grid {
+                gap: 20px;
+            }
+
+            .balance-card {
+                padding: 20px;
+            }
+
+            .balance-amount {
+                font-size: 28px;
             }
         }
 
@@ -827,8 +929,8 @@
 
             <div class="user-actions">
                 <div class="user-dropdown" id="userDropdown">
-                    <div class="user-avatar" id="userAvatar">C</div>
-                    <span class="user-name" id="userName">co-owner (chí nghĩa)</span>
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <span class="user-name" id="userName">Loading...</span>
                     <i class="fas fa-chevron-down" style="margin-left: 5px; font-size: 12px; transition: transform 0.3s ease;"></i>
                     <div class="dropdown-menu" id="dropdownMenu">
                         <a href="account.html" class="dropdown-item">
@@ -867,10 +969,10 @@
             <!-- Sidebar -->
             <div class="account-sidebar">
                 <div class="sidebar-header">
-                    <div class="account-avatar" id="accountAvatar">C</div>
+                    <div class="account-avatar" id="accountAvatar">U</div>
                     <div>
-                        <h2 class="account-name" id="accountName">co-owner (chí nghĩa)</h2>
-                        <div class="account-id" id="accountId">ID: 613d57</div>
+                        <h2 class="account-name" id="accountName">Loading...</h2>
+                        <div class="account-id" id="accountId">ID: ------</div>
                     </div>
                 </div>
                 
@@ -910,11 +1012,11 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <label class="info-label">Họ và tên</label>
-                            <div class="info-value" id="userFullName">co-owner (chí nghĩa)</div>
+                            <div class="info-value" id="userFullName">Loading...</div>
                         </div>
                         <div class="info-item">
                             <label class="info-label">Email</label>
-                            <div class="info-value" id="userEmail">chinhan20917976549@gmail.com</div>
+                            <div class="info-value" id="userEmail">Loading...</div>
                         </div>
                         <div class="info-item">
                             <label class="info-label">Số điện thoại</label>
@@ -922,11 +1024,11 @@
                         </div>
                         <div class="info-item">
                             <label class="info-label">Ngày đăng ký</label>
-                            <div class="info-value" id="userRegisterDate">01/08/2025</div>
+                            <div class="info-value" id="userRegisterDate">Loading...</div>
                         </div>
                         <div class="info-item">
                             <label class="info-label">ID tài khoản</label>
-                            <div class="info-value" id="userAccountId">613d57</div>
+                            <div class="info-value" id="userAccountId">------</div>
                         </div>
                         <div class="info-item">
                             <label class="info-label">Trạng thái</label>
@@ -1181,23 +1283,82 @@
         // Account Manager Class
         class AccountManager {
             constructor() {
-                this.currentUser = {
-                    id: '613d57',
-                    name: 'co-owner (chí nghĩa)',
-                    email: 'chinhan20917976549@gmail.com',
-                    phone: 'Chưa cập nhật',
-                    registerDate: '2025-08-01T12:00:00Z'
-                };
+                this.currentUser = null;
                 this.init();
             }
 
             init() {
-                this.loadUserData();
+                this.loadUserFromToken();
                 this.setupEventListeners();
+            }
+
+            async loadUserFromToken() {
+                const token = localStorage.getItem('token');
+                
+                if (!token) {
+                    // Redirect to login if no token
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                try {
+                    // Try to get user data from API
+                    const response = await fetch('https://shop-4mlk.onrender.com/api/v1/users/me', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include'
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.currentUser = data.data.user;
+                        
+                        // Get balance
+                        const balanceResponse = await fetch('https://shop-4mlk.onrender.com/api/v1/users/me/balance', {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'include'
+                        });
+                        
+                        if (balanceResponse.ok) {
+                            const balanceData = await balanceResponse.json();
+                            this.currentUser.balance = balanceData.data.balance;
+                        }
+                        
+                    } else {
+                        throw new Error('Failed to fetch user data');
+                    }
+                } catch (error) {
+                    console.error('Error loading user:', error);
+                    
+                    // Fallback: try to get from localStorage or use default
+                    const savedUser = localStorage.getItem('currentUser');
+                    if (savedUser) {
+                        this.currentUser = JSON.parse(savedUser);
+                    } else {
+                        // Default user if nothing else works
+                        this.currentUser = {
+                            _id: localStorage.getItem('userId') || '613d57',
+                            name: localStorage.getItem('userName') || 'User',
+                            email: localStorage.getItem('userEmail') || 'user@example.com',
+                            phone: 'Chưa cập nhật',
+                            createdAt: new Date().toISOString(),
+                            balance: 0
+                        };
+                    }
+                }
+
+                this.loadUserData();
                 this.loadStateFromStorage();
             }
 
             loadUserData() {
+                if (!this.currentUser) return;
+
                 const firstLetter = this.currentUser.name[0].toUpperCase();
                 
                 // Update user display
@@ -1211,14 +1372,17 @@
                 if (userName) userName.textContent = this.currentUser.name;
                 if (accountAvatar) accountAvatar.textContent = firstLetter;
                 if (accountName) accountName.textContent = this.currentUser.name;
-                if (accountId) accountId.textContent = `ID: ${this.currentUser.id}`;
+                if (accountId) accountId.textContent = `ID: ${this.currentUser._id.slice(-6)}`;
                 
                 // Update account info
                 this.updateElement('userFullName', this.currentUser.name);
                 this.updateElement('userEmail', this.currentUser.email);
-                this.updateElement('userPhone', this.currentUser.phone);
-                this.updateElement('userRegisterDate', Utils.formatDate(this.currentUser.registerDate));
-                this.updateElement('userAccountId', this.currentUser.id);
+                this.updateElement('userPhone', this.currentUser.phone || 'Chưa cập nhật');
+                this.updateElement('userRegisterDate', Utils.formatDate(this.currentUser.createdAt));
+                this.updateElement('userAccountId', this.currentUser._id.slice(-6));
+
+                // Save to localStorage for backup
+                localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
             }
 
             updateElement(id, value) {
@@ -1227,8 +1391,14 @@
             }
 
             loadStateFromStorage() {
-                // Load balance
-                const balance = localStorage.getItem('userBalance') || '0';
+                // Load balance from user data or localStorage
+                let balance = 0;
+                if (this.currentUser && this.currentUser.balance !== undefined) {
+                    balance = this.currentUser.balance;
+                } else {
+                    balance = localStorage.getItem('userBalance') || '0';
+                }
+                
                 this.updateElement('balanceAmount', Utils.formatPrice(balance));
                 
                 // Load 2FA status
@@ -1239,10 +1409,45 @@
                 this.loadTransactionHistory();
             }
 
-            loadTransactionHistory() {
+            async loadTransactionHistory() {
                 const historyList = document.getElementById('historyList');
                 if (!historyList) return;
 
+                try {
+                    const token = localStorage.getItem('token');
+                    if (token) {
+                        const response = await fetch('https://shop-4mlk.onrender.com/api/v1/users/transactions', {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'include'
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            const transactions = data.data.transactions || [];
+                            
+                            if (transactions.length === 0) {
+                                historyList.innerHTML = `
+                                    <div class="empty-state">
+                                        <i class="fas fa-history"></i>
+                                        <h3>Chưa có giao dịch nào</h3>
+                                        <p>Lịch sử giao dịch sẽ hiển thị tại đây.</p>
+                                    </div>
+                                `;
+                                return;
+                            }
+
+                            historyList.innerHTML = transactions.slice().reverse().map(this.createHistoryItemHTML).join('');
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading transactions:', error);
+                }
+
+                // Fallback to localStorage
                 const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
                 
                 if (transactions.length === 0) {
@@ -1354,8 +1559,16 @@
 
             logout() {
                 if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-                    // Clear local storage
-                    localStorage.clear();
+                    // Clear all user data
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('currentUser');
+                    localStorage.removeItem('userBalance');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userId');
+                    localStorage.removeItem('is2FAEnabled');
+                    localStorage.removeItem('transactions');
+                    localStorage.removeItem('rememberMe');
                     
                     Utils.showToast('Đăng xuất thành công!', 'success');
                     setTimeout(() => {
