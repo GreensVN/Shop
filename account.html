@@ -1435,7 +1435,7 @@
     <!-- Deposit Modal -->
     <div class="modal" id="depositModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="ModalManager.closeModal('depositModal')">&times;</button>
+            <button class="modal-close" onclick="ModalManager.closeModal('depositModal')">×</button>
             <h2 class="modal-title">Nạp tiền bằng thẻ cào</h2>
             
             <div class="card-types">
@@ -1501,7 +1501,7 @@
     <!-- Change Password Modal -->
     <div class="modal" id="changePasswordModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="ModalManager.closeModal('changePasswordModal')">&times;</button>
+            <button class="modal-close" onclick="ModalManager.closeModal('changePasswordModal')">×</button>
             <h2 class="modal-title">Đổi mật khẩu</h2>
             
             <form id="changePasswordForm">
@@ -1578,7 +1578,7 @@
                 toast.className = `toast ${type}`;
                 toast.innerHTML = `
                     <span>${message}</span>
-                    <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 10px; cursor: pointer; font-size: 16px;">&times;</button>
+                    <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 10px; cursor: pointer; font-size: 16px;">×</button>
                 `;
                 
                 document.body.appendChild(toast);
@@ -2249,6 +2249,5 @@
         // Expose AccountManager for external use
         window.AccountManager = AccountManager;
     </script>
-<script src="main.js"></script>   <!-- Nạp "bộ não" chung trước -->
 </body>
 </html>
