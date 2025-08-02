@@ -91,6 +91,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            text-decoration: none;
         }
         
         .btn-primary {
@@ -114,6 +115,79 @@
             background-color: #fff3e0;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        
+        /* User dropdown styles */
+        .user-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ff9800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .user-name {
+            font-weight: 500;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 10px 0;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            margin-top: 10px;
+        }
+        
+        .user-dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .dropdown-divider {
+            height: 1px;
+            background-color: #eee;
+            margin: 5px 0;
         }
         
         /* Breadcrumb */
@@ -190,7 +264,7 @@
         
         .main-image.zoomed {
             cursor: zoom-out;
-            transform: scale(1.8);
+            transform: scale(1.2);
             z-index: 100;
             position: relative;
         }
@@ -744,14 +818,14 @@
             gap: 10px;
         }
         
-        .btn-add-to-cart {
+        .product-actions-card .btn-add-to-cart {
             flex: 1;
             justify-content: center;
             padding: 8px;
             font-size: 14px;
         }
         
-        .btn-wishlist {
+        .product-actions-card .btn-wishlist {
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -904,52 +978,43 @@
         }
         
         /* Toast notifications */
-        .toast-container {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
         .toast {
-            padding: 15px 25px;
-            border-radius: 4px;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-            animation: slideIn 0.5s, fadeOut 0.5s 2.5s;
-            transform: translateX(-100px);
-            opacity: 0;
-        }
-        
-        @keyframes slideIn {
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-            }
-        }
-        
-        .toast.success {
+            position: fixed;
+            top: 20px;
+            right: 20px;
             background-color: #2e7d32;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+        
+        .toast.visible {
+            opacity: 1;
+            transform: translateX(0);
         }
         
         .toast.error {
             background-color: #e53935;
         }
         
-        .toast i {
-            font-size: 24px;
+        .toast-message {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 18px;
         }
         
         /* Mobile Menu */
@@ -990,6 +1055,20 @@
                 opacity: 1;
                 pointer-events: all;
             }
+            
+            .quantity-selector {
+                order: 1;
+            }
+            
+            .btn-add-to-cart {
+                order: 2;
+                flex: 1;
+            }
+            
+            .btn-wishlist {
+                order: 3;
+                width: 45px;
+            }
         }
         
         /* Progress bar */
@@ -1023,6 +1102,45 @@
             font-weight: bold;
             z-index: 2;
         }
+        
+        /* Loading state */
+        .btn-submit.loading {
+            pointer-events: none;
+        }
+        
+        .btn-submit.loading .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .spinner {
+            display: none;
+        }
+        
+        /* Error state */
+        .form-group.has-error input,
+        .form-group.has-error textarea,
+        .form-group.has-error select {
+            border-color: #e53935;
+        }
+        
+        .error-message {
+            color: #e53935;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -1030,9 +1148,6 @@
     <div class="progress-container">
         <div class="progress-bar" id="progressBar"></div>
     </div>
-    
-    <!-- Toast container -->
-    <div class="toast-container" id="toastContainer"></div>
     
     <!-- Header -->
     <header class="header">
@@ -1068,7 +1183,7 @@
                 <div class="user-avatar" id="userAvatar">U</div>
                 <span class="user-name" id="userName">User</span>
                 <div class="dropdown-menu">
-                    <a href="#" class="dropdown-item">
+                    <a href="#" class="dropdown-item" id="accountButton">
                         <i class="fas fa-user"></i>
                         <span>Tài khoản</span>
                     </a>
@@ -1081,10 +1196,10 @@
                         <span>Giỏ hàng</span>
                     </a>
                     <div class="dropdown-divider"></div>
-                    <div class="dropdown-item" id="logoutButton">
+                    <button class="dropdown-item" id="logoutButton">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Đăng xuất</span>
-                    </div>
+                    </button>
                 </div>
             </div>
 
@@ -1109,20 +1224,20 @@
             <div class="product-gallery">
                 <span class="featured-badge">NỔI BẬT</span>
                 <div class="main-image" id="mainImage">
-                    <img id="mainProductImage" src="https://i.ibb.co/Vc8YddCj/s-l1200.png" alt="Product Image" loading="lazy">
+                    <img id="mainProductImage" src="https://i.ibb.co/Vc8YddCj/s-l1200.png" alt="Raccoon Product" loading="lazy">
                 </div>
                 <div class="thumbnail-images" id="thumbnailImages">
-                    <div class="thumbnail active">
-                        <img src="https://via.placeholder.com/100x80?text=Thumb+1" alt="Thumbnail 1">
+                    <div class="thumbnail active" data-image="https://i.ibb.co/Vc8YddCj/s-l1200.png">
+                        <img src="https://i.ibb.co/Vc8YddCj/s-l1200.png" alt="Thumbnail 1">
                     </div>
-                    <div class="thumbnail">
-                        <img src="https://via.placeholder.com/100x80?text=Thumb+2" alt="Thumbnail 2">
+                    <div class="thumbnail" data-image="https://i.ibb.co/Vc8YddCj/s-l1200.png">
+                        <img src="https://i.ibb.co/Vc8YddCj/s-l1200.png" alt="Thumbnail 2">
                     </div>
-                    <div class="thumbnail">
-                        <img src="https://via.placeholder.com/100x80?text=Thumb+3" alt="Thumbnail 3">
+                    <div class="thumbnail" data-image="https://i.ibb.co/Vc8YddCj/s-l1200.png">
+                        <img src="https://i.ibb.co/Vc8YddCj/s-l1200.png" alt="Thumbnail 3">
                     </div>
-                    <div class="thumbnail">
-                        <img src="https://via.placeholder.com/100x80?text=Thumb+4" alt="Thumbnail 4">
+                    <div class="thumbnail" data-image="https://i.ibb.co/Vc8YddCj/s-l1200.png">
+                        <img src="https://i.ibb.co/Vc8YddCj/s-l1200.png" alt="Thumbnail 4">
                     </div>
                 </div>
             </div>
@@ -1151,54 +1266,54 @@
                 <div class="product-price-container">
                     <span class="current-price" id="currentPrice">250.000đ</span>
                     <span class="old-price" id="oldPrice">300.000đ</span>
-                    <span class="discount-badge" id="discountBadge">-16,67%</span>
+                    <span class="discount-badge" id="discountBadge">-16%</span>
                 </div>
                 
                 <div class="product-description" id="productDescription">
-                    <p>Raccoon!</p>
+                    <p>Raccoon - Thú cưng thông minh và đáng yêu! Với tính cách hoạt bát, thân thiện và khả năng học hỏi nhanh chóng, Raccoon sẽ là người bạn tuyệt vời cho gia đình bạn.</p>
                 </div>
                 
                 <div class="product-features" id="productFeatures">
                     <h3>Tính năng nổi bật:</h3>
                     <ul>
-                        <li>Đầy đủ tính năng VIP không giới hạn</li>
-                        <li>Hỗ trợ khách hàng 24/7 qua nhiều kênh</li>
-                        <li>Quà tặng hàng tháng giá trị cao</li>
-                        <li>Ưu tiên giao dịch và xử lý yêu cầu</li>
-                        <li>Trải nghiệm không quảng cáo phiền phức</li>
-                        <li>Truy cập sớm các tính năng mới</li>
+                        <li>Thông minh và dễ huấn luyện</li>
+                        <li>Thân thiện với trẻ em và gia đình</li>
+                        <li>Có khả năng thích nghi cao với môi trường</li>
+                        <li>Tính cách hoạt bát và vui tươi</li>
+                        <li>Được chăm sóc sức khỏe định kỳ</li>
+                        <li>Có đầy đủ giấy tờ và vaccine</li>
                     </ul>
                 </div>
                 
                 <div class="product-actions">
                     <div class="quantity-selector">
-                        <button class="quantity-btn" id="decreaseQty">-</button>
-                        <input type="number" id="productQty" value="1" min="1">
-                        <button class="quantity-btn" id="increaseQty">+</button>
+                        <button class="quantity-btn" id="decreaseQty" type="button">-</button>
+                        <input type="number" id="productQty" value="1" min="1" max="10">
+                        <button class="quantity-btn" id="increaseQty" type="button">+</button>
                     </div>
                     
-                    <button class="btn btn-primary btn-add-to-cart" id="addToCartBtn">
+                    <button class="btn btn-primary btn-add-to-cart" id="addToCartBtn" type="button">
                         <i class="fas fa-shopping-cart"></i>
-                        Thêm vào giỏ hàng
+                        <span>Thêm vào giỏ hàng</span>
                     </button>
                     
-                    <button class="btn btn-outline btn-wishlist" id="addToWishlistBtn">
+                    <button class="btn btn-outline btn-wishlist" id="addToWishlistBtn" type="button">
                         <i class="far fa-heart"></i>
-                        Yêu thích
+                        <span>Yêu thích</span>
                     </button>
                 </div>
                 
                 <div class="product-meta-info">
                     <div class="meta-item">
                         <i class="fas fa-tag"></i>
-                        <span>Danh mục: <a href="#">Dịch vụ Grow A Garden</a></span>
+                        <span>Danh mục: <a href="#">Thú cưng</a></span>
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-share-alt"></i>
                         <span>Chia sẻ: 
-                            <a href="#"><i class="fab fa-facebook"></i></a>
-                            <a href="#"><i class="fab fa-twitter"></i></a>
-                            <a href="#"><i class="fab fa-pinterest"></i></a>
+                            <a href="#" title="Chia sẻ lên Facebook"><i class="fab fa-facebook"></i></a>
+                            <a href="#" title="Chia sẻ lên Twitter"><i class="fab fa-twitter"></i></a>
+                            <a href="#" title="Chia sẻ lên Pinterest"><i class="fab fa-pinterest"></i></a>
                         </span>
                     </div>
                 </div>
@@ -1216,48 +1331,52 @@
             <div class="tabs-content">
                 <div class="tab-pane active" id="description">
                     <div id="detailedDescription">
-                        <p>Gói VIP 1 tháng cung cấp cho bạn trải nghiệm tốt nhất với đầy đủ các tính năng cao cấp của Grow A Garden. Đây là giải pháp hoàn hảo cho những người đam mê làm vườn muốn nâng cao hiệu quả và trải nghiệm.</p>
+                        <h3>Giới thiệu về Raccoon</h3>
+                        <p>Raccoon là một trong những loài thú cưng thông minh và đáng yêu nhất. Với bộ lông mềm mại, đôi mắt sáng và tính cách hoạt bát, Raccoon sẽ mang đến cho gia đình bạn những giây phút vui vẻ và ý nghĩa.</p>
                         
                         <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 3px solid #2e7d32;">
-                            <h3 style="margin-bottom: 15px; color: #2e7d32;">Lợi ích khi sử dụng gói VIP</h3>
+                            <h3 style="margin-bottom: 15px; color: #2e7d32;">Đặc điểm nổi bật</h3>
                             <ul style="list-style: none;">
                                 <li style="margin-bottom: 10px; padding-left: 25px; position: relative;">
                                     <i class="fas fa-check-circle" style="position: absolute; left: 0; top: 3px; color: #2e7d32;"></i>
-                                    <strong>Tăng năng suất:</strong> Công cụ quản lý vườn thông minh giúp bạn tiết kiệm thời gian
+                                    <strong>Thông minh cao:</strong> Có khả năng học hỏi và ghi nhớ các lệnh một cách nhanh chóng
                                 </li>
                                 <li style="margin-bottom: 10px; padding-left: 25px; position: relative;">
                                     <i class="fas fa-check-circle" style="position: absolute; left: 0; top: 3px; color: #2e7d32;"></i>
-                                    <strong>Hỗ trợ chuyên gia:</strong> Tư vấn từ các chuyên gia làm vườn hàng đầu
+                                    <strong>Thân thiện:</strong> Dễ dàng hòa nhập với các thành viên trong gia đình
                                 </li>
                                 <li style="margin-bottom: 10px; padding-left: 25px; position: relative;">
                                     <i class="fas fa-check-circle" style="position: absolute; left: 0; top: 3px; color: #2e7d32;"></i>
-                                    <strong>Quà tặng độc quyền:</strong> Nhận hạt giống và dụng cụ làm vườn cao cấp hàng tháng
+                                    <strong>Sức khỏe tốt:</strong> Được chăm sóc bởi đội ngũ bác sĩ thú y chuyên nghiệp
                                 </li>
                             </ul>
                         </div>
                         
-                        <p><strong>Đặc quyền VIP bao gồm:</strong></p>
+                        <h3>Hướng dẫn chăm sóc</h3>
+                        <p><strong>Dinh dưỡng:</strong></p>
                         <ul>
-                            <li>Truy cập không giới hạn tất cả tính năng cao cấp</li>
-                            <li>Hỗ trợ khách hàng ưu tiên 24/7 qua chat, email và điện thoại</li>
-                            <li>Nhận quà tặng đặc biệt hàng tháng trị giá lên đến 100.000đ</li>
-                            <li>Tốc độ xử lý giao dịch nhanh hơn 50%</li>
-                            <li>Không có quảng cáo làm phiền trong trải nghiệm</li>
-                            <li>Truy cập sớm các tính năng mới trước người dùng thường</li>
-                            <li>Giảm giá 10% cho tất cả đơn hàng trong thời gian sử dụng VIP</li>
+                            <li>Cho ăn 2-3 lần mỗi ngày với thức ăn chuyên dụng</li>
+                            <li>Bổ sung vitamin và khoáng chất cần thiết</li>
+                            <li>Luôn đảm bảo có nước sạch</li>
                         </ul>
-                        <p><strong>Hướng dẫn sử dụng:</strong></p>
-                        <ol>
-                            <li>Mua gói VIP từ cửa hàng</li>
-                            <li>Nhận mã kích hoạt qua email ngay sau khi thanh toán</li>
-                            <li>Đăng nhập tài khoản Grow A Garden và vào phần Cài đặt</li>
-                            <li>Nhập mã kích hoạt vào mục "Nâng cấp tài khoản"</li>
-                            <li>Tận hưởng các đặc quyền VIP ngay lập tức</li>
-                        </ol>
+                        
+                        <p><strong>Vệ sinh:</strong></p>
+                        <ul>
+                            <li>Tắm rửa định kỳ 1-2 tuần/lần</li>
+                            <li>Vệ sinh tai, mắt, răng miệng thường xuyên</li>
+                            <li>Cắt móng định kỳ</li>
+                        </ul>
+                        
+                        <p><strong>Tập luyện:</strong></p>
+                        <ul>
+                            <li>Dành thời gian chơi đùa hàng ngày</li>
+                            <li>Huấn luyện các kỹ năng cơ bản</li>
+                            <li>Tạo môi trường an toàn để vận động</li>
+                        </ul>
                         
                         <div style="margin-top: 30px; background: #e8f5e9; padding: 20px; border-radius: 8px; text-align: center;">
-                            <h3 style="color: #2e7d32; margin-bottom: 15px;">Đảm bảo hài lòng 100%</h3>
-                            <p>Nếu không hài lòng với gói VIP, chúng tôi hoàn tiền trong vòng 7 ngày!</p>
+                            <h3 style="color: #2e7d32; margin-bottom: 15px;">Cam kết chất lượng</h3>
+                            <p>Chúng tôi cam kết cung cấp những chú thú cưng khỏe mạnh, được chăm sóc tốt nhất. Nếu có bất kỳ vấn đề gì, chúng tôi sẵn sàng hỗ trợ 24/7!</p>
                         </div>
                     </div>
                 </div>
@@ -1268,15 +1387,17 @@
                         <h4>Viết đánh giá</h4>
                         <form id="reviewForm">
                             <div class="form-group">
-                                <label for="reviewName">Tên của bạn</label>
-                                <input type="text" id="reviewName" required>
+                                <label for="reviewName">Tên của bạn *</label>
+                                <input type="text" id="reviewName" name="reviewName" required>
+                                <div class="error-message"></div>
                             </div>
                             <div class="form-group">
-                                <label for="reviewEmail">Email</label>
-                                <input type="email" id="reviewEmail" required>
+                                <label for="reviewEmail">Email *</label>
+                                <input type="email" id="reviewEmail" name="reviewEmail" required>
+                                <div class="error-message"></div>
                             </div>
                             <div class="form-group">
-                                <label>Đánh giá của bạn</label>
+                                <label>Đánh giá của bạn *</label>
                                 <div class="rating-input">
                                     <input type="radio" id="star5" name="rating" value="5">
                                     <label for="star5"><i class="fas fa-star"></i></label>
@@ -1289,12 +1410,18 @@
                                     <input type="radio" id="star1" name="rating" value="1">
                                     <label for="star1"><i class="fas fa-star"></i></label>
                                 </div>
+                                <div class="error-message"></div>
                             </div>
                             <div class="form-group">
-                                <label for="reviewText">Nội dung đánh giá</label>
-                                <textarea id="reviewText" rows="5" required placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."></textarea>
+                                <label for="reviewText">Nội dung đánh giá *</label>
+                                <textarea id="reviewText" name="reviewText" rows="5" required placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."></textarea>
+                                <div class="error-message"></div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+                            <button type="submit" class="btn btn-primary btn-submit">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>Gửi đánh giá</span>
+                                <div class="spinner"></div>
+                            </button>
                         </form>
                     </div>
                     
@@ -1302,7 +1429,7 @@
                         <div class="review-item">
                             <div class="review-header">
                                 <span class="review-author">Nguyễn Văn A</span>
-                                <span class="review-date">20/06/2023</span>
+                                <span class="review-date">20/12/2024</span>
                                 <div class="review-rating">
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star"></i>
@@ -1312,13 +1439,13 @@
                                 </div>
                             </div>
                             <div class="review-content">
-                                <p>Sản phẩm rất tốt, tôi rất hài lòng với dịch vụ này. Hỗ trợ khách hàng rất nhanh chóng và nhiệt tình. Sẽ ủng hộ shop dài dài.</p>
+                                <p>Raccoon rất dễ thương và thông minh. Con vật rất thân thiện với cả gia đình, đặc biệt là với các em nhỏ. Chăm sóc không quá khó khăn và shop hỗ trợ rất tận tình.</p>
                             </div>
                         </div>
                         <div class="review-item">
                             <div class="review-header">
                                 <span class="review-author">Trần Thị B</span>
-                                <span class="review-date">15/06/2023</span>
+                                <span class="review-date">15/12/2024</span>
                                 <div class="review-rating">
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star"></i>
@@ -1328,13 +1455,13 @@
                                 </div>
                             </div>
                             <div class="review-content">
-                                <p>Dịch vụ tốt, hỗ trợ nhanh chóng. Giá cả hợp lý so với những gì nhận được. Tuy nhiên giao diện có thể cải thiện thêm.</p>
+                                <p>Chất lượng tốt, raccoon khỏe mạnh và hoạt bát. Đóng gói cẩn thận, giao hàng đúng hẹn. Giá cả hợp lý so với chất lượng nhận được.</p>
                             </div>
                         </div>
                         <div class="review-item">
                             <div class="review-header">
                                 <span class="review-author">Lê Văn C</span>
-                                <span class="review-date">10/06/2023</span>
+                                <span class="review-date">10/12/2024</span>
                                 <div class="review-rating">
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star"></i>
@@ -1344,15 +1471,15 @@
                                 </div>
                             </div>
                             <div class="review-content">
-                                <p>Mua gói VIP và rất hài lòng. Tốc độ xử lý nhanh, không gặp quảng cáo phiền phức. Quà tặng hàng tháng rất có giá trị.</p>
+                                <p>Rất hài lòng với sản phẩm. Raccoon rất thông minh, học lệnh rất nhanh. Shop tư vấn nhiệt tình và chu đáo. Sẽ giới thiệu cho bạn bè.</p>
                             </div>
                         </div>
                     </div>
                     
                     <div class="load-more-reviews">
-                        <button class="btn btn-outline" id="loadMoreReviews">
+                        <button class="btn btn-outline" id="loadMoreReviews" type="button">
                             <i class="fas fa-plus"></i>
-                            Xem thêm đánh giá
+                            <span>Xem thêm đánh giá</span>
                         </button>
                     </div>
                 </div>
@@ -1361,24 +1488,33 @@
                     <h3>Chính sách vận chuyển</h3>
                     <p>Chúng tôi giao hàng toàn quốc với các phương thức sau:</p>
                     <ul>
-                        <li><strong>Giao hàng nhanh:</strong> Trong 2-4 giờ (nội thành Hà Nội, TP.HCM) - Phí 20.000đ</li>
-                        <li><strong>Giao hàng tiêu chuẩn:</strong> 1-3 ngày (toàn quốc) - Phí 15.000đ</li>
+                        <li><strong>Giao hàng nhanh:</strong> Trong 2-4 giờ (nội thành Hà Nội, TP.HCM) - Phí 50.000đ</li>
+                        <li><strong>Giao hàng tiêu chuẩn:</strong> 1-3 ngày (toàn quốc) - Phí 30.000đ</li>
                         <li><strong>Nhận hàng tại cửa hàng:</strong> Miễn phí</li>
                     </ul>
-                    <p><strong>Lưu ý:</strong> Đối với sản phẩm là dịch vụ, mã kích hoạt sẽ được gửi qua email ngay sau khi thanh toán thành công.</p>
+                    <p><strong>Lưu ý:</strong> Đối với thú cưng, chúng tôi có đội ngũ chuyên gia vận chuyển với phương tiện chuyên dụng để đảm bảo an toàn tuyệt đối.</p>
                     
                     <h3 style="margin-top: 30px;">Chính sách bảo hành</h3>
                     <p>Chúng tôi cam kết:</p>
                     <ul>
-                        <li><strong>Bảo hành 7 ngày:</strong> Hoàn tiền 100% nếu không hài lòng với dịch vụ</li>
-                        <li><strong>Hỗ trợ kỹ thuật:</strong> 24/7 qua nhiều kênh: hotline, chat, email</li>
-                        <li><strong>Đổi trả miễn phí:</strong> Trong trường hợp mã kích hoạt không hoạt động</li>
-                        <li><strong>Tư vấn trọn đời:</strong> Cho khách hàng đã sử dụng dịch vụ</li>
+                        <li><strong>Bảo hành sức khỏe 30 ngày:</strong> Hoàn tiền 100% nếu thú cưng có vấn đề sức khỏe trong 30 ngày đầu</li>
+                        <li><strong>Hỗ trợ tư vấn:</strong> 24/7 qua hotline, chat, email về cách chăm sóc</li>
+                        <li><strong>Khám bệnh miễn phí:</strong> Trong 6 tháng đầu tại các phòng khám đối tác</li>
+                        <li><strong>Vaccine và sức khỏe:</strong> Được tiêm vaccine đầy đủ và kiểm tra sức khỏe định kỳ</li>
+                    </ul>
+                    
+                    <h3 style="margin-top: 30px;">Hướng dẫn chăm sóc</h3>
+                    <p>Khi nhận thú cưng:</p>
+                    <ul>
+                        <li>Để thú cưng nghỉ ngơi trong 24h đầu để thích nghi môi trường mới</li>
+                        <li>Cho ăn theo đúng chế độ dinh dưỡng được hướng dẫn</li>
+                        <li>Quan sát tình trạng sức khỏe và liên hệ shop nếu có bất thường</li>
+                        <li>Đưa đi khám sức khỏe định kỳ theo lịch trình</li>
                     </ul>
                     
                     <div style="margin-top: 30px; background: #fff8e1; padding: 20px; border-radius: 8px; border-left: 3px solid #ff9800;">
                         <h3 style="color: #ff9800; margin-bottom: 15px;">Cam kết chất lượng</h3>
-                        <p>Chúng tôi tự hào mang đến dịch vụ tốt nhất với sự hỗ trợ tận tâm từ đội ngũ chuyên gia. Mọi vấn đề phát sinh sẽ được giải quyết trong vòng 24 giờ.</p>
+                        <p>Chúng tôi tự hào là địa chỉ tin cậy cho những người yêu thú cưng. Mọi vấn đề về sức khỏe thú cưng sẽ được giải quyết trong vòng 24 giờ với sự hỗ trợ từ đội ngũ bác sĩ thú y chuyên nghiệp.</p>
                     </div>
                 </div>
             </div>
@@ -1388,14 +1524,14 @@
         <section class="related-products">
             <h2 class="section-title">Sản phẩm liên quan</h2>
             <div class="products-grid" id="relatedProducts">
-                <div class="product-card fade-in">
+                <div class="product-card">
                     <div class="product-image">
-                        <img src="https://via.placeholder.com/300x200?text=Gói+Premium+3+Tháng" alt="Mimic Octopus">
+                        <img src="https://via.placeholder.com/300x200?text=Mimic+Octopus" alt="Mimic Octopus" loading="lazy">
                         <span class="product-badge">HOT</span>
                     </div>
                     <div class="product-info-card">
                         <h3 class="product-title-card">Mimic Octopus</h3>
-                        <p class="product-description-card">Mimic Octopus</p>
+                        <p class="product-description-card">Bạch tuộc mimic thông minh và độc đáo</p>
                         <div class="product-price">
                             <div>
                                 <span class="product-current-price">70.000đ</span>
@@ -1411,28 +1547,27 @@
                                 <i class="fas fa-shopping-cart"></i>
                                 <span>Mua Ngay</span>
                             </a>
-                            <button class="btn btn-outline btn-wishlist">
+                            <button class="btn btn-outline btn-wishlist" type="button">
                                 <i class="far fa-heart"></i>
                             </button>
                         </div>
                     </div>
                 </div>
-                <div class="product-card fade-in">
+                
+                <div class="product-card">
                     <div class="product-image">
-                        <img src="https://via.placeholder.com/300x200?text=Gói+Ultimate+1+Năm" alt="Gói Ultimate 1 Năm">
-                        <span class="product-badge">NEW</span>
+                        <img src="https://via.placeholder.com/300x200?text=Hamster" alt="Hamster" loading="lazy">
                     </div>
                     <div class="product-info-card">
-                        <h3 class="product-title-card">Gói Ultimate 1 Năm</h3>
-                        <p class="product-description-card">Tài khoản Ultimate trọn gói 1 năm</p>
+                        <h3 class="product-title-card">Hamster</h3>
+                        <p class="product-description-card">Chuột hamster nhỏ xinh và dễ thương</p>
                         <div class="product-price">
                             <div>
-                                <span class="product-current-price">1.200.000đ</span>
-                                <span class="product-old-price">1.500.000đ</span>
+                                <span class="product-current-price">150.000đ</span>
                             </div>
                             <span class="product-sales">
                                 <i class="fas fa-user"></i>
-                                42
+                                85
                             </span>
                         </div>
                         <div class="product-actions-card">
@@ -1440,63 +1575,7 @@
                                 <i class="fas fa-shopping-cart"></i>
                                 <span>Mua Ngay</span>
                             </a>
-                            <button class="btn btn-outline btn-wishlist">
-                                <i class="far fa-heart"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card fade-in">
-                    <div class="product-image">
-                        <img src="https://via.placeholder.com/300x200?text=Gói+Basic+1+Tháng" alt="Gói Basic 1 Tháng">
-                        <span class="product-badge">GIẢM 15%</span>
-                    </div>
-                    <div class="product-info-card">
-                        <h3 class="product-title-card">Gói Basic 1 Tháng</h3>
-                        <p class="product-description-card">Tài khoản Basic dành cho người mới</p>
-                        <div class="product-price">
-                            <div>
-                                <span class="product-current-price">80.000đ</span>
-                                <span class="product-old-price">94.000đ</span>
-                            </div>
-                            <span class="product-sales">
-                                <i class="fas fa-user"></i>
-                                120
-                            </span>
-                        </div>
-                        <div class="product-actions-card">
-                            <a href="#" class="btn btn-primary btn-add-to-cart">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span>Mua Ngay</span>
-                            </a>
-                            <button class="btn btn-outline btn-wishlist">
-                                <i class="far fa-heart"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card fade-in">
-                    <div class="product-image">
-                        <img src="https://via.placeholder.com/300x200?text=Gói+Family" alt="Gói Family">
-                    </div>
-                    <div class="product-info-card">
-                        <h3 class="product-title-card">Gói Family</h3>
-                        <p class="product-description-card">Dành cho tối đa 5 thành viên</p>
-                        <div class="product-price">
-                            <div>
-                                <span class="product-current-price">250.000đ</span>
-                            </div>
-                            <span class="product-sales">
-                                <i class="fas fa-user"></i>
-                                35
-                            </span>
-                        </div>
-                        <div class="product-actions-card">
-                            <a href="#" class="btn btn-primary btn-add-to-cart">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span>Mua Ngay</span>
-                            </a>
-                            <button class="btn btn-outline btn-wishlist">
+                            <button class="btn btn-outline btn-wishlist" type="button">
                                 <i class="far fa-heart"></i>
                             </button>
                         </div>
@@ -1511,19 +1590,19 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-logo">
-                    <img src="https://via.placeholder.com/150x50?text=Grow+A+Garden" alt="Shop Grow A Garden">
+                    <img src="https://i.ibb.co/k6BvctRR/t-i-xu-ng.jpg" alt="Shop Grow A Garden" loading="lazy">
                     <span>Shop Grow A Garden - Giống Cây - Thú Cưng</span>
                     <div style="display: flex; gap: 15px; margin-top: 10px;">
-                        <a href="#" style="color: white; font-size: 20px;"><i class="fab fa-facebook"></i></a>
-                        <a href="#" style="color: white; font-size: 20px;"><i class="fab fa-instagram"></i></a>
-                        <a href="#" style="color: white; font-size: 20px;"><i class="fab fa-youtube"></i></a>
+                        <a href="#" style="color: white; font-size: 20px;" title="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" style="color: white; font-size: 20px;" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" style="color: white; font-size: 20px;" title="YouTube"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
                 
                 <div>
                     <h3 class="footer-title">Về Chúng Tôi</h3>
                     <p class="footer-text">Chuyên cung cấp dịch vụ, giống cây và thú cưng chất lượng. Giao dịch nhanh chóng, uy tín.</p>
-                    <div class="footer-links">
+                    <ul class="footer-links">
                         <li class="footer-link">
                             <a href="#">
                                 <i class="fas fa-info-circle"></i>
@@ -1536,7 +1615,7 @@
                                 <span>Tin tức</span>
                             </a>
                         </li>
-                    </div>
+                    </ul>
                 </div>
                 
                 <div>
@@ -1567,13 +1646,13 @@
                     <h3 class="footer-title">Liên Hệ</h3>
                     <ul class="footer-links">
                         <li class="footer-link">
-                            <a href="#">
+                            <a href="mailto:support@shopgrowgarden.com">
                                 <i class="fas fa-envelope"></i>
                                 <span>Email: support@shopgrowgarden.com</span>
                             </a>
                         </li>
                         <li class="footer-link">
-                            <a href="#">
+                            <a href="tel:0123456789">
                                 <i class="fas fa-phone"></i>
                                 <span>Hotline: 0123 456 789</span>
                             </a>
@@ -1595,18 +1674,94 @@
     </footer>
 
     <!-- Back to Top Button -->
-    <button class="back-to-top" id="backToTop">
+    <button class="back-to-top" id="backToTop" aria-label="Lên đầu trang">
         <i class="fas fa-arrow-up"></i>
     </button>
     
     <!-- Messenger Float Button -->
-    <a href="https://www.messenger.com/t/8645401405544278" target="_blank" class="messenger-float">
-        <img src="https://i.imgur.com/G7i5D02.png" alt="Messenger">
+    <a href="https://www.messenger.com/t/8645401405544278" target="_blank" class="messenger-float" rel="noopener noreferrer">
+        <img src="https://i.imgur.com/G7i5D02.png" alt="Nhắn tin với chúng tôi qua Messenger" loading="lazy">
     </a>
     
     <!-- JavaScript -->
     <script>
-        // Tabs functionality
+        // Global variables
+        let currentUser = null;
+        let userBalance = 0;
+        
+        // Utility functions
+        function formatPrice(price) {
+            const num = typeof price === 'string' ? parseInt(price) : price;
+            return num.toLocaleString('vi-VN');
+        }
+        
+        function showToast(message, type = 'success') {
+            // Remove existing toasts
+            const existingToasts = document.querySelectorAll('.toast');
+            existingToasts.forEach(toast => toast.remove());
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="toast-message">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                    ${message}
+                </div>
+                <button class="toast-close" type="button">&times;</button>
+            `;
+            document.body.appendChild(toast);
+            
+            // Show toast
+            setTimeout(() => {
+                toast.classList.add('visible');
+            }, 100);
+            
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('visible');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 300);
+            }, 3000);
+            
+            // Close button
+            const closeBtn = toast.querySelector('.toast-close');
+            closeBtn.addEventListener('click', () => {
+                toast.classList.remove('visible');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 300);
+            });
+        }
+        
+        function showError(input, message) {
+            const formGroup = input.closest('.form-group');
+            if (formGroup) {
+                formGroup.classList.add('has-error');
+                const errorElement = formGroup.querySelector('.error-message');
+                if (errorElement) {
+                    errorElement.textContent = message;
+                    errorElement.style.display = 'block';
+                }
+            }
+        }
+        
+        function clearError(input) {
+            const formGroup = input.closest('.form-group');
+            if (formGroup) {
+                formGroup.classList.remove('has-error');
+                const errorElement = formGroup.querySelector('.error-message');
+                if (errorElement) {
+                    errorElement.style.display = 'none';
+                }
+            }
+        }
+        
+        // Product page functionality
         document.addEventListener('DOMContentLoaded', function() {
             // Tab switching
             const tabNavs = document.querySelectorAll('.tabs-nav li');
@@ -1622,7 +1777,10 @@
                     
                     // Add active class to clicked tab
                     this.classList.add('active');
-                    document.getElementById(tabId).classList.add('active');
+                    const targetPane = document.getElementById(tabId);
+                    if (targetPane) {
+                        targetPane.classList.add('active');
+                    }
                 });
             });
             
@@ -1631,120 +1789,180 @@
             const increaseBtn = document.getElementById('increaseQty');
             const quantityInput = document.getElementById('productQty');
             
-            decreaseBtn.addEventListener('click', function() {
-                let value = parseInt(quantityInput.value);
-                if (value > 1) {
-                    quantityInput.value = value - 1;
-                }
-            });
-            
-            increaseBtn.addEventListener('click', function() {
-                let value = parseInt(quantityInput.value);
-                quantityInput.value = value + 1;
-            });
+            if (decreaseBtn && increaseBtn && quantityInput) {
+                decreaseBtn.addEventListener('click', function() {
+                    let value = parseInt(quantityInput.value) || 1;
+                    if (value > 1) {
+                        quantityInput.value = value - 1;
+                    }
+                });
+                
+                increaseBtn.addEventListener('click', function() {
+                    let value = parseInt(quantityInput.value) || 1;
+                    const max = parseInt(quantityInput.getAttribute('max')) || 999;
+                    if (value < max) {
+                        quantityInput.value = value + 1;
+                    }
+                });
+                
+                // Validate quantity input
+                quantityInput.addEventListener('input', function() {
+                    let value = parseInt(this.value) || 1;
+                    const min = parseInt(this.getAttribute('min')) || 1;
+                    const max = parseInt(this.getAttribute('max')) || 999;
+                    
+                    if (value < min) {
+                        this.value = min;
+                    } else if (value > max) {
+                        this.value = max;
+                    }
+                });
+            }
             
             // Add to cart function
-            document.getElementById('addToCartBtn').addEventListener('click', function() {
-                const quantity = parseInt(document.getElementById('productQty').value);
-                showToast(`Đã thêm ${quantity} sản phẩm vào giỏ hàng`, 'success');
-            });
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            if (addToCartBtn) {
+                addToCartBtn.addEventListener('click', function() {
+                    const quantity = parseInt(document.getElementById('productQty').value) || 1;
+                    const productName = document.getElementById('productTitle').textContent;
+                    
+                    // Add loading state
+                    this.classList.add('loading');
+                    this.disabled = true;
+                    
+                    setTimeout(() => {
+                        this.classList.remove('loading');
+                        this.disabled = false;
+                        showToast(`Đã thêm ${quantity} "${productName}" vào giỏ hàng`, 'success');
+                    }, 1000);
+                });
+            }
             
             // Add to wishlist function
-            document.getElementById('addToWishlistBtn').addEventListener('click', function() {
-                const btn = this;
-                const icon = btn.querySelector('i');
-                
-                if (icon.classList.contains('far')) {
-                    icon.classList.replace('far', 'fas');
-                    btn.style.backgroundColor = '#fff3e0';
-                    btn.style.borderColor = '#e53935';
-                    btn.style.color = '#e53935';
-                    showToast('Đã thêm sản phẩm vào danh sách yêu thích', 'success');
-                } else {
-                    icon.classList.replace('fas', 'far');
-                    btn.style.backgroundColor = '';
-                    btn.style.borderColor = '#ff9800';
-                    btn.style.color = '#ff9800';
-                    showToast('Đã xóa sản phẩm khỏi danh sách yêu thích', 'success');
-                }
-            });
+            const addToWishlistBtn = document.getElementById('addToWishlistBtn');
+            if (addToWishlistBtn) {
+                addToWishlistBtn.addEventListener('click', function() {
+                    const icon = this.querySelector('i');
+                    const span = this.querySelector('span');
+                    const productName = document.getElementById('productTitle').textContent;
+                    
+                    if (icon && icon.classList.contains('far')) {
+                        icon.classList.replace('far', 'fas');
+                        this.style.backgroundColor = '#fff3e0';
+                        this.style.borderColor = '#e53935';
+                        this.style.color = '#e53935';
+                        if (span) span.textContent = 'Đã thích';
+                        showToast(`Đã thêm "${productName}" vào danh sách yêu thích`, 'success');
+                    } else if (icon) {
+                        icon.classList.replace('fas', 'far');
+                        this.style.backgroundColor = '';
+                        this.style.borderColor = '#ff9800';
+                        this.style.color = '#ff9800';
+                        if (span) span.textContent = 'Yêu thích';
+                        showToast(`Đã xóa "${productName}" khỏi danh sách yêu thích`, 'success');
+                    }
+                });
+            }
             
             // Review form submission
-            document.getElementById('reviewForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                // Check if a rating is selected
-                const rating = document.querySelector('input[name="rating"]:checked');
-                if (!rating) {
-                    showToast('Vui lòng chọn số sao đánh giá', 'error');
-                    return;
-                }
-                
-                const name = document.getElementById('reviewName').value;
-                const reviewContent = document.getElementById('reviewText').value;
-                
-                // Create new review element
-                const reviewList = document.getElementById('reviewList');
-                const reviewItem = document.createElement('div');
-                reviewItem.classList.add('review-item');
-                
-                const stars = '';
-                for (let i = 0; i < 5; i++) {
-                    if (i < parseInt(rating.value)) {
-                        stars += '<i class="fas fa-star"></i>';
+            const reviewForm = document.getElementById('reviewForm');
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Get form data
+                    const name = document.getElementById('reviewName').value.trim();
+                    const email = document.getElementById('reviewEmail').value.trim();
+                    const rating = document.querySelector('input[name="rating"]:checked');
+                    const reviewContent = document.getElementById('reviewText').value.trim();
+                    const submitBtn = this.querySelector('.btn-submit');
+                    
+                    // Validate form
+                    let isValid = true;
+                    
+                    if (!name) {
+                        showError(document.getElementById('reviewName'), 'Vui lòng nhập tên của bạn');
+                        isValid = false;
                     } else {
-                        stars += '<i class="far fa-star"></i>';
+                        clearError(document.getElementById('reviewName'));
                     }
-                }
-                
-                const now = new Date();
-                const dateStr = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
-                
-                reviewItem.innerHTML = `
-                    <div class="review-header">
-                        <span class="review-author">${name}</span>
-                        <span class="review-date">${dateStr}</span>
-                        <div class="review-rating">
-                            ${stars}
-                        </div>
-                    </div>
-                    <div class="review-content">
-                        <p>${reviewContent}</p>
-                    </div>
-                `;
-                
-                reviewList.prepend(reviewItem);
-                showToast('Cảm ơn bạn đã đánh giá sản phẩm!', 'success');
-                this.reset();
-            });
-            
-            // Back to top button
-            const backToTopBtn = document.getElementById('backToTop');
-            
-            window.addEventListener('scroll', function() {
-                if (window.pageYOffset > 300) {
-                    backToTopBtn.classList.add('visible');
-                } else {
-                    backToTopBtn.classList.remove('visible');
-                }
-                
-                // Update progress bar
-                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-                const scrolled = (winScroll / height) * 100;
-                document.getElementById("progressBar").style.width = scrolled + "%";
-            });
-            
-            backToTopBtn.addEventListener('click', function() {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
+                    
+                    if (!email) {
+                        showError(document.getElementById('reviewEmail'), 'Vui lòng nhập email');
+                        isValid = false;
+                    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        showError(document.getElementById('reviewEmail'), 'Email không hợp lệ');
+                        isValid = false;
+                    } else {
+                        clearError(document.getElementById('reviewEmail'));
+                    }
+                    
+                    if (!rating) {
+                        showError(document.querySelector('.rating-input'), 'Vui lòng chọn số sao đánh giá');
+                        isValid = false;
+                    } else {
+                        clearError(document.querySelector('.rating-input'));
+                    }
+                    
+                    if (!reviewContent) {
+                        showError(document.getElementById('reviewText'), 'Vui lòng nhập nội dung đánh giá');
+                        isValid = false;
+                    } else {
+                        clearError(document.getElementById('reviewText'));
+                    }
+                    
+                    if (!isValid) return;
+                    
+                    // Show loading state
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        // Create new review element
+                        const reviewList = document.getElementById('reviewList');
+                        const reviewItem = document.createElement('div');
+                        reviewItem.classList.add('review-item');
+                        
+                        let stars = '';
+                        for (let i = 0; i < 5; i++) {
+                            if (i < parseInt(rating.value)) {
+                                stars += '<i class="fas fa-star"></i>';
+                            } else {
+                                stars += '<i class="far fa-star"></i>';
+                            }
+                        }
+                        
+                        const now = new Date();
+                        const dateStr = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+                        
+                        reviewItem.innerHTML = `
+                            <div class="review-header">
+                                <span class="review-author">${name}</span>
+                                <span class="review-date">${dateStr}</span>
+                                <div class="review-rating">
+                                    ${stars}
+                                </div>
+                            </div>
+                            <div class="review-content">
+                                <p>${reviewContent}</p>
+                            </div>
+                        `;
+                        
+                        reviewList.prepend(reviewItem);
+                        
+                        // Reset form and button state
+                        submitBtn.classList.remove('loading');
+                        submitBtn.disabled = false;
+                        this.reset();
+                        
+                        showToast('Cảm ơn bạn đã đánh giá sản phẩm!', 'success');
+                    }, 1500);
                 });
-            });
+            }
             
             // Thumbnail click functionality
             const thumbnails = document.querySelectorAll('.thumbnail');
             const mainImage = document.getElementById('mainProductImage');
-            const mainImageContainer = document.getElementById('mainImage');
             
             thumbnails.forEach(thumbnail => {
                 thumbnail.addEventListener('click', function() {
@@ -1754,104 +1972,270 @@
                     // Add active class to clicked thumbnail
                     this.classList.add('active');
                     
-                    const img = this.querySelector('img');
-                    mainImage.src = img.src;
+                    // Update main image
+                    const newImageSrc = this.getAttribute('data-image');
+                    if (newImageSrc && mainImage) {
+                        mainImage.src = newImageSrc;
+                    }
                 });
             });
             
             // Image zoom functionality
-            mainImageContainer.addEventListener('click', function() {
-                this.classList.toggle('zoomed');
-            });
+            const mainImageContainer = document.getElementById('mainImage');
+            if (mainImageContainer) {
+                mainImageContainer.addEventListener('click', function() {
+                    this.classList.toggle('zoomed');
+                });
+            }
             
             // Mobile menu toggle
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const navMenu = document.getElementById('navMenu');
             
-            mobileMenuBtn.addEventListener('click', function() {
-                navMenu.classList.toggle('active');
-            });
-            
-            // Load more reviews
-            document.getElementById('loadMoreReviews').addEventListener('click', function() {
-                const reviewList = document.getElementById('reviewList');
-                
-                // Simulate loading
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...';
-                
-                setTimeout(() => {
-                    // Add more reviews
-                    for (let i = 0; i < 2; i++) {
-                        const reviewItem = document.createElement('div');
-                        reviewItem.classList.add('review-item');
-                        
-                        const names = ['Phạm Thị D', 'Hoàng Văn E', 'Lý Thị F'];
-                        const ratings = [4, 5, 4];
-                        const dates = ['05/06/2023', '01/06/2023', '28/05/2023'];
-                        const contents = [
-                            'Gói VIP giúp tôi quản lý vườn hiệu quả hơn nhiều. Đặc biệt thích tính năng nhắc lịch tưới nước và bón phân.',
-                            'Tuyệt vời! Hỗ trợ khách hàng rất chuyên nghiệp. Quà tặng hàng tháng là điểm cộng lớn.',
-                            'Sau 1 tháng sử dụng thấy rất hài lòng. Giao diện thân thiện, dễ sử dụng.'
-                        ];
-                        
-                        const randomIndex = Math.floor(Math.random() * names.length);
-                        
-                        let stars = '';
-                        for (let j = 0; j < 5; j++) {
-                            if (j < ratings[randomIndex]) {
-                                stars += '<i class="fas fa-star"></i>';
-                            } else {
-                                stars += '<i class="far fa-star"></i>';
-                            }
-                        }
-                        
-                        reviewItem.innerHTML = `
-                            <div class="review-header">
-                                <span class="review-author">${names[randomIndex]}</span>
-                                <span class="review-date">${dates[randomIndex]}</span>
-                                <div class="review-rating">
-                                    ${stars}
-                                </div>
-                            </div>
-                            <div class="review-content">
-                                <p>${contents[randomIndex]}</p>
-                            </div>
-                        `;
-                        
-                        reviewList.appendChild(reviewItem);
-                    }
+            if (mobileMenuBtn && navMenu) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    navMenu.classList.toggle('active');
                     
-                    this.innerHTML = '<i class="fas fa-plus"></i> Xem thêm đánh giá';
-                    showToast('Đã tải thêm đánh giá', 'success');
-                }, 800);
-            });
-            
-            // Toast notification function
-            function showToast(message, type) {
-                const toastContainer = document.getElementById('toastContainer');
-                const toast = document.createElement('div');
-                toast.classList.add('toast', type);
+                    // Change icon
+                    const icon = this.querySelector('i');
+                    if (navMenu.classList.contains('active')) {
+                        icon.classList.replace('fa-bars', 'fa-times');
+                    } else {
+                        icon.classList.replace('fa-times', 'fa-bars');
+                    }
+                });
                 
-                toast.innerHTML = `
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                    <span>${message}</span>
-                `;
-                
-                toastContainer.appendChild(toast);
-                
-                // Remove toast after animation completes
-                setTimeout(() => {
-                    toast.remove();
-                }, 3000);
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!navMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                        navMenu.classList.remove('active');
+                        const icon = mobileMenuBtn.querySelector('i');
+                        icon.classList.replace('fa-times', 'fa-bars');
+                    }
+                });
             }
             
-            // Initialize with a featured badge
+            // Load more reviews
+            const loadMoreBtn = document.getElementById('loadMoreReviews');
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', function() {
+                    const reviewList = document.getElementById('reviewList');
+                    const btn = this;
+                    
+                    // Show loading state
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Đang tải...</span>';
+                    btn.disabled = true;
+                    
+                    setTimeout(() => {
+                        // Sample reviews data
+                        const sampleReviews = [
+                            {
+                                name: 'Phạm Thị D',
+                                date: '05/12/2024',
+                                rating: 4,
+                                content: 'Raccoon rất dễ thương, con vật khỏe mạnh và hoạt bát. Đóng gói cẩn thận, giao hàng nhanh chóng.'
+                            },
+                            {
+                                name: 'Hoàng Văn E',
+                                date: '01/12/2024',
+                                rating: 5,
+                                content: 'Chất lượng tuyệt vời! Shop tư vấn nhiệt tình, hướng dẫn cách chăm sóc rất chi tiết.'
+                            }
+                        ];
+                        
+                        // Add new reviews
+                        sampleReviews.forEach(review => {
+                            const reviewItem = document.createElement('div');
+                            reviewItem.classList.add('review-item');
+                            
+                            let stars = '';
+                            for (let i = 0; i < 5; i++) {
+                                if (i < review.rating) {
+                                    stars += '<i class="fas fa-star"></i>';
+                                } else {
+                                    stars += '<i class="far fa-star"></i>';
+                                }
+                            }
+                            
+                            reviewItem.innerHTML = `
+                                <div class="review-header">
+                                    <span class="review-author">${review.name}</span>
+                                    <span class="review-date">${review.date}</span>
+                                    <div class="review-rating">
+                                        ${stars}
+                                    </div>
+                                </div>
+                                <div class="review-content">
+                                    <p>${review.content}</p>
+                                </div>
+                            `;
+                            
+                            reviewList.appendChild(reviewItem);
+                        });
+                        
+                        // Reset button state
+                        btn.innerHTML = '<i class="fas fa-plus"></i> <span>Xem thêm đánh giá</span>';
+                        btn.disabled = false;
+                        
+                        showToast('Đã tải thêm đánh giá', 'success');
+                    }, 1000);
+                });
+            }
+            
+            // Back to top button
+            const backToTopBtn = document.getElementById('backToTop');
+            
+            if (backToTopBtn) {
+                window.addEventListener('scroll', function() {
+                    if (window.pageYOffset > 300) {
+                        backToTopBtn.classList.add('visible');
+                    } else {
+                        backToTopBtn.classList.remove('visible');
+                    }
+                    
+                    // Update progress bar
+                    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                    const scrolled = (winScroll / height) * 100;
+                    const progressBar = document.getElementById('progressBar');
+                    if (progressBar) {
+                        progressBar.style.width = scrolled + "%";
+                    }
+                });
+                
+                backToTopBtn.addEventListener('click', function() {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+            
+            // Product card interactions for related products
+            const productCards = document.querySelectorAll('.product-card .btn-add-to-cart');
+            productCards.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productCard = this.closest('.product-card');
+                    const productName = productCard.querySelector('.product-title-card').textContent;
+                    
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Đang thêm...</span>';
+                    this.disabled = true;
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-check"></i> <span>Đã thêm</span>';
+                        showToast(`Đã thêm "${productName}" vào giỏ hàng`, 'success');
+                        
+                        setTimeout(() => {
+                            this.innerHTML = '<i class="fas fa-shopping-cart"></i> <span>Mua Ngay</span>';
+                            this.disabled = false;
+                        }, 2000);
+                    }, 1000);
+                });
+            });
+            
+            const wishlistBtns = document.querySelectorAll('.product-card .btn-wishlist');
+            wishlistBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const icon = this.querySelector('i');
+                    const productCard = this.closest('.product-card');
+                    const productName = productCard.querySelector('.product-title-card').textContent;
+                    
+                    if (icon.classList.contains('far')) {
+                        icon.classList.replace('far', 'fas');
+                        this.style.backgroundColor = '#fff3e0';
+                        this.style.borderColor = '#e53935';
+                        this.style.color = '#e53935';
+                        showToast(`Đã thêm "${productName}" vào yêu thích`, 'success');
+                    } else {
+                        icon.classList.replace('fas', 'far');
+                        this.style.backgroundColor = '';
+                        this.style.borderColor = '#ff9800';
+                        this.style.color = '#ff9800';
+                        showToast(`Đã xóa "${productName}" khỏi yêu thích`, 'success');
+                    }
+                });
+            });
+            
+            // Social share functionality
+            const shareLinks = document.querySelectorAll('.meta-item a[title*="Chia sẻ"]');
+            shareLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const platform = this.querySelector('i').classList.contains('fa-facebook') ? 'Facebook' : 
+                                   this.querySelector('i').classList.contains('fa-twitter') ? 'Twitter' : 'Pinterest';
+                    showToast(`Đã sao chép link chia sẻ ${platform}`, 'success');
+                });
+            });
+            
+            // Initialize welcome toast
             setTimeout(() => {
-                showToast('🔥 Gói VIP đang được giảm giá 25%!', 'success');
+                showToast('Chào mừng đến với trang sản phẩm Raccoon! 🦝', 'success');
             }, 1000);
         });
     </script>
-<script src="main.js"></script>   <!-- Nạp "bộ não" chung trước -->
+    
+    <!-- Load main.js for shared functionality -->
+    <script src="main.js"></script>
 </body>
-</html>
-
+</html>-add-to-cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Mua Ngay</span>
+                            </a>
+                            <button class="btn btn-outline btn-wishlist" type="button">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/300x200?text=Golden+Retriever" alt="Golden Retriever" loading="lazy">
+                        <span class="product-badge">NEW</span>
+                    </div>
+                    <div class="product-info-card">
+                        <h3 class="product-title-card">Golden Retriever</h3>
+                        <p class="product-description-card">Chó Golden Retriever thuần chủng</p>
+                        <div class="product-price">
+                            <div>
+                                <span class="product-current-price">1.200.000đ</span>
+                                <span class="product-old-price">1.500.000đ</span>
+                            </div>
+                            <span class="product-sales">
+                                <i class="fas fa-user"></i>
+                                42
+                            </span>
+                        </div>
+                        <div class="product-actions-card">
+                            <a href="#" class="btn btn-primary btn-add-to-cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Mua Ngay</span>
+                            </a>
+                            <button class="btn btn-outline btn-wishlist" type="button">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/300x200?text=Persian+Cat" alt="Persian Cat" loading="lazy">
+                        <span class="product-badge">GIẢM 15%</span>
+                    </div>
+                    <div class="product-info-card">
+                        <h3 class="product-title-card">Persian Cat</h3>
+                        <p class="product-description-card">Mèo Ba Tư lông dài đáng yêu</p>
+                        <div class="product-price">
+                            <div>
+                                <span class="product-current-price">800.000đ</span>
+                                <span class="product-old-price">940.000đ</span>
+                            </div>
+                            <span class="product-sales">
+                                <i class="fas fa-user"></i>
+                                120
+                            </span>
+                        </div>
+                        <div class="product-actions-card">
+                            <a href="#" class="btn btn-primary btn
