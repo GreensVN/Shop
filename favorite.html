@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sản phẩm yêu thích - Shop Grow A Garden</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header (giống index.html) -->
+
+    <main class="container">
+        <h1 class="page-title">Sản phẩm yêu thích</h1>
+        
+        <div class="products-grid" id="favoritesGrid">
+            <!-- Sản phẩm yêu thích sẽ được tải bằng JavaScript -->
+            <div class="empty-favorites">
+                <i class="fas fa-heart"></i>
+                <h3>Chưa có sản phẩm yêu thích</h3>
+                <p>Hãy thêm sản phẩm vào danh sách yêu thích!</p>
+                <a href="index.html" class="btn btn-primary">Khám phá sản phẩm</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer (giống index.html) -->
+
+    <script src="main.js"></script>
+    <script>
+    // favorite.js
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadFavorites();
+    });
+
+    async function loadFavorites() {
+        const favoritesGrid = document.getElementById('favoritesGrid');
+        
+        try {
+            const favorites = await getFavorites();
+            
+            if (favorites.length === 0) {
+                favoritesGrid.innerHTML = `
+                    <div class="empty-favorites">
+                        <i class="fas fa-heart"></i>
+                        <h3>Chưa có sản phẩm yêu thích</h3>
+                        <p>Hãy thêm sản phẩm vào danh sách yêu thích!</p>
+                        <a href="index.html" class="btn btn-primary">Khám phá sản phẩm</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            let favoritesHTML = '';
+            
+            for (const product of favorites) {
+                favoritesHTML += `
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="${product.images[0] || 'https://via.placeholder.com/300'}" alt="${product.title}" loading="lazy">
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">${product.title}</h3>
+                            <div class="product-price">${window.formatPrice(product.price)}đ</div>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-outline add-to-cart" data-id="${product._id}">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Thêm vào giỏ</span>
+                            </button>
+                            <button class="btn btn-icon favorite-btn active" data-id="${product._id}">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            favoritesGrid.innerHTML = favoritesHTML;
+            
+            // Gắn sự kiện
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-id');
+                    addToCart(productId);
+                });
+            });
+            
+            document.querySelectorAll('.favorite-btn').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const productId = this.getAttribute('data-id');
+                    await removeFromFavorites(productId);
+                });
+            });
+            
+        } catch (error) {
+            favoritesGrid.innerHTML = `
+                <div class="error-favorites">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Đã xảy ra lỗi</h3>
+                    <p>Không thể tải danh sách yêu thích. Vui lòng thử lại sau.</p>
+                </div>
+            `;
+        }
+    }
+    </script>
+</body>
+</html>

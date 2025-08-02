@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng - Shop Grow A Garden</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-container">
+            <a href="index.html">
+                <img src="https://i.ibb.co/q3r1hTft/8574d186247eba75669b7d50d42bd650-png.png" alt="Shop Grow A Garden" class="logo">
+            </a>
+            
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link active">
+                    <i class="fas fa-home"></i>
+                    <span>Trang Chủ</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-seedling"></i>
+                    <span>Giống Cây</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-paw"></i>
+                    <span>Thú Cưng</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-gamepad"></i>
+                    <span>Tài Khoản Game</span>
+                </a>
+            </nav>
+
+            <div class="user-dropdown" id="userDropdown" style="display: none;">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <span class="user-name" id="userName">User</span>
+                <div class="dropdown-menu">
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-user"></i>
+                        <span>Tài khoản</span>
+                    </a>
+                    <a href="cart.html" class="nav-link">
+                      <i class="fas fa-shopping-cart"></i>
+                      <span>Giỏ hàng</span>
+                      <span class="cart-count" id="cartCount">0</span>
+                    </a>
+                    <a href="favorite.html" class="nav-link">
+                      <i class="fas fa-heart"></i>
+                      <span>Yêu thích</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" id="logoutButton">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Đăng xuất</span>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="loginButton">
+                <i class="fas fa-user"></i>
+                <span>Đăng Nhập</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="container cart-container">
+        <h1 class="page-title">Giỏ hàng của bạn</h1>
+        
+        <div class="cart-items" id="cartItems">
+            <!-- Sản phẩm sẽ được tải bằng JavaScript -->
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart"></i>
+                <h3>Giỏ hàng trống</h3>
+                <p>Hãy thêm sản phẩm vào giỏ hàng!</p>
+                <a href="index.html" class="btn btn-primary">Tiếp tục mua sắm</a>
+            </div>
+        </div>
+        
+        <div class="cart-summary">
+            <h3>Tổng cộng</h3>
+            <div class="summary-row">
+                <span>Tạm tính:</span>
+                <span id="subtotal">0đ</span>
+            </div>
+            <div class="summary-row">
+                <span>Giảm giá:</span>
+                <span id="discount">0đ</span>
+            </div>
+            <div class="summary-row total">
+                <span>Thành tiền:</span>
+                <span id="total">0đ</span>
+            </div>
+            <button class="btn btn-primary btn-checkout" id="checkoutButton">Thanh toán</button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-logo">
+                    <img src="https://i.ibb.co/k6BvctRR/t-i-xu-ng.jpg" alt="Shop Grow A Garden" loading="lazy">
+                    <span>Shop Grow A Garden - Giống Cây - Thú Cưng</span>
+                </div>
+                
+                <div>
+                    <h3 class="footer-title">Về Chúng Tôi</h3>
+                    <p class="footer-text">Chuyên cung cấp dịch vụ, giống cây và thú cưng chất lượng. Giao dịch nhanh chóng, uy tín.</p>
+                </div>
+                
+                <div>
+                    <h3 class="footer-title">Liên Hệ</h3>
+                    <ul class="footer-links">
+                        <li class="footer-link">
+                            <a href="mailto:support@shopgrowgarden.com">
+                                <i class="fas fa-envelope"></i>
+                                <span>Email: support@shopgrowgarden.com</span>
+                            </a>
+                        </li>
+                        <li class="footer-link">
+                            <a href="tel:0123456789">
+                                <i class="fas fa-phone"></i>
+                                <span>Hotline: 0123 456 789</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 Shop Grow A Garden. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script>
+    // cart.js
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadCart();
+        
+        // Sự kiện thanh toán
+        document.getElementById('checkoutButton').addEventListener('click', function() {
+            showToast('Tính năng thanh toán đang phát triển', 'info');
+        });
+    });
+
+    async function loadCart() {
+        const cartItemsElement = document.getElementById('cartItems');
+        const subtotalElement = document.getElementById('subtotal');
+        const totalElement = document.getElementById('total');
+        
+        try {
+            const cart = await getCart();
+            
+            if (cart.length === 0) {
+                cartItemsElement.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h3>Giỏ hàng trống</h3>
+                        <p>Hãy thêm sản phẩm vào giỏ hàng!</p>
+                        <a href="index.html" class="btn btn-primary">Tiếp tục mua sắm</a>
+                    </div>
+                `;
+                subtotalElement.textContent = '0đ';
+                totalElement.textContent = '0đ';
+                return;
+            }
+            
+            let subtotal = 0;
+            let cartHTML = '';
+            
+            for (const item of cart) {
+                const product = item.product;
+                const totalPrice = product.price * item.quantity;
+                subtotal += totalPrice;
+                
+                cartHTML += `
+                    <div class="cart-item" data-id="${product._id}">
+                        <img src="${product.images[0] || 'https://via.placeholder.com/100'}" alt="${product.title}">
+                        <div class="cart-item-details">
+                            <h3 class="cart-item-title">${product.title}</h3>
+                            <div class="cart-item-price">${window.formatPrice(product.price)}đ</div>
+                        </div>
+                        <div class="cart-item-quantity">
+                            <button class="btn-quantity minus" data-id="${product._id}">-</button>
+                            <input type="number" value="${item.quantity}" min="1" class="quantity-input" data-id="${product._id}">
+                            <button class="btn-quantity plus" data-id="${product._id}">+</button>
+                        </div>
+                        <div class="cart-item-total">${window.formatPrice(totalPrice)}đ</div>
+                        <button class="btn-remove" data-id="${product._id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            }
+            
+            cartItemsElement.innerHTML = cartHTML;
+            subtotalElement.textContent = window.formatPrice(subtotal) + 'đ';
+            totalElement.textContent = window.formatPrice(subtotal) + 'đ'; // Chưa tính giảm giá
+            
+            // Gắn sự kiện
+            document.querySelectorAll('.btn-remove').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-id');
+                    removeFromCart(productId);
+                });
+            });
+            
+            document.querySelectorAll('.minus').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-id');
+                    const input = this.nextElementSibling;
+                    let quantity = parseInt(input.value) - 1;
+                    if (quantity < 1) quantity = 1;
+                    input.value = quantity;
+                    updateCartItemQuantity(productId, quantity);
+                });
+            });
+            
+            document.querySelectorAll('.plus').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-id');
+                    const input = this.previousElementSibling;
+                    let quantity = parseInt(input.value) + 1;
+                    input.value = quantity;
+                    updateCartItemQuantity(productId, quantity);
+                });
+            });
+            
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    const productId = this.getAttribute('data-id');
+                    let quantity = parseInt(this.value);
+                    if (quantity < 1) quantity = 1;
+                    this.value = quantity;
+                    updateCartItemQuantity(productId, quantity);
+                });
+            });
+            
+        } catch (error) {
+            cartItemsElement.innerHTML = `
+                <div class="error-cart">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Đã xảy ra lỗi</h3>
+                    <p>Không thể tải giỏ hàng. Vui lòng thử lại sau.</p>
+                </div>
+            `;
+        }
+    }
+    </script>
+</body>
+</html>
