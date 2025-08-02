@@ -49,7 +49,6 @@ app.use(cors(corsOptions));
 
 // --- KẾT THÚC CẤU HÌNH CORS ---
 
-
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
@@ -121,6 +120,25 @@ const userSchema = new mongoose.Schema({
         default: 'pending',
       },
     },
+  ],
+  // THÊM TRƯỜNG FAVORITES VÀ CART
+  favorites: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Product',
+    }
+  ],
+  cart: [
+    {
+      product: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Product',
+      },
+      quantity: {
+        type: Number,
+        default: 1,
+      }
+    }
   ],
   passwordChangedAt: Date,
   passwordResetToken: String,
@@ -578,13 +596,10 @@ const authController = {
 
 // User Controller
 const userController = {
-  // Đã sửa: getMe bây giờ nằm BÊN TRONG userController
   getMe: catchAsync(async (req, res, next) => {
-    // Lấy thông tin user trực tiếp từ req.user đã được middleware protect thêm vào
     const user = await User.findById(req.user.id);
 
     if (!user) {
-      // Thêm kiểm tra phòng trường hợp user bị xóa sau khi token được tạo
       return res.status(404).json({
         status: 'fail',
         message: 'User not found'
@@ -600,18 +615,14 @@ const userController = {
   }),
 
   getMyBalance: catchAsync(async (req, res, next) => {
-  // Không cần tìm lại user vì thông tin đã có sẵn trong req.user
-  res.status(200).json({
-    status: 'success',
-    data: {
-      balance: req.user.balance,
-    },
-  });
-}),
+    res.status(200).json({
+      status: 'success',
+      data: {
+        balance: req.user.balance,
+      },
+    });
+  }),
 
-
-  // Đã sửa: Xóa hàm getUser không cần thiết vì getMe đã xử lý
-  // Đã sửa: Xóa dấu phẩy thừa ở đầu
   updateMe: catchAsync(async (req, res, next) => {
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
@@ -705,7 +716,6 @@ const userController = {
     });
   }),
   
-  // Thêm lại hàm getUser để route của admin hoạt động
   getUser: catchAsync(async (req, res, next) => {
     const user = await User.findById(req.params.id);
     
@@ -982,6 +992,138 @@ const transactionController = {
   }),
 };
 
+// Cart and Favorites Controller
+const cartFavoriteController = {
+  addToCart: catchAsync(async (req, res, next) => {
+    const { productId, quantity = 1 } = req.body;
+    
+    const user = await User.findById(req.user.id);
+    const existingItemIndex = user.cart.findIndex(item => item.product.equals(productId));
+    
+    if (existingItemIndex !== -1) {
+      user.cart[existingItemIndex].quantity += quantity;
+    } else {
+      user.cart.push({ product: productId, quantity });
+    }
+    
+    await user.save({ validateBeforeSave: false });
+    
+    res.status(200).json({
+      status: 'success',
+      data: {
+        cart: user.cart
+      }
+    });
+  }),
+  
+  getCart: catchAsync(async (req, res, next) => {
+    const user = await User.findById(req.user.id).populate({
+      path: 'cart.product',
+      select: 'title price images'
+    });
+    
+    res.status(200).json({
+      status: 'success',
+      data: {
+        cart: user.cart
+      }
+    });
+  }),
+  
+  updateCart: catchAsync(async (req, res, next) => {
+    const { cart } = req.body;
+    
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { cart },
+      { new: true, runValidators: true }
+    ).populate({
+      path: 'cart.product',
+      select: 'title price images'
+    });
+    
+    res.status(200).json({
+      status: 'success',
+      data: {
+        cart: user.cart
+      }
+    });
+  }),
+  
+  removeFromCart: catchAsync(async (req, res, next) => {
+    const { productId } = req.params;
+    
+    const user = await User.findById(req.user.id);
+    user.cart = user.cart.filter(item => !item.product.equals(productId));
+    
+    await user.save({ validateBeforeSave: false });
+    
+    res.status(204).json({
+      status: 'success',
+      data: null
+    });
+  }),
+  
+  addToFavorites: catchAsync(async (req, res, next) => {
+    const { productId } = req.body;
+    
+    const user = await User.findById(req.user.id);
+    if (!user.favorites.includes(productId)) {
+      user.favorites.push(productId);
+      await user.save({ validateBeforeSave: false });
+    }
+    
+    res.status(200).json({
+      status: 'success',
+      data: {
+        favorites: user.favorites
+      }
+    });
+  }),
+  
+  getFavorites: catchAsync(async (req, res, next) => {
+    const user = await User.findById(req.user.id).populate({
+      path: 'favorites',
+      select: 'title price images'
+    });
+    
+    res.status(200).json({
+      status: 'success',
+      data: {
+        favorites: user.favorites
+      }
+    });
+  }),
+  
+  removeFromFavorites: catchAsync(async (req, res, next) => {
+    const { productId } = req.params;
+    
+    const user = await User.findById(req.user.id);
+    user.favorites = user.favorites.filter(id => !id.equals(productId));
+    
+    await user.save({ validateBeforeSave: false });
+    
+    res.status(204).json({
+      status: 'success',
+      data: null
+    });
+  }),
+  
+  checkFavorite: catchAsync(async (req, res, next) => {
+    const { productId } = req.params;
+    
+    const user = await User.findById(req.user.id);
+    const isFavorite = user.favorites.some(id => id.equals(productId));
+    
+    res.status(200).json({
+      status: 'success',
+      data: {
+        isFavorite
+      }
+    });
+  })
+};
+
 // Routes
 app.post('/api/v1/users/signup', authController.signup);
 app.post('/api/v1/users/login', authController.login);
@@ -999,6 +1141,17 @@ app.patch('/api/v1/users/updateMe', userController.updateMe);
 app.delete('/api/v1/users/deleteMe', userController.deleteMe);
 app.post('/api/v1/users/deposit', userController.deposit);
 app.get('/api/v1/users/transactions', userController.getTransactions);
+
+// THÊM CÁC ROUTE MỚI CHO GIỎ HÀNG VÀ YÊU THÍCH
+app.post('/api/v1/cart', cartFavoriteController.addToCart);
+app.get('/api/v1/cart', cartFavoriteController.getCart);
+app.patch('/api/v1/cart', cartFavoriteController.updateCart);
+app.delete('/api/v1/cart/:productId', cartFavoriteController.removeFromCart);
+
+app.post('/api/v1/favorites', cartFavoriteController.addToFavorites);
+app.get('/api/v1/favorites', cartFavoriteController.getFavorites);
+app.delete('/api/v1/favorites/:productId', cartFavoriteController.removeFromFavorites);
+app.get('/api/v1/favorites/check/:productId', cartFavoriteController.checkFavorite);
 
 // Admin only routes
 app.use(authController.restrictTo('admin'));
