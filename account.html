@@ -1221,6 +1221,30 @@
 
             <div class="user-actions">
                 <!-- User dropdown (shown when logged in) -->
+                <div class="user-dropdown" id="userDropdown" style="display: none;">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <span class="user-name" id="userName">User</span>
+                    <div class="dropdown-menu">
+                        <a href="account.html" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Tài khoản</span>
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-heart"></i>
+                            <span>Yêu thích</span>
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Giỏ hàng</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="AccountManager.logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Login button (shown when not logged in) -->
                 <a href="index.html" class="btn btn-primary" id="loginButton">
                     <i class="fas fa-user"></i>
@@ -1637,7 +1661,8 @@
             <h2 class="modal-title">Thiết lập Xác thực 2 bước</h2>
             <div class="two-fa-content">
                 <p>Quét mã QR này bằng ứng dụng xác thực của bạn (ví dụ: Google Authenticator).</p>
-                <img src="https://i.ibb.co/hL6Mhsz/qr-code-2-removebg-preview.png" alt="QR Code" class="qr-code">
+                <!-- FIXED: Replaced broken image link with a working one -->
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=otpauth://totp/ShopGrowAGarden:chinhan209?secret=JBSWY3DPEHPK3PXP&issuer=ShopGrowAGarden" alt="QR Code" class="qr-code">
                 <p>Nếu không thể quét mã, hãy nhập mã này thủ công:</p>
                 <p style="font-weight: bold; font-family: monospace;">JBSWY3DPEHPK3PXP</p>
                 <div class="form-note" style="background-color: rgba(220, 53, 69, 0.1); color: var(--danger-color);">
@@ -1813,7 +1838,7 @@
             },
             
             init() {
-                // Simulate being logged in
+                // This script now assumes the user is always logged in on this page.
                 this.showAccountContent();
                 this.updateUserDisplay();
                 this.loadUserData();
@@ -1821,10 +1846,15 @@
             },
 
             showAccountContent() {
-                document.getElementById('accountContent').style.display = 'block';
-                document.getElementById('loginPrompt').style.display = 'none';
-                document.getElementById('userDropdown').style.display = 'flex';
-                document.getElementById('loginButton').style.display = 'none';
+                const accountContentEl = document.getElementById('accountContent');
+                const loginPromptEl = document.getElementById('loginPrompt');
+                const userDropdownEl = document.getElementById('userDropdown');
+                const loginButtonEl = document.getElementById('loginButton');
+
+                if (accountContentEl) accountContentEl.style.display = 'block';
+                if (loginPromptEl) loginPromptEl.style.display = 'none';
+                if (userDropdownEl) userDropdownEl.style.display = 'flex';
+                if (loginButtonEl) loginButtonEl.style.display = 'none';
             },
 
             updateUserDisplay() {
@@ -1847,7 +1877,7 @@
                 document.getElementById('userRegisterDate').textContent = Utils.formatDate(this.currentUser.registerDate);
                 document.getElementById('userAccountId').textContent = userId;
 
-                // Load balance, history, and 2FA status from localStorage
+                // Load state from localStorage
                 this.loadStateFromLocalStorage();
             },
 
@@ -1856,7 +1886,7 @@
                 const is2FAEnabled = localStorage.getItem('is2FAEnabled') === 'true';
 
                 document.getElementById('balanceAmount').textContent = Utils.formatPrice(balance);
-                this.update2FAStatus(is2FAEnabled);
+                this.update2FAStatusUI(is2FAEnabled);
                 this.loadTransactionHistory();
             },
             
@@ -1873,15 +1903,16 @@
                     return;
                 }
 
-                historyList.innerHTML = transactions.reverse().map(this.createHistoryItem).join('');
+                historyList.innerHTML = transactions.slice().reverse().map(this.createHistoryItemHTML).join('');
             },
 
-            createHistoryItem(transaction) {
+            createHistoryItemHTML(transaction) {
                 const iconClass = transaction.type === 'deposit' ? 'success' : 'purchase';
-                const icon = transaction.type === 'deposit' ? 'fa-plus' : 'fa-shopping-cart';
+                const icon = transaction.type === 'deposit' ? 'fa-plus' : 'fa-hand-holding-usd';
                 const amountClass = transaction.type === 'deposit' ? 'success' : 'purchase';
                 const amountPrefix = transaction.type === 'deposit' ? '+' : '-';
-                const title = transaction.type === 'deposit' ? 'Nạp tiền thành công' : 'Mua hàng';
+                const title = transaction.type === 'deposit' ? 'Nạp tiền thành công' : 'Yêu cầu rút tiền';
+                const info = transaction.type === 'deposit' ? `Thẻ ${transaction.info}` : `Về ${transaction.info}`;
 
                 return `
                     <div class="history-item">
@@ -1889,7 +1920,7 @@
                         <div class="history-details">
                             <div class="history-title">${title}</div>
                             <div class="history-date">${Utils.formatDateTime(transaction.date)}</div>
-                            <div class="history-info">${transaction.cardType ? `Thẻ ${transaction.cardType}` : 'Giao dịch'}</div>
+                            <div class="history-info">${info}</div>
                         </div>
                         <div class="history-amount ${amountClass}">${amountPrefix}${Utils.formatPrice(transaction.amount)}</div>
                     </div>`;
@@ -1928,7 +1959,7 @@
                     const newTransaction = {
                         type: 'deposit',
                         amount: amount,
-                        cardType: document.querySelector('.card-type.selected').dataset.type,
+                        info: document.querySelector('.card-type.selected').dataset.type,
                         date: new Date().toISOString()
                     };
                     transactions.push(newTransaction);
@@ -1945,29 +1976,50 @@
             processWithdrawal() {
                  const form = document.getElementById('withdrawForm');
                  const submitBtn = form.querySelector('.btn-submit');
+                 const amountToWithdraw = parseInt(document.getElementById('withdrawAmount').value);
+                 const currentBalance = parseInt(localStorage.getItem('userBalance') || '0');
+
+                 if (amountToWithdraw > currentBalance) {
+                     Utils.showToast('Số dư không đủ để thực hiện giao dịch.', 'error');
+                     return;
+                 }
                  
                  submitBtn.classList.add('loading');
                  submitBtn.disabled = true;
                  
                  setTimeout(() => {
-                     Utils.showToast('Yêu cầu rút tiền đã được gửi thành công!', 'success');
-                     ModalManager.closeModal('withdrawModal');
+                    const newBalance = currentBalance - amountToWithdraw;
+                    localStorage.setItem('userBalance', newBalance);
+                    
+                    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+                    const newTransaction = {
+                        type: 'purchase', // Using 'purchase' to show negative amount
+                        amount: amountToWithdraw,
+                        info: document.getElementById('bankAccount').value.toUpperCase(),
+                        date: new Date().toISOString()
+                    };
+                    transactions.push(newTransaction);
+                    localStorage.setItem('transactions', JSON.stringify(transactions));
+
+                    document.getElementById('balanceAmount').textContent = Utils.formatPrice(newBalance);
+                    Utils.showToast('Yêu cầu rút tiền đã được gửi thành công!', 'success');
+                    this.loadTransactionHistory();
+                    ModalManager.closeModal('withdrawModal');
+
                  }, 1500);
             },
             
-            update2FAStatus(isEnabled) {
+            update2FAStatusUI(isEnabled) {
                  const statusEl = document.getElementById('2faStatus');
                  const buttonEl = document.getElementById('toggle2faBtn');
                  if (isEnabled) {
                      statusEl.textContent = 'Đã bật';
                      statusEl.style.color = 'var(--success-color)';
                      buttonEl.innerHTML = '<i class="fas fa-toggle-on"></i> <span>Tắt</span>';
-                     localStorage.setItem('is2FAEnabled', 'true');
                  } else {
                      statusEl.textContent = 'Chưa bật';
                      statusEl.style.color = 'var(--gray-color)';
                      buttonEl.innerHTML = '<i class="fas fa-toggle-off"></i> <span>Bật</span>';
-                     localStorage.setItem('is2FAEnabled', 'false');
                  }
             },
             
@@ -1975,7 +2027,8 @@
                 const isEnabled = localStorage.getItem('is2FAEnabled') === 'true';
                 if (isEnabled) {
                     if (confirm('Bạn có chắc chắn muốn tắt Xác thực 2 bước không?')) {
-                        this.update2FAStatus(false);
+                        localStorage.setItem('is2FAEnabled', 'false');
+                        this.update2FAStatusUI(false);
                         Utils.showToast('Xác thực 2 bước đã được tắt.', 'info');
                     }
                 } else {
@@ -1984,7 +2037,8 @@
             },
 
             enable2FA() {
-                this.update2FAStatus(true);
+                localStorage.setItem('is2FAEnabled', 'true');
+                this.update2FAStatusUI(true);
                 Utils.showToast('Xác thực 2 bước đã được bật thành công!', 'success');
                 ModalManager.closeModal('2faModal');
             },
@@ -2003,7 +2057,7 @@
 
                 document.getElementById('depositForm').addEventListener('submit', (e) => { e.preventDefault(); this.processDeposit(); });
                 document.getElementById('withdrawForm').addEventListener('submit', (e) => { e.preventDefault(); this.processWithdrawal(); });
-                document.getElementById('changePasswordForm').addEventListener('submit', (e) => { e.preventDefault(); Utils.showToast('Chức năng này cần backend.', 'info'); });
+                document.getElementById('changePasswordForm').addEventListener('submit', (e) => { e.preventDefault(); Utils.showToast('Mô phỏng: Mật khẩu đã được thay đổi!', 'success'); ModalManager.closeModal('changePasswordModal'); });
                 
                 document.querySelectorAll('.quick-amount').forEach(btn => {
                     btn.addEventListener('click', (e) => {
@@ -2041,6 +2095,5 @@
             AccountManager.init();
         });
     </script>
-<script src="main.js"></script>   <!-- Nạp "bộ não" chung trước -->
 </body>
 </html>
