@@ -1,861 +1,10 @@
-</footer>
-
-    <!-- Deposit Modal -->
-    <div class="modal" id="depositModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('depositModal')">&times;</button>
-            <h2 class="modal-title">Nạp tiền bằng thẻ cào</h2>
-            
-            <div class="card-types">
-                <div class="card-type selected" data-type="viettel">
-                    <div class="card-logo">VT</div>
-                    <span>Viettel</span>
-                </div>
-                <div class="card-type" data-type="mobifone">
-                    <div class="card-logo">MB</div>
-                    <span>Mobifone</span>
-                </div>
-                <div class="card-type" data-type="vinaphone">
-                    <div class="card-logo">VP</div>
-                    <span>Vinaphone</span>
-                </div>
-                <div class="card-type" data-type="gate">
-                    <div class="card-logo">GT</div>
-                    <span>Gate</span>
-                </div>
-            </div>
-            
-            <form id="depositForm">
-                <div class="form-group">
-                    <label for="cardNumber">Mã thẻ <small>(10-15 chữ số)</small></label>
-                    <input type="text" id="cardNumber" placeholder="Nhập mã thẻ" required maxlength="15">
-                </div>
-                
-                <div class="form-group">
-                    <label for="cardSerial">Số serial <small>(5-12 chữ số)</small></label>
-                    <input type="text" id="cardSerial" placeholder="Nhập số serial" required maxlength="12">
-                </div>
-                
-                <div class="form-group">
-                    <label for="cardAmount">Mệnh giá</label>
-                    <select id="cardAmount" required>
-                        <option value="">-- Chọn mệnh giá --</option>
-                        <option value="10000">10,000đ</option>
-                        <option value="20000">20,000đ</option>
-                        <option value="50000">50,000đ</option>
-                        <option value="100000">100,000đ</option>
-                        <option value="200000">200,000đ</option>
-                        <option value="500000">500,000đ</option>
-                    </select>
-                </div>
-                
-                <div class="form-note">
-                    <i class="fas fa-info-circle"></i>
-                    <span>Mã thẻ và số serial nằm ở mặt sau thẻ cào</span>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-submit">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Nạp tiền</span>
-                    <div class="spinner"></div>
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Profile Modal -->
-    <div class="modal" id="editProfileModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('editProfileModal')">&times;</button>
-            <h2 class="modal-title">Chỉnh sửa thông tin</h2>
-            
-            <form id="editProfileForm">
-                <div class="form-group">
-                    <label for="editName">Họ và tên</label>
-                    <input type="text" id="editName" placeholder="Nhập họ và tên" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="editPhone">Số điện thoại</label>
-                    <input type="tel" id="editPhone" placeholder="Nhập số điện thoại">
-                </div>
-                
-                <div class="form-group">
-                    <label for="editAddress">Địa chỉ</label>
-                    <input type="text" id="editAddress" placeholder="Nhập địa chỉ">
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-submit">
-                    <i class="fas fa-save"></i>
-                    <span>Lưu thay đổi</span>
-                    <div class="spinner"></div>
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Change Password Modal -->
-    <div class="modal" id="changePasswordModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('changePasswordModal')">&times;</button>
-            <h2 class="modal-title">Đổi mật khẩu</h2>
-            
-            <form id="changePasswordForm">
-                <div class="form-group password-group">
-                    <label for="currentPassword">Mật khẩu hiện tại</label>
-                    <input type="password" id="currentPassword" placeholder="Nhập mật khẩu hiện tại" required>
-                    <span class="password-toggle" onclick="togglePassword('currentPassword')">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                </div>
-                
-                <div class="form-group password-group">
-                    <label for="newPassword">Mật khẩu mới</label>
-                    <input type="password" id="newPassword" placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)" required minlength="6">
-                    <span class="password-toggle" onclick="togglePassword('newPassword')">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                </div>
-                
-                <div class="form-group password-group">
-                    <label for="confirmNewPassword">Nhập lại mật khẩu mới</label>
-                    <input type="password" id="confirmNewPassword" placeholder="Nhập lại mật khẩu mới" required>
-                    <span class="password-toggle" onclick="togglePassword('confirmNewPassword')">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-submit">
-                    <i class="fas fa-key"></i>
-                    <span>Đổi mật khẩu</span>
-                    <div class="spinner"></div>
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        // Utility Functions
-        const Utils = {
-            formatPrice: (price) => {
-                return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
-            },
-            
-            formatDate: (date) => {
-                return new Date(date).toLocaleDateString('vi-VN');
-            },
-            
-            formatDateTime: (date) => {
-                return new Date(date).toLocaleString('vi-VN');
-            },
-            
-            generateId: () => {
-                return Math.floor(100000 + Math.random() * 900000);
-            },
-
-            showToast: (message, type = 'success', duration = 3000) => {
-                // Remove existing toasts
-                document.querySelectorAll('.toast').forEach(toast => toast.remove());
-                
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.innerHTML = `
-                    <span>${message}</span>
-                    <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 10px; cursor: pointer; font-size: 16px;">&times;</button>
-                `;
-                
-                document.body.appendChild(toast);
-                
-                // Show toast
-                setTimeout(() => toast.classList.add('show'), 100);
-                
-                // Auto hide
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 300);
-                }, duration);
-            },
-
-            validateCard: (number, serial) => {
-                const cardRegex = /^[0-9]{10,15}$/;
-                const serialRegex = /^[0-9]{5,12}$/;
-                return cardRegex.test(number) && serialRegex.test(serial);
-            },
-
-            validatePassword: (password) => {
-                return password && password.length >= 6;
-            }
-        };
-
-        // Storage Manager
-        const StorageManager = {
-            getCurrentUser: () => {
-                try {
-                    const user = JSON.parse(localStorage.getItem('currentUser'));
-                    return user;
-                } catch (e) {
-                    return null;
-                }
-            },
-            
-            saveCurrentUser: (user) => {
-                localStorage.setItem('currentUser', JSON.stringify(user));
-            },
-            
-            clearCurrentUser: () => {
-                localStorage.removeItem('currentUser');
-            },
-
-            getUsers: () => {
-                try {
-                    return JSON.parse(localStorage.getItem('users')) || [];
-                } catch (e) {
-                    return [];
-                }
-            },
-            
-            saveUsers: (users) => {
-                localStorage.setItem('users', JSON.stringify(users));
-            },
-
-            updateUser: (updatedUser) => {
-                const users = StorageManager.getUsers();
-                const index = users.findIndex(u => u.email === updatedUser.email);
-                if (index !== -1) {
-                    users[index] = updatedUser;
-                    StorageManager.saveUsers(users);
-                    StorageManager.saveCurrentUser(updatedUser);
-                }
-                return updatedUser;
-            },
-
-            addTransaction: (transaction) => {
-                const user = StorageManager.getCurrentUser();
-                if (!user) return;
-                
-                if (!user.transactions) user.transactions = [];
-                user.transactions.unshift({
-                    ...transaction,
-                    id: Utils.generateId(),
-                    date: new Date().toISOString()
-                });
-                
-                StorageManager.updateUser(user);
-                return user.transactions[0];
-            }
-        };
-
-        // Account Manager
-        class AccountManager {
-            constructor() {
-                this.currentUser = null;
-                this.init();
-            }
-
-            init() {
-                this.checkLoginStatus();
-                this.setupEventListeners();
-            }
-
-            checkLoginStatus() {
-                this.currentUser = StorageManager.getCurrentUser();
-                
-                if (this.currentUser) {
-                    this.showAccountContent();
-                    this.updateUserDisplay();
-                    this.loadUserData();
-                } else {
-                    this.showLoginPrompt();
-                }
-            }
-
-            showAccountContent() {
-                document.getElementById('accountContent').style.display = 'block';
-                document.getElementById('loginPrompt').style.display = 'none';
-                document.getElementById('userDropdown').style.display = 'flex';
-                document.getElementById('loginButton').style.display = 'none';
-            }
-
-            showLoginPrompt() {
-                document.getElementById('accountContent').style.display = 'none';
-                document.getElementById('loginPrompt').style.display = 'block';
-                document.getElementById('userDropdown').style.display = 'none';
-                document.getElementById('loginButton').style.display = 'flex';
-            }
-
-            updateUserDisplay() {
-                if (!this.currentUser) return;
-
-                const firstLetter = this.currentUser.name ? this.currentUser.name[0].toUpperCase() : 'U';
-                
-                // Update header
-                document.getElementById('userAvatar').textContent = firstLetter;
-                document.getElementById('userName').textContent = this.currentUser.name || 'User';
-                
-                // Update sidebar
-                document.getElementById('accountAvatar').textContent = firstLetter;
-                document.getElementById('accountName').textContent = this.currentUser.name || 'User';
-                document.getElementById('accountId').textContent = `ID: ${this.currentUser.id || Utils.generateId()}`;
-            }
-
-            loadUserData() {
-                if (!this.currentUser) return;
-
-                // Update account info
-                document.getElementById('userFullName').textContent = this.currentUser.name || 'User';
-                document.getElementById('userEmail').textContent = this.currentUser.email || 'user@example.com';
-                document.getElementById('userPhone').textContent = this.currentUser.phone || 'Chưa cập nhật';
-                document.getElementById('userRegisterDate').textContent = Utils.formatDate(this.currentUser.registerDate || new Date());
-                document.getElementById('userAccountId').textContent = this.currentUser.id || Utils.generateId();
-
-                // Update balance
-                const balance = this.currentUser.balance || 0;
-                document.getElementById('balanceAmount').textContent = Utils.formatPrice(balance);
-
-                // Load transaction history
-                this.loadTransactionHistory();
-            }
-
-            loadTransactionHistory() {
-                const historyList = document.getElementById('historyList');
-                
-                if (!this.currentUser.transactions || this.currentUser.transactions.length === 0) {
-                    historyList.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-history"></i>
-                            <h3>Chưa có giao dịch nào</h3>
-                            <p>Lịch sử giao dịch sẽ hiển thị tại đây khi bạn có giao dịch</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                const historyHTML = this.currentUser.transactions.map(transaction => this.createHistoryItem(transaction)).join('');
-                historyList.innerHTML = historyHTML;
-            }
-
-            createHistoryItem(transaction) {
-                const iconClass = transaction.type === 'deposit' ? 'success' : 'purchase';
-                const icon = transaction.type === 'deposit' ? 'fas fa-plus' : 'fas fa-shopping-cart';
-                const amountClass = transaction.type === 'deposit' ? 'success' : 'purchase';
-                const amountPrefix = transaction.type === 'deposit' ? '+' : '-';
-
-                return `
-                    <div class="history-item">
-                        <div class="history-icon ${iconClass}">
-                            <i class="${icon}"></i>
-                        </div>
-                        <div class="history-details">
-                            <div class="history-title">${transaction.title}</div>
-                            <div class="history-date">${Utils.formatDateTime(transaction.date)}</div>
-                            <div class="history-info">${transaction.description || ''}</div>
-                        </div>
-                        <div class="history-amount ${amountClass}">
-                            ${amountPrefix}${Utils.formatPrice(transaction.amount)}
-                        </div>
-                    </div>
-                `;
-            }
-
-            setupEventListeners() {
-                // Tab switching
-                document.querySelectorAll('.menu-item').forEach(item => {
-                    item.addEventListener('click', (e) => {
-                        const tabId = e.currentTarget.dataset.tab;
-                        this.switchTab(tabId);
-                    });
-                });
-
-                // Deposit functionality
-                document.getElementById('depositBtn').addEventListener('click', () => {
-                    showModal('depositModal');
-                });
-
-                // Quick amounts
-                document.querySelectorAll('.quick-amount').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        // Remove previous selections
-                        document.querySelectorAll('.quick-amount').forEach(b => b.classList.remove('selected'));
-                        
-                        // Select current
-                        e.target.classList.add('selected');
-                        
-                        // Set amount in modal
-                        const amount = e.target.dataset.amount;
-                        document.getElementById('cardAmount').value = amount;
-                        
-                        // Open deposit modal
-                        showModal('depositModal');
-                    });
-                });
-
-                // Card type selection
-                document.querySelectorAll('.card-type').forEach(card => {
-                    card.addEventListener('click', (e) => {
-                        document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
-                        e.currentTarget.classList.add('selected');
-                    });
-                });
-
-                // Method cards
-                document.querySelectorAll('.method-card').forEach(card => {
-                    card.addEventListener('click', (e) => {
-                        if (e.currentTarget.classList.contains('coming-soon')) {
-                            Utils.showToast('Tính năng này sẽ sớm ra mắt', 'info');
-                            return;
-                        }
-                        
-                        document.querySelectorAll('.method-card').forEach(c => c.classList.remove('active'));
-                        e.currentTarget.classList.add('active');
-                        
-                        if (e.currentTarget.dataset.method === 'card') {
-                            showModal('depositModal');
-                        }
-                    });
-                });
-
-                // Forms
-                document.getElementById('depositForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.processDeposit();
-                });
-
-                document.getElementById('editProfileForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.saveProfile();
-                });
-
-                document.getElementById('changePasswordForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.changePassword();
-                });
-
-                // Edit profile button
-                document.getElementById('editProfileBtn').addEventListener('click', () => {
-                    this.openEditProfile();
-                });
-
-                // Change password button
-                document.getElementById('changePasswordBtn').addEventListener('click', () => {
-                    showModal('changePasswordModal');
-                });
-
-                // Security buttons
-                document.getElementById('enable2FABtn').addEventListener('click', () => {
-                    Utils.showToast('Tính năng xác thực 2 bước sẽ sớm ra mắt', 'info');
-                });
-
-                document.getElementById('manageDevicesBtn').addEventListener('click', () => {
-                    Utils.showToast('Tính năng quản lý thiết bị sẽ sớm ra mắt', 'info');
-                });
-
-                document.getElementById('logoutAllBtn').addEventListener('click', () => {
-                    logout();
-                });
-
-                // History filters
-                document.getElementById('filterHistoryBtn').addEventListener('click', () => {
-                    this.filterHistory();
-                });
-
-                // Input formatting
-                this.setupInputFormatting();
-            }
-
-            setupInputFormatting() {
-                // Card number input (numbers only)
-                document.getElementById('cardNumber').addEventListener('input', (e) => {
-                    e.target.value = e.target.value.replace(/\D/g, '');
-                });
-
-                // Card serial input (numbers only)
-                document.getElementById('cardSerial').addEventListener('input', (e) => {
-                    e.target.value = e.target.value.replace(/\D/g, '');
-                });
-
-                // Phone input (numbers only)
-                document.getElementById('editPhone').addEventListener('input', (e) => {
-                    e.target.value = e.target.value.replace(/\D/g, '');
-                });
-            }
-
-            switchTab(tabId) {
-                // Update menu items
-                document.querySelectorAll('.menu-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-
-                // Update tab content
-                document.querySelectorAll('.tab-content').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                document.getElementById(tabId + 'Tab').classList.add('active');
-            }
-
-            async processDeposit() {
-                const form = document.getElementById('depositForm');
-                const submitBtn = form.querySelector('.btn-submit');
-                const cardNumber = document.getElementById('cardNumber').value.trim();
-                const cardSerial = document.getElementById('cardSerial').value.trim();
-                const cardAmount = document.getElementById('cardAmount').value;
-                const selectedCard = document.querySelector('.card-type.selected');
-
-                // Validation
-                if (!cardNumber || !cardSerial || !cardAmount || !selectedCard) {
-                    Utils.showToast('Vui lòng điền đầy đủ thông tin', 'error');
-                    return;
-                }
-
-                if (!Utils.validateCard(cardNumber, cardSerial)) {
-                    Utils.showToast('Mã thẻ hoặc số serial không đúng định dạng', 'error');
-                    return;
-                }
-
-                // Show loading
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-
-                try {
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-
-                    // Random success rate (85% success)
-                    const isSuccess = Math.random() > 0.15;
-
-                    if (isSuccess) {
-                        // Add transaction
-                        const transaction = {
-                            type: 'deposit',
-                            title: 'Nạp tiền thẻ cào',
-                            description: `Nạp tiền qua thẻ ${selectedCard.querySelector('span').textContent}`,
-                            amount: parseInt(cardAmount),
-                            cardType: selectedCard.querySelector('span').textContent,
-                            cardNumber: cardNumber,
-                            status: 'success'
-                        };
-
-                        StorageManager.addTransaction(transaction);
-
-                        // Update balance
-                        this.currentUser.balance = (this.currentUser.balance || 0) + parseInt(cardAmount);
-                        StorageManager.updateUser(this.currentUser);
-
-                        // Update UI
-                        document.getElementById('balanceAmount').textContent = Utils.formatPrice(this.currentUser.balance);
-                        this.loadTransactionHistory();
-
-                        // Clear form
-                        form.reset();
-                        document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
-                        document.querySelector('.card-type[data-type="viettel"]').classList.add('selected');
-
-                        Utils.showToast(`Nạp tiền thành công ${Utils.formatPrice(parseInt(cardAmount))}`, 'success');
-                        closeModal('depositModal');
-                    } else {
-                        Utils.showToast('Thẻ cào không hợp lệ hoặc đã được sử dụng', 'error');
-                    }
-                } catch (error) {
-                    Utils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
-                } finally {
-                    submitBtn.classList.remove('loading');
-                    submitBtn.disabled = false;
-                }
-            }
-
-            openEditProfile() {
-                document.getElementById('editName').value = this.currentUser.name || '';
-                document.getElementById('editPhone').value = this.currentUser.phone || '';
-                document.getElementById('editAddress').value = this.currentUser.address || '';
-                showModal('editProfileModal');
-            }
-
-            async saveProfile() {
-                const form = document.getElementById('editProfileForm');
-                const submitBtn = form.querySelector('.btn-submit');
-                const name = document.getElementById('editName').value.trim();
-                const phone = document.getElementById('editPhone').value.trim();
-                const address = document.getElementById('editAddress').value.trim();
-
-                if (!name) {
-                    Utils.showToast('Vui lòng nhập họ và tên', 'error');
-                    return;
-                }
-
-                // Show loading
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-
-                try {
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-
-                    // Update user data
-                    this.currentUser.name = name;
-                    this.currentUser.phone = phone;
-                    this.currentUser.address = address;
-
-                    StorageManager.updateUser(this.currentUser);
-                    this.loadUserData();
-                    this.updateUserDisplay();
-
-                    Utils.showToast('Cập nhật thông tin thành công', 'success');
-                    closeModal('editProfileModal');
-                } catch (error) {
-                    Utils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
-                } finally {
-                    submitBtn.classList.remove('loading');
-                    submitBtn.disabled = false;
-                }
-            }
-
-            async changePassword() {
-                const form = document.getElementById('changePasswordForm');
-                const submitBtn = form.querySelector('.btn-submit');
-                const currentPassword = document.getElementById('currentPassword').value;
-                const newPassword = document.getElementById('newPassword').value;
-                const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-
-                // Validation
-                if (!currentPassword || !newPassword || !confirmNewPassword) {
-                    Utils.showToast('Vui lòng điền đầy đủ thông tin', 'error');
-                    return;
-                }
-
-                if (currentPassword !== this.currentUser.password) {
-                    Utils.showToast('Mật khẩu hiện tại không đúng', 'error');
-                    return;
-                }
-
-                if (!Utils.validatePassword(newPassword)) {
-                    Utils.showToast('Mật khẩu mới phải có ít nhất 6 ký tự', 'error');
-                    return;
-                }
-
-                if (newPassword !== confirmNewPassword) {
-                    Utils.showToast('Mật khẩu mới không khớp', 'error');
-                    return;
-                }
-
-                // Show loading
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-
-                try {
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-
-                    // Update password
-                    this.currentUser.password = newPassword;
-                    StorageManager.updateUser(this.currentUser);
-
-                    // Clear form
-                    form.reset();
-
-                    Utils.showToast('Đổi mật khẩu thành công', 'success');
-                    closeModal('changePasswordModal');
-                } catch (error) {
-                    Utils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
-                } finally {
-                    submitBtn.classList.remove('loading');
-                    submitBtn.disabled = false;
-                }
-            }
-
-            filterHistory() {
-                const typeFilter = document.getElementById('historyTypeFilter').value;
-                const startDate = document.getElementById('historyStartDate').value;
-                const endDate = document.getElementById('historyEndDate').value;
-
-                if (!this.currentUser.transactions) return;
-
-                let filteredTransactions = [...this.currentUser.transactions];
-
-                // Filter by type
-                if (typeFilter !== 'all') {
-                    filteredTransactions = filteredTransactions.filter(t => t.type === typeFilter);
-                }
-
-                // Filter by date range
-                if (startDate) {
-                    filteredTransactions = filteredTransactions.filter(t => 
-                        new Date(t.date) >= new Date(startDate)
-                    );
-                }
-
-                if (endDate) {
-                    filteredTransactions = filteredTransactions.filter(t => 
-                        new Date(t.date) <= new Date(endDate + 'T23:59:59')
-                    );
-                }
-
-                // Update display
-                const historyList = document.getElementById('historyList');
-                if (filteredTransactions.length === 0) {
-                    historyList.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-search"></i>
-                            <h3>Không tìm thấy giao dịch nào</h3>
-                            <p>Thử thay đổi bộ lọc để xem kết quả khác</p>
-                        </div>
-                    `;
-                } else {
-                    const historyHTML = filteredTransactions.map(transaction => this.createHistoryItem(transaction)).join('');
-                    historyList.innerHTML = historyHTML;
-                }
-
-                Utils.showToast(`Tìm thấy ${filteredTransactions.length} giao dịch`, 'info');
-            }
-        }
-
-        // Modal Functions
-        function showModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'flex';
-                setTimeout(() => modal.classList.add('show'), 10);
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('show');
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }, 300);
-            }
-        }
-
-        // Password Toggle Function
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const icon = document.querySelector(`[onclick="togglePassword('${inputId}')"] i`);
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
-
-        // Global logout function
-        function logout() {
-            StorageManager.clearCurrentUser();
-            Utils.showToast('Đăng xuất thành công', 'success');
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1000);
-        }
-
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            new AccountManager();
-
-            // Close modal when clicking outside
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        closeModal(modal.id);
-                    }
-                });
-            });
-        });
-
-        // Demo data for testing (remove in production)
-        function createDemoUser() {
-            const demoUser = {
-                id: Utils.generateId(),
-                name: 'Nguyễn Văn Demo',
-                email: 'demo@example.com',
-                phone: '0123456789',
-                password: '123456',
-                balance: 250000,
-                registerDate: new Date().toISOString(),
-                transactions: [
-                    {
-                        id: Utils.generateId(),
-                        type: 'deposit',
-                        title: 'Nạp tiền thẻ cào',
-                        description: 'Nạp tiền qua thẻ Viettel',
-                        amount: 100000,
-                        cardType: 'Viettel',
-                        cardNumber: '1234567890123',
-                        status: 'success',
-                        date: new Date(Date.now() - 86400000).toISOString()
-                    },
-                    {
-                        id: Utils.generateId(),
-                        type: 'deposit',
-                        title: 'Nạp tiền thẻ cào',
-                        description: 'Nạp tiền qua thẻ Mobifone',
-                        amount: 50000,
-                        cardType: 'Mobifone',
-                        cardNumber: '9876543210987',
-                        status: 'success',
-                        date: new Date(Date.now() - 172800000).toISOString()
-                    },
-                    {
-                        id: Utils.generateId(),
-                        type: 'purchase',
-                        title: 'Mua sản phẩm',
-                        description: 'Giống cây hoa hồng',
-                        amount: 100000,
-                        status: 'success',
-                        date: new Date(Date.now() - 259200000).toISOString()
-                    }
-                ]
-            };
-
-            StorageManager.saveCurrentUser(demoUser);
-            
-            // Also save to users list
-            const users = StorageManager.getUsers();
-            const existingIndex = users.findIndex(u => u.email === demoUser.email);
-            if (existingIndex !== -1) {
-                users[existingIndex] = demoUser;
-            } else {
-                users.push(demoUser);
-            }
-            StorageManager.saveUsers(users);
-            
-            location.reload();
-        }
-
-        // Add demo button for testing (remove in production)
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            const demoBtn = document.createElement('button');
-            demoBtn.textContent = 'Demo Login';
-            demoBtn.className = 'btn btn-outline';
-            demoBtn.style.position = 'fixed';
-            demoBtn.style.bottom = '20px';
-            demoBtn.style.right = '20px';
-            demoBtn.style.zIndex = '9999';
-            demoBtn.onclick = createDemoUser;
-            document.body.appendChild(demoBtn);
-        }
-
-        // Animations
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
-    </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tài khoản - Shop Grow A Garden</title>
-    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVFiFtZc9aBRBFMd/M7ubTWI0GoM2NmIhFlYWYmVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVh">
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVFiFtZc9aBRBFMd/M7ubTWI0GoM2NmIhFlYWYmVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVh">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -1931,6 +1080,10 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -2295,6 +1448,140 @@
         </div>
     </footer>
 
+    <!-- Deposit Modal -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('depositModal')">&times;</button>
+            <h2 class="modal-title">Nạp tiền bằng thẻ cào</h2>
+            
+            <div class="card-types">
+                <div class="card-type selected" data-type="viettel">
+                    <div class="card-logo">VT</div>
+                    <span>Viettel</span>
+                </div>
+                <div class="card-type" data-type="mobifone">
+                    <div class="card-logo">MB</div>
+                    <span>Mobifone</span>
+                </div>
+                <div class="card-type" data-type="vinaphone">
+                    <div class="card-logo">VP</div>
+                    <span>Vinaphone</span>
+                </div>
+                <div class="card-type" data-type="gate">
+                    <div class="card-logo">GT</div>
+                    <span>Gate</span>
+                </div>
+            </div>
+            
+            <form id="depositForm">
+                <div class="form-group">
+                    <label for="cardNumber">Mã thẻ <small>(10-15 chữ số)</small></label>
+                    <input type="text" id="cardNumber" placeholder="Nhập mã thẻ" required maxlength="15">
+                </div>
+                
+                <div class="form-group">
+                    <label for="cardSerial">Số serial <small>(5-12 chữ số)</small></label>
+                    <input type="text" id="cardSerial" placeholder="Nhập số serial" required maxlength="12">
+                </div>
+                
+                <div class="form-group">
+                    <label for="cardAmount">Mệnh giá</label>
+                    <select id="cardAmount" required>
+                        <option value="">-- Chọn mệnh giá --</option>
+                        <option value="10000">10,000đ</option>
+                        <option value="20000">20,000đ</option>
+                        <option value="50000">50,000đ</option>
+                        <option value="100000">100,000đ</option>
+                        <option value="200000">200,000đ</option>
+                        <option value="500000">500,000đ</option>
+                    </select>
+                </div>
+                
+                <div class="form-note">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Mã thẻ và số serial nằm ở mặt sau thẻ cào</span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-submit">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Nạp tiền</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal" id="editProfileModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('editProfileModal')">&times;</button>
+            <h2 class="modal-title">Chỉnh sửa thông tin</h2>
+            
+            <form id="editProfileForm">
+                <div class="form-group">
+                    <label for="editName">Họ và tên</label>
+                    <input type="text" id="editName" placeholder="Nhập họ và tên" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editPhone">Số điện thoại</label>
+                    <input type="tel" id="editPhone" placeholder="Nhập số điện thoại">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editAddress">Địa chỉ</label>
+                    <input type="text" id="editAddress" placeholder="Nhập địa chỉ">
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-submit">
+                    <i class="fas fa-save"></i>
+                    <span>Lưu thay đổi</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('changePasswordModal')">&times;</button>
+            <h2 class="modal-title">Đổi mật khẩu</h2>
+            
+            <form id="changePasswordForm">
+                <div class="form-group password-group">
+                    <label for="currentPassword">Mật khẩu hiện tại</label>
+                    <input type="password" id="currentPassword" placeholder="Nhập mật khẩu hiện tại" required>
+                    <span class="password-toggle" onclick="togglePassword('currentPassword')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
+                
+                <div class="form-group password-group">
+                    <label for="newPassword">Mật khẩu mới</label>
+                    <input type="password" id="newPassword" placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)" required minlength="6">
+                    <span class="password-toggle" onclick="togglePassword('newPassword')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
+                
+                <div class="form-group password-group">
+                    <label for="confirmNewPassword">Nhập lại mật khẩu mới</label>
+                    <input type="password" id="confirmNewPassword" placeholder="Nhập lại mật khẩu mới" required>
+                    <span class="password-toggle" onclick="togglePassword('confirmNewPassword')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-submit">
+                    <i class="fas fa-key"></i>
+                    <span>Đổi mật khẩu</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Utility Functions
         const Utils = {
@@ -2306,16 +1593,53 @@
                 return new Date(date).toLocaleDateString('vi-VN');
             },
             
+            formatDateTime: (date) => {
+                return new Date(date).toLocaleString('vi-VN');
+            },
+            
             generateId: () => {
                 return Math.floor(100000 + Math.random() * 900000);
+            },
+
+            showToast: (message, type = 'success', duration = 3000) => {
+                // Remove existing toasts
+                document.querySelectorAll('.toast').forEach(toast => toast.remove());
+                
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 10px; cursor: pointer; font-size: 16px;">&times;</button>
+                `;
+                
+                document.body.appendChild(toast);
+                
+                // Show toast
+                setTimeout(() => toast.classList.add('show'), 100);
+                
+                // Auto hide
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            },
+
+            validateCard: (number, serial) => {
+                const cardRegex = /^[0-9]{10,15}$/;
+                const serialRegex = /^[0-9]{5,12}$/;
+                return cardRegex.test(number) && serialRegex.test(serial);
+            },
+
+            validatePassword: (password) => {
+                return password && password.length >= 6;
             }
         };
 
-        // Storage Manager
+        // Storage Manager - Sử dụng sessionStorage thay vì localStorage để tránh lỗi
         const StorageManager = {
             getCurrentUser: () => {
                 try {
-                    const user = JSON.parse(localStorage.getItem('currentUser'));
+                    const user = JSON.parse(sessionStorage.getItem('currentUser'));
                     return user;
                 } catch (e) {
                     return null;
@@ -2323,11 +1647,49 @@
             },
             
             saveCurrentUser: (user) => {
-                localStorage.setItem('currentUser', JSON.stringify(user));
+                sessionStorage.setItem('currentUser', JSON.stringify(user));
             },
             
             clearCurrentUser: () => {
-                localStorage.removeItem('currentUser');
+                sessionStorage.removeItem('currentUser');
+            },
+
+            getUsers: () => {
+                try {
+                    return JSON.parse(sessionStorage.getItem('users')) || [];
+                } catch (e) {
+                    return [];
+                }
+            },
+            
+            saveUsers: (users) => {
+                sessionStorage.setItem('users', JSON.stringify(users));
+            },
+
+            updateUser: (updatedUser) => {
+                const users = StorageManager.getUsers();
+                const index = users.findIndex(u => u.email === updatedUser.email);
+                if (index !== -1) {
+                    users[index] = updatedUser;
+                    StorageManager.saveUsers(users);
+                    StorageManager.saveCurrentUser(updatedUser);
+                }
+                return updatedUser;
+            },
+
+            addTransaction: (transaction) => {
+                const user = StorageManager.getCurrentUser();
+                if (!user) return;
+                
+                if (!user.transactions) user.transactions = [];
+                user.transactions.unshift({
+                    ...transaction,
+                    id: Utils.generateId(),
+                    date: new Date().toISOString()
+                });
+                
+                StorageManager.updateUser(user);
+                return user.transactions[0];
             }
         };
 
@@ -2397,6 +1759,50 @@
                 // Update balance
                 const balance = this.currentUser.balance || 0;
                 document.getElementById('balanceAmount').textContent = Utils.formatPrice(balance);
+
+                // Load transaction history
+                this.loadTransactionHistory();
+            }
+
+            loadTransactionHistory() {
+                const historyList = document.getElementById('historyList');
+                
+                if (!this.currentUser.transactions || this.currentUser.transactions.length === 0) {
+                    historyList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <h3>Chưa có giao dịch nào</h3>
+                            <p>Lịch sử giao dịch sẽ hiển thị tại đây khi bạn có giao dịch</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const historyHTML = this.currentUser.transactions.map(transaction => this.createHistoryItem(transaction)).join('');
+                historyList.innerHTML = historyHTML;
+            }
+
+            createHistoryItem(transaction) {
+                const iconClass = transaction.type === 'deposit' ? 'success' : 'purchase';
+                const icon = transaction.type === 'deposit' ? 'fas fa-plus' : 'fas fa-shopping-cart';
+                const amountClass = transaction.type === 'deposit' ? 'success' : 'purchase';
+                const amountPrefix = transaction.type === 'deposit' ? '+' : '-';
+
+                return `
+                    <div class="history-item">
+                        <div class="history-icon ${iconClass}">
+                            <i class="${icon}"></i>
+                        </div>
+                        <div class="history-details">
+                            <div class="history-title">${transaction.title}</div>
+                            <div class="history-date">${Utils.formatDateTime(transaction.date)}</div>
+                            <div class="history-info">${transaction.description || ''}</div>
+                        </div>
+                        <div class="history-amount ${amountClass}">
+                            ${amountPrefix}${Utils.formatPrice(transaction.amount)}
+                        </div>
+                    </div>
+                `;
             }
 
             setupEventListeners() {
@@ -2406,6 +1812,118 @@
                         const tabId = e.currentTarget.dataset.tab;
                         this.switchTab(tabId);
                     });
+                });
+
+                // Deposit functionality
+                document.getElementById('depositBtn').addEventListener('click', () => {
+                    showModal('depositModal');
+                });
+
+                // Quick amounts
+                document.querySelectorAll('.quick-amount').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // Remove previous selections
+                        document.querySelectorAll('.quick-amount').forEach(b => b.classList.remove('selected'));
+                        
+                        // Select current
+                        e.target.classList.add('selected');
+                        
+                        // Set amount in modal
+                        const amount = e.target.dataset.amount;
+                        document.getElementById('cardAmount').value = amount;
+                        
+                        // Open deposit modal
+                        showModal('depositModal');
+                    });
+                });
+
+                // Card type selection
+                document.querySelectorAll('.card-type').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
+                        e.currentTarget.classList.add('selected');
+                    });
+                });
+
+                // Method cards
+                document.querySelectorAll('.method-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        if (e.currentTarget.classList.contains('coming-soon')) {
+                            Utils.showToast('Tính năng này sẽ sớm ra mắt', 'info');
+                            return;
+                        }
+                        
+                        document.querySelectorAll('.method-card').forEach(c => c.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+                        
+                        if (e.currentTarget.dataset.method === 'card') {
+                            showModal('depositModal');
+                        }
+                    });
+                });
+
+                // Forms
+                document.getElementById('depositForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.processDeposit();
+                });
+
+                document.getElementById('editProfileForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveProfile();
+                });
+
+                document.getElementById('changePasswordForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.changePassword();
+                });
+
+                // Edit profile button
+                document.getElementById('editProfileBtn').addEventListener('click', () => {
+                    this.openEditProfile();
+                });
+
+                // Change password button
+                document.getElementById('changePasswordBtn').addEventListener('click', () => {
+                    showModal('changePasswordModal');
+                });
+
+                // Security buttons
+                document.getElementById('enable2FABtn').addEventListener('click', () => {
+                    Utils.showToast('Tính năng xác thực 2 bước sẽ sớm ra mắt', 'info');
+                });
+
+                document.getElementById('manageDevicesBtn').addEventListener('click', () => {
+                    Utils.showToast('Tính năng quản lý thiết bị sẽ sớm ra mắt', 'info');
+                });
+
+                document.getElementById('logoutAllBtn').addEventListener('click', () => {
+                    logout();
+                });
+
+                // History filters
+                document.getElementById('filterHistoryBtn').addEventListener('click', () => {
+                    this.filterHistory();
+                });
+
+                // Input formatting
+                this.setupInputFormatting();
+            }
+
+            setupInputFormatting() {
+                // Card number input (numbers only)
+                document.getElementById('cardNumber').addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                });
+
+                // Card serial input (numbers only)
+                document.getElementById('cardSerial').addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                });
+
+                // Phone input (numbers only)
+                document.getElementById('editPhone').addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/\D/g, '');
                 });
             }
 
@@ -2422,17 +1940,280 @@
                 });
                 document.getElementById(tabId + 'Tab').classList.add('active');
             }
+
+            async processDeposit() {
+                const form = document.getElementById('depositForm');
+                const submitBtn = form.querySelector('.btn-submit');
+                const cardNumber = document.getElementById('cardNumber').value.trim();
+                const cardSerial = document.getElementById('cardSerial').value.trim();
+                const cardAmount = document.getElementById('cardAmount').value;
+                const selectedCard = document.querySelector('.card-type.selected');
+
+                // Validation
+                if (!cardNumber || !cardSerial || !cardAmount || !selectedCard) {
+                    Utils.showToast('Vui lòng điền đầy đủ thông tin', 'error');
+                    return;
+                }
+
+                if (!Utils.validateCard(cardNumber, cardSerial)) {
+                    Utils.showToast('Mã thẻ hoặc số serial không đúng định dạng', 'error');
+                    return;
+                }
+
+                // Show loading
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+
+                try {
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    // Random success rate (85% success)
+                    const isSuccess = Math.random() > 0.15;
+
+                    if (isSuccess) {
+                        // Add transaction
+                        const transaction = {
+                            type: 'deposit',
+                            title: 'Nạp tiền thẻ cào',
+                            description: `Nạp tiền qua thẻ ${selectedCard.querySelector('span').textContent}`,
+                            amount: parseInt(cardAmount),
+                            cardType: selectedCard.querySelector('span').textContent,
+                            cardNumber: cardNumber,
+                            status: 'success'
+                        };
+
+                        StorageManager.addTransaction(transaction);
+
+                        // Update balance
+                        this.currentUser.balance = (this.currentUser.balance || 0) + parseInt(cardAmount);
+                        StorageManager.updateUser(this.currentUser);
+
+                        // Update UI
+                        document.getElementById('balanceAmount').textContent = Utils.formatPrice(this.currentUser.balance);
+                        this.loadTransactionHistory();
+
+                        // Clear form
+                        form.reset();
+                        document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
+                        document.querySelector('.card-type[data-type="viettel"]').classList.add('selected');
+
+                        Utils.showToast(`Nạp tiền thành công ${Utils.formatPrice(parseInt(cardAmount))}`, 'success');
+                        closeModal('depositModal');
+                    } else {
+                        Utils.showToast('Thẻ cào không hợp lệ hoặc đã được sử dụng', 'error');
+                    }
+                } catch (error) {
+                    Utils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
+                } finally {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }
+
+            openEditProfile() {
+                document.getElementById('editName').value = this.currentUser.name || '';
+                document.getElementById('editPhone').value = this.currentUser.phone || '';
+                document.getElementById('editAddress').value = this.currentUser.address || '';
+                showModal('editProfileModal');
+            }
+
+            async saveProfile() {
+                const form = document.getElementById('editProfileForm');
+                const submitBtn = form.querySelector('.btn-submit');
+                const name = document.getElementById('editName').value.trim();
+                const phone = document.getElementById('editPhone').value.trim();
+                const address = document.getElementById('editAddress').value.trim();
+
+                if (!name) {
+                    Utils.showToast('Vui lòng nhập họ và tên', 'error');
+                    return;
+                }
+
+                // Show loading
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+
+                try {
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    // Update user data
+                    this.currentUser.name = name;
+                    this.currentUser.phone = phone;
+                    this.currentUser.address = address;
+
+                    StorageManager.updateUser(this.currentUser);
+                    this.loadUserData();
+                    this.updateUserDisplay();
+
+                    Utils.showToast('Cập nhật thông tin thành công', 'success');
+                    closeModal('editProfileModal');
+                } catch (error) {
+                    Utils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
+                } finally {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }
+
+            async changePassword() {
+                const form = document.getElementById('changePasswordForm');
+                const submitBtn = form.querySelector('.btn-submit');
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+                // Validation
+                if (!currentPassword || !newPassword || !confirmNewPassword) {
+                    Utils.showToast('Vui lòng điền đầy đủ thông tin', 'error');
+                    return;
+                }
+
+                if (currentPassword !== this.currentUser.password) {
+                    Utils.showToast('Mật khẩu hiện tại không đúng', 'error');
+                    return;
+                }
+
+                if (!Utils.validatePassword(newPassword)) {
+                    Utils.showToast('Mật khẩu mới phải có ít nhất 6 ký tự', 'error');
+                    return;
+                }
+
+                if (newPassword !== confirmNewPassword) {
+                    Utils.showToast('Mật khẩu mới không khớp', 'error');
+                    return;
+                }
+
+                // Show loading
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+
+                try {
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    // Update password
+                    this.currentUser.password = newPassword;
+                    StorageManager.updateUser(this.currentUser);
+
+                    // Clear form
+                    form.reset();
+
+                    Utils.showToast('Đổi mật khẩu thành công', 'success');
+                    closeModal('changePasswordModal');
+                } catch (error) {
+                    Utils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
+                } finally {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }
+
+            filterHistory() {
+                const typeFilter = document.getElementById('historyTypeFilter').value;
+                const startDate = document.getElementById('historyStartDate').value;
+                const endDate = document.getElementById('historyEndDate').value;
+
+                if (!this.currentUser.transactions) return;
+
+                let filteredTransactions = [...this.currentUser.transactions];
+
+                // Filter by type
+                if (typeFilter !== 'all') {
+                    filteredTransactions = filteredTransactions.filter(t => t.type === typeFilter);
+                }
+
+                // Filter by date range
+                if (startDate) {
+                    filteredTransactions = filteredTransactions.filter(t => 
+                        new Date(t.date) >= new Date(startDate)
+                    );
+                }
+
+                if (endDate) {
+                    filteredTransactions = filteredTransactions.filter(t => 
+                        new Date(t.date) <= new Date(endDate + 'T23:59:59')
+                    );
+                }
+
+                // Update display
+                const historyList = document.getElementById('historyList');
+                if (filteredTransactions.length === 0) {
+                    historyList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-search"></i>
+                            <h3>Không tìm thấy giao dịch nào</h3>
+                            <p>Thử thay đổi bộ lọc để xem kết quả khác</p>
+                        </div>
+                    `;
+                } else {
+                    const historyHTML = filteredTransactions.map(transaction => this.createHistoryItem(transaction)).join('');
+                    historyList.innerHTML = historyHTML;
+                }
+
+                Utils.showToast(`Tìm thấy ${filteredTransactions.length} giao dịch`, 'info');
+            }
+        }
+
+        // Modal Functions
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }, 300);
+            }
+        }
+
+        // Password Toggle Function
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.querySelector(`[onclick="togglePassword('${inputId}')"] i`);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
         }
 
         // Global logout function
         function logout() {
             StorageManager.clearCurrentUser();
-            window.location.href = 'index.html';
+            Utils.showToast('Đăng xuất thành công', 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
         }
 
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             new AccountManager();
+
+            // Close modal when clicking outside
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal(modal.id);
+                    }
+                });
+            });
         });
 
         // Demo data for testing (remove in production)
@@ -2444,10 +2225,54 @@
                 phone: '0123456789',
                 password: '123456',
                 balance: 250000,
-                registerDate: new Date().toISOString()
+                registerDate: new Date().toISOString(),
+                transactions: [
+                    {
+                        id: Utils.generateId(),
+                        type: 'deposit',
+                        title: 'Nạp tiền thẻ cào',
+                        description: 'Nạp tiền qua thẻ Viettel',
+                        amount: 100000,
+                        cardType: 'Viettel',
+                        cardNumber: '1234567890123',
+                        status: 'success',
+                        date: new Date(Date.now() - 86400000).toISOString()
+                    },
+                    {
+                        id: Utils.generateId(),
+                        type: 'deposit',
+                        title: 'Nạp tiền thẻ cào',
+                        description: 'Nạp tiền qua thẻ Mobifone',
+                        amount: 50000,
+                        cardType: 'Mobifone',
+                        cardNumber: '9876543210987',
+                        status: 'success',
+                        date: new Date(Date.now() - 172800000).toISOString()
+                    },
+                    {
+                        id: Utils.generateId(),
+                        type: 'purchase',
+                        title: 'Mua sản phẩm',
+                        description: 'Giống cây hoa hồng',
+                        amount: 100000,
+                        status: 'success',
+                        date: new Date(Date.now() - 259200000).toISOString()
+                    }
+                ]
             };
 
             StorageManager.saveCurrentUser(demoUser);
+            
+            // Also save to users list
+            const users = StorageManager.getUsers();
+            const existingIndex = users.findIndex(u => u.email === demoUser.email);
+            if (existingIndex !== -1) {
+                users[existingIndex] = demoUser;
+            } else {
+                users.push(demoUser);
+            }
+            StorageManager.saveUsers(users);
+            
             location.reload();
         }
 
@@ -2467,4 +2292,3 @@
 <script src="main.js"></script>   <!-- Nạp "bộ não" chung trước -->
 </body>
 </html>
-
