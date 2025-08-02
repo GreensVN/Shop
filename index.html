@@ -43,14 +43,15 @@
                         <i class="fas fa-user"></i>
                         <span>Tài khoản</span>
                     </a>
-                    <a href="cart.html" class="nav-link">
+                    <a href="cart.html" class="dropdown-item">
                       <i class="fas fa-shopping-cart"></i>
                       <span>Giỏ hàng</span>
-                      <span class="cart-count" id="cartCount">0</span>
+                      <span class="cart-count badge">0</span>
                     </a>
-                    <a href="favorite.html" class="nav-link">
+                    <a href="favorite.html" class="dropdown-item">
                       <i class="fas fa-heart"></i>
                       <span>Yêu thích</span>
+                      <span class="favorite-count badge">0</span>
                     </a>
                     <div class="dropdown-divider"></div>
                     <button class="dropdown-item" id="logoutButton">
@@ -85,21 +86,21 @@
         </div>
         
         <div class="account-actions">
-            <div class="account-action" id="depositAction">
+            <div class="account-action" id="depositAction" data-action="deposit">
                 <i class="fas fa-money-bill-wave"></i>
                 <span>Nạp tiền</span>
             </div>
-            <div class="account-action coming-soon-action">
+            <div class="account-action coming-soon-action" data-action="cart">
                 <i class="fas fa-shopping-cart"></i>
                 <span>Giỏ hàng</span>
                 <small class="coming-soon-badge">Coming Soon</small>
             </div>
-            <div class="account-action coming-soon-action">
+            <div class="account-action coming-soon-action" data-action="favorite">
                 <i class="fas fa-heart"></i>
                 <span>Yêu thích</span>
                 <small class="coming-soon-badge">Coming Soon</small>
             </div>
-            <div class="account-action coming-soon-action">
+            <div class="account-action coming-soon-action" data-action="history">
                 <i class="fas fa-history"></i>
                 <span>Lịch sử</span>
                 <small class="coming-soon-badge">Coming Soon</small>
@@ -258,18 +259,6 @@
         <section id="productsSection">
             <div class="products-grid" id="productsGrid">
                 <!-- Products will be loaded here via JavaScript -->
-                <div class="product-card">
-                  <!-- ... phần hiện tại ... -->
-                  <div class="product-actions">
-                    <button class="btn btn-outline add-to-cart" data-id="${product._id}">
-                      <i class="fas fa-shopping-cart"></i>
-                      <span>Thêm vào giỏ</span>
-                    </button>
-                    <button class="btn btn-icon favorite-btn" data-id="${product._id}">
-                      <i class="far fa-heart"></i>
-                    </button>
-                  </div>
-                </div>
             </div>
         </section>
     </main>
@@ -459,41 +448,7 @@
     </div>
 </div>
 
-<!-- Thêm liên kết trong header -->
-<nav class="nav-menu">
-  <!-- ... Các mục khác ... -->
-  <a href="cart.html" class="nav-link" id="cartLink">
-    <i class="fas fa-shopping-cart"></i>
-    <span>Giỏ hàng</span>
-    <span class="badge cart-count">0</span>
-  </a>
-  <a href="favorite.html" class="nav-link" id="favoriteLink">
-    <i class="fas fa-heart"></i>
-    <span>Yêu thích</span>
-    <span class="badge favorite-count">0</span>
-  </a>
-</nav>
-
-<!-- Thêm liên kết trong dropdown user -->
-<div class="dropdown-menu">
-  <!-- ... Các mục khác ... -->
-  <a href="cart.html" class="dropdown-item">
-    <i class="fas fa-shopping-cart"></i>
-    <span>Giỏ hàng</span>
-    <span class="badge cart-count">0</span>
-  </a>
-  <a href="favorite.html" class="dropdown-item">
-    <i class="fas fa-heart"></i>
-    <span>Yêu thích</span>
-    <span class="badge favorite-count">0</span>
-  </a>
-</div>
-<script src="main.js"></script>   <!-- Nạp "bộ não" chung trước -->
-<script src="script.js"></script>   <!-- Nạp code riêng của trang chủ sau -->
+<script src="main.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
-
-
-
-
-
