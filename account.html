@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tài khoản - Shop Grow A Garden</title>
-    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVFiFtZc9aBRBFMd/M7ubTWI0GoM2NmIhFlYWYmVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVh">
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVFiFtZc9aBRBFMd/M7ubTWI0GoM2NmIhFlYWYmVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVh">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -627,6 +627,90 @@
             color: #999;
         }
 
+        /* Messenger Chat Button */
+        .messenger-chat {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #0084ff, #006ce7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 132, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            text-decoration: none;
+            color: white;
+        }
+
+        .messenger-chat:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 132, 255, 0.4);
+            color: white;
+        }
+
+        .messenger-chat i {
+            font-size: 24px;
+        }
+
+        .messenger-chat::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            z-index: -1;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        /* Tooltip for Messenger */
+        .messenger-chat .tooltip {
+            position: absolute;
+            right: 70px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .messenger-chat .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            margin-top: -5px;
+            border: 5px solid transparent;
+            border-left-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .messenger-chat:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -967,6 +1051,17 @@
                 border-radius: 20px;
                 white-space: nowrap;
             }
+
+            .messenger-chat {
+                bottom: 15px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
+            }
+
+            .messenger-chat i {
+                font-size: 20px;
+            }
         }
 
         @media (max-width: 768px) {
@@ -990,6 +1085,10 @@
 
             .login-actions {
                 flex-direction: column;
+            }
+
+            .messenger-chat .tooltip {
+                display: none;
             }
         }
 
@@ -1288,6 +1387,12 @@
         </div>
     </main>
     
+    <!-- Messenger Chat Button -->
+    <a href="https://www.messenger.com/e2ee/t/6933504863440412" target="_blank" class="messenger-chat">
+        <i class="fab fa-facebook-messenger"></i>
+        <div class="tooltip">Chat với chúng tôi</div>
+    </a>
+    
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -1452,12 +1557,10 @@
                 return new Date(date).toLocaleString('vi-VN');
             },
             
-            // FIX: Generate consistent user ID based on user data
             generateUserId: (userData) => {
                 if (userData && userData._id) return userData._id.slice(-6);
                 if (userData && userData.id) return userData.id.toString().slice(-6);
                 if (userData && userData.email) {
-                    // Generate consistent ID from email hash
                     let hash = 0;
                     for (let i = 0; i < userData.email.length; i++) {
                         const char = userData.email.charCodeAt(i);
@@ -1465,11 +1568,10 @@
                     }
                     return Math.abs(hash).toString().slice(-6).padStart(6, '0');
                 }
-                return '000001'; // Default fallback
+                return '000001';
             },
 
             showToast: (message, type = 'success', duration = 3000) => {
-                // Remove existing toasts first
                 document.querySelectorAll('.toast').forEach(toast => toast.remove());
                 
                 const toast = document.createElement('div');
@@ -1481,10 +1583,8 @@
                 
                 document.body.appendChild(toast);
                 
-                // Show toast
                 setTimeout(() => toast.classList.add('show'), 100);
                 
-                // Auto hide
                 setTimeout(() => {
                     toast.classList.remove('show');
                     setTimeout(() => toast.remove(), 300);
@@ -1550,7 +1650,6 @@
                         modal.style.display = 'none';
                         document.body.style.overflow = 'auto';
                         
-                        // Reset forms
                         const form = modal.querySelector('form');
                         if (form) {
                             form.reset();
@@ -1614,7 +1713,8 @@
         const AccountManager = {
             currentUser: null,
             userBalance: 0,
-            isProcessingDeposit: false, // FIX: Prevent duplicate deposits
+            isProcessingDeposit: false,
+            currentPassword: null, // Store current password for validation
 
             init() {
                 this.checkLoginStatus();
@@ -1622,7 +1722,6 @@
             },
 
             checkLoginStatus() {
-                // Check if user is logged in from external source
                 if (window.currentUser) {
                     this.currentUser = window.currentUser;
                     this.userBalance = window.userBalance || 0;
@@ -1644,7 +1743,6 @@
                     this.currentUser = userData.data.user;
                     this.userBalance = balanceData.data.balance || 0;
                     
-                    // Update global variables if they exist
                     if (typeof window.currentUser !== 'undefined') {
                         window.currentUser = this.currentUser;
                         window.userBalance = this.userBalance;
@@ -1677,7 +1775,7 @@
                 if (!this.currentUser) return;
 
                 const firstLetter = this.currentUser.name ? this.currentUser.name[0].toUpperCase() : 'U';
-                const userId = Utils.generateUserId(this.currentUser); // FIX: Consistent ID
+                const userId = Utils.generateUserId(this.currentUser);
                 
                 // Update header
                 const userAvatar = document.getElementById('userAvatar');
@@ -1697,7 +1795,7 @@
             loadUserData() {
                 if (!this.currentUser) return;
 
-                const userId = Utils.generateUserId(this.currentUser); // FIX: Consistent ID
+                const userId = Utils.generateUserId(this.currentUser);
                 
                 // Update account info
                 const elements = {
@@ -1800,18 +1898,13 @@
                 // Quick amounts
                 document.querySelectorAll('.quick-amount').forEach(btn => {
                     btn.addEventListener('click', (e) => {
-                        // Remove previous selections
                         document.querySelectorAll('.quick-amount').forEach(b => b.classList.remove('selected'));
-                        
-                        // Select current
                         e.target.classList.add('selected');
                         
-                        // Set amount in modal
                         const amount = e.target.dataset.amount;
                         const cardAmountSelect = document.getElementById('cardAmount');
                         if (cardAmountSelect) cardAmountSelect.value = amount;
                         
-                        // Open deposit modal
                         ModalManager.showModal('depositModal');
                     });
                 });
@@ -1832,7 +1925,7 @@
                     });
                 }
 
-                // Deposit form - FIX: Prevent duplicate submissions
+                // Deposit form
                 const depositForm = document.getElementById('depositForm');
                 if (depositForm) {
                     depositForm.addEventListener('submit', (e) => {
@@ -1843,7 +1936,7 @@
                     });
                 }
 
-                // Change password form
+                // Change password form - SỬA LỖI KIỂM TRA MẬT KHẨU
                 const changePasswordForm = document.getElementById('changePasswordForm');
                 if (changePasswordForm) {
                     changePasswordForm.addEventListener('submit', (e) => {
@@ -1892,7 +1985,6 @@
                 }
             },
 
-            // FIX: Prevent duplicate deposit processing
             async processDeposit() {
                 if (this.isProcessingDeposit) {
                     Utils.showToast('Đang xử lý giao dịch, vui lòng chờ...', 'warning');
@@ -1999,6 +2091,7 @@
                 }
             },
 
+            // SỬA LỖI ĐỔI MẬT KHẨU - KIỂM TRA MẬT KHẨU CŨ VÀ MỚI
             async changePassword() {
                 const form = document.getElementById('changePasswordForm');
                 const submitBtn = form.querySelector('.btn-submit');
@@ -2034,6 +2127,12 @@
                     Utils.showError(document.getElementById('confirmNewPassword'), 'Mật khẩu mới không khớp');
                     isValid = false;
                 }
+
+                // KIỂM TRA MẬT KHẨU CŨ VÀ MỚI GIỐNG NHAU
+                if (currentPassword && newPassword && currentPassword === newPassword) {
+                    Utils.showError(document.getElementById('newPassword'), 'Mật khẩu mới phải khác mật khẩu hiện tại');
+                    isValid = false;
+                }
                 
                 if (!isValid) return;
 
@@ -2050,20 +2149,28 @@
                             passwordConfirm: confirmNewPassword
                         });
                     } else {
-                        // Fallback simulation
+                        // Fallback simulation with password validation
                         await new Promise(resolve => setTimeout(resolve, 1500));
                         
-                        // Simulate validation (in real app, API validates current password)
-                        if (currentPassword.length < 6) {
+                        // Simulate stored password check (in real app, this is handled by backend)
+                        if (this.currentPassword && this.currentPassword !== currentPassword) {
                             throw new Error('Mật khẩu hiện tại không đúng');
                         }
+                        
+                        // If no stored password, accept any 6+ character password as current
+                        if (!this.currentPassword && currentPassword.length < 6) {
+                            throw new Error('Mật khẩu hiện tại không đúng');
+                        }
+                        
+                        // Update stored password for future validations
+                        this.currentPassword = newPassword;
                     }
 
                     Utils.showToast('Đổi mật khẩu thành công', 'success');
                     ModalManager.closeModal('changePasswordModal');
                 } catch (error) {
                     console.error('Change password error:', error);
-                    if (error.message.includes('password') || error.message.includes('Password')) {
+                    if (error.message.includes('password') || error.message.includes('Password') || error.message.includes('mật khẩu')) {
                         Utils.showError(document.getElementById('currentPassword'), error.message);
                     } else {
                         Utils.showToast(error.message || 'Có lỗi xảy ra, vui lòng thử lại', 'error');
@@ -2106,6 +2213,7 @@
                 this.currentUser = null;
                 this.userBalance = 0;
                 this.isProcessingDeposit = false;
+                this.currentPassword = null; // Reset stored password
                 
                 Utils.showToast('Đăng xuất thành công', 'success');
                 
@@ -2144,4 +2252,3 @@
 <script src="main.js"></script>   <!-- Nạp "bộ não" chung trước -->
 </body>
 </html>
-
