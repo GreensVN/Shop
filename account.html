@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tài khoản - Shop Grow A Garden</title>
-    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVFiFtZc9aBRBFMd/M7ubTWI0GoM2NmIhFlYWYmVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVh">
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVFiFtZc9aBRBFMd/M7ubTWI0GoM2NmIhFlYWYmVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVhYWVh">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -1132,7 +1132,7 @@
                             <span>Giỏ hàng</span>
                         </a>
                         <div class="dropdown-divider"></div>
-                        <button class="dropdown-item" onclick="logout()">
+                        <button class="dropdown-item" onclick="SharedUtils.logout()">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>Đăng xuất</span>
                         </button>
@@ -1188,7 +1188,7 @@
                         </button>
                     </nav>
                     
-                    <button class="btn btn-outline" onclick="logout()" style="width: 100%;">
+                    <button class="btn btn-outline" onclick="SharedUtils.logout()" style="width: 100%;">
                         <i class="fas fa-sign-out-alt"></i>
                         Đăng xuất
                     </button>
@@ -1451,7 +1451,7 @@
     <!-- Deposit Modal -->
     <div class="modal" id="depositModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('depositModal')">&times;</button>
+            <button class="modal-close" onclick="SharedUtils.closeModal('depositModal')">&times;</button>
             <h2 class="modal-title">Nạp tiền bằng thẻ cào</h2>
             
             <div class="card-types">
@@ -1514,7 +1514,7 @@
     <!-- Edit Profile Modal -->
     <div class="modal" id="editProfileModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('editProfileModal')">&times;</button>
+            <button class="modal-close" onclick="SharedUtils.closeModal('editProfileModal')">&times;</button>
             <h2 class="modal-title">Chỉnh sửa thông tin</h2>
             
             <form id="editProfileForm">
@@ -1545,14 +1545,14 @@
     <!-- Change Password Modal -->
     <div class="modal" id="changePasswordModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('changePasswordModal')">&times;</button>
+            <button class="modal-close" onclick="SharedUtils.closeModal('changePasswordModal')">&times;</button>
             <h2 class="modal-title">Đổi mật khẩu</h2>
             
             <form id="changePasswordForm">
                 <div class="form-group password-group">
                     <label for="currentPassword">Mật khẩu hiện tại</label>
                     <input type="password" id="currentPassword" placeholder="Nhập mật khẩu hiện tại" required>
-                    <span class="password-toggle" onclick="togglePassword('currentPassword')">
+                    <span class="password-toggle" onclick="SharedUtils.togglePassword('currentPassword')">
                         <i class="fas fa-eye"></i>
                     </span>
                 </div>
@@ -1560,7 +1560,7 @@
                 <div class="form-group password-group">
                     <label for="newPassword">Mật khẩu mới</label>
                     <input type="password" id="newPassword" placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)" required minlength="6">
-                    <span class="password-toggle" onclick="togglePassword('newPassword')">
+                    <span class="password-toggle" onclick="SharedUtils.togglePassword('newPassword')">
                         <i class="fas fa-eye"></i>
                     </span>
                 </div>
@@ -1568,7 +1568,7 @@
                 <div class="form-group password-group">
                     <label for="confirmNewPassword">Nhập lại mật khẩu mới</label>
                     <input type="password" id="confirmNewPassword" placeholder="Nhập lại mật khẩu mới" required>
-                    <span class="password-toggle" onclick="togglePassword('confirmNewPassword')">
+                    <span class="password-toggle" onclick="SharedUtils.togglePassword('confirmNewPassword')">
                         <i class="fas fa-eye"></i>
                     </span>
                 </div>
@@ -1583,10 +1583,11 @@
     </div>
 
     <script>
-        // Utility Functions
-        const Utils = {
+        // ===== SHARED UTILITIES (Tránh conflict với main.js) =====
+        const SharedUtils = {
             formatPrice: (price) => {
-                return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
+                const num = typeof price === 'string' ? parseInt(price) : price;
+                return new Intl.NumberFormat('vi-VN').format(num) + 'đ';
             },
             
             formatDate: (date) => {
@@ -1602,6 +1603,12 @@
             },
 
             showToast: (message, type = 'success', duration = 3000) => {
+                // Kiểm tra xem có function showToast global không
+                if (typeof window.showToast === 'function') {
+                    window.showToast(message, type);
+                    return;
+                }
+                
                 // Remove existing toasts
                 document.querySelectorAll('.toast').forEach(toast => toast.remove());
                 
@@ -1632,54 +1639,114 @@
 
             validatePassword: (password) => {
                 return password && password.length >= 6;
+            },
+
+            showModal: (modalId) => {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'flex';
+                    setTimeout(() => modal.classList.add('show'), 10);
+                    document.body.style.overflow = 'hidden';
+                }
+            },
+
+            closeModal: (modalId) => {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('show');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }, 300);
+                }
+            },
+
+            togglePassword: (inputId) => {
+                const input = document.getElementById(inputId);
+                const icon = document.querySelector(`[onclick*="${inputId}"] i`);
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            },
+
+            logout: () => {
+                // Sử dụng logout từ main.js nếu có
+                if (typeof window.logoutUser === 'function') {
+                    window.logoutUser();
+                    return;
+                }
+                
+                // Fallback logout
+                localStorage.removeItem('token');
+                localStorage.removeItem('currentUser');
+                sessionStorage.removeItem('currentUser');
+                SharedUtils.showToast('Đăng xuất thành công', 'success');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
             }
         };
 
-        // Storage Manager - Đọc từ localStorage (như trang chủ)
+        // ===== STORAGE MANAGER =====
         const StorageManager = {
             getCurrentUser: () => {
                 try {
-                    // Thử đọc từ localStorage trước (từ trang chủ)
-                    let user = JSON.parse(localStorage.getItem('currentUser'));
+                    // Thử localStorage trước, sau đó sessionStorage
+                    let user = localStorage.getItem('currentUser');
                     if (!user) {
-                        // Nếu không có, thử sessionStorage
-                        user = JSON.parse(sessionStorage.getItem('currentUser'));
+                        user = sessionStorage.getItem('currentUser');
                     }
-                    return user;
+                    return user ? JSON.parse(user) : null;
                 } catch (e) {
+                    console.error('Error getting current user:', e);
                     return null;
                 }
             },
             
             saveCurrentUser: (user) => {
-                // Lưu vào cả localStorage và sessionStorage
-                localStorage.setItem('currentUser', JSON.stringify(user));
-                sessionStorage.setItem('currentUser', JSON.stringify(user));
+                try {
+                    const userStr = JSON.stringify(user);
+                    localStorage.setItem('currentUser', userStr);
+                    sessionStorage.setItem('currentUser', userStr);
+                } catch (e) {
+                    console.error('Error saving current user:', e);
+                }
             },
             
             clearCurrentUser: () => {
                 localStorage.removeItem('currentUser');
                 sessionStorage.removeItem('currentUser');
+                localStorage.removeItem('token');
             },
 
             getUsers: () => {
                 try {
-                    // Thử đọc từ localStorage trước
-                    let users = JSON.parse(localStorage.getItem('users'));
+                    let users = localStorage.getItem('users');
                     if (!users) {
-                        // Nếu không có, thử sessionStorage
-                        users = JSON.parse(sessionStorage.getItem('users'));
+                        users = sessionStorage.getItem('users');
                     }
-                    return users || [];
+                    return users ? JSON.parse(users) : [];
                 } catch (e) {
+                    console.error('Error getting users:', e);
                     return [];
                 }
             },
             
             saveUsers: (users) => {
-                // Lưu vào cả localStorage và sessionStorage
-                localStorage.setItem('users', JSON.stringify(users));
-                sessionStorage.setItem('users', JSON.stringify(users));
+                try {
+                    const usersStr = JSON.stringify(users);
+                    localStorage.setItem('users', usersStr);
+                    sessionStorage.setItem('users', usersStr);
+                } catch (e) {
+                    console.error('Error saving users:', e);
+                }
             },
 
             updateUser: (updatedUser) => {
@@ -1700,7 +1767,7 @@
                 if (!user.transactions) user.transactions = [];
                 user.transactions.unshift({
                     ...transaction,
-                    id: Utils.generateId(),
+                    id: SharedUtils.generateId(),
                     date: new Date().toISOString()
                 });
                 
@@ -1709,7 +1776,7 @@
             }
         };
 
-        // Account Manager
+        // ===== ACCOUNT MANAGER =====
         class AccountManager {
             constructor() {
                 this.currentUser = null;
@@ -1722,7 +1789,12 @@
             }
 
             checkLoginStatus() {
-                this.currentUser = StorageManager.getCurrentUser();
+                // Thử lấy từ main.js trước
+                if (window.currentUser) {
+                    this.currentUser = window.currentUser;
+                } else {
+                    this.currentUser = StorageManager.getCurrentUser();
+                }
                 
                 if (this.currentUser) {
                     this.showAccountContent();
@@ -1753,28 +1825,43 @@
                 const firstLetter = this.currentUser.name ? this.currentUser.name[0].toUpperCase() : 'U';
                 
                 // Update header
-                document.getElementById('userAvatar').textContent = firstLetter;
-                document.getElementById('userName').textContent = this.currentUser.name || 'User';
+                const userAvatar = document.getElementById('userAvatar');
+                const userName = document.getElementById('userName');
+                if (userAvatar) userAvatar.textContent = firstLetter;
+                if (userName) userName.textContent = this.currentUser.name || 'User';
                 
                 // Update sidebar
-                document.getElementById('accountAvatar').textContent = firstLetter;
-                document.getElementById('accountName').textContent = this.currentUser.name || 'User';
-                document.getElementById('accountId').textContent = `ID: ${this.currentUser.id || Utils.generateId()}`;
+                const accountAvatar = document.getElementById('accountAvatar');
+                const accountName = document.getElementById('accountName');
+                const accountId = document.getElementById('accountId');
+                if (accountAvatar) accountAvatar.textContent = firstLetter;
+                if (accountName) accountName.textContent = this.currentUser.name || 'User';
+                if (accountId) accountId.textContent = `ID: ${this.currentUser.id || SharedUtils.generateId()}`;
             }
 
             loadUserData() {
                 if (!this.currentUser) return;
 
                 // Update account info
-                document.getElementById('userFullName').textContent = this.currentUser.name || 'User';
-                document.getElementById('userEmail').textContent = this.currentUser.email || 'user@example.com';
-                document.getElementById('userPhone').textContent = this.currentUser.phone || 'Chưa cập nhật';
-                document.getElementById('userRegisterDate').textContent = Utils.formatDate(this.currentUser.registerDate || new Date());
-                document.getElementById('userAccountId').textContent = this.currentUser.id || Utils.generateId();
+                const elements = {
+                    userFullName: this.currentUser.name || 'User',
+                    userEmail: this.currentUser.email || 'user@example.com',
+                    userPhone: this.currentUser.phone || 'Chưa cập nhật',
+                    userRegisterDate: SharedUtils.formatDate(this.currentUser.registerDate || new Date()),
+                    userAccountId: this.currentUser.id || SharedUtils.generateId()
+                };
 
-                // Update balance
-                const balance = this.currentUser.balance || 0;
-                document.getElementById('balanceAmount').textContent = Utils.formatPrice(balance);
+                Object.entries(elements).forEach(([id, value]) => {
+                    const element = document.getElementById(id);
+                    if (element) element.textContent = value;
+                });
+
+                // Update balance (ưu tiên từ main.js)
+                const balance = window.userBalance || this.currentUser.balance || 0;
+                const balanceElement = document.getElementById('balanceAmount');
+                if (balanceElement) {
+                    balanceElement.textContent = SharedUtils.formatPrice(balance);
+                }
 
                 // Load transaction history
                 this.loadTransactionHistory();
@@ -1782,6 +1869,7 @@
 
             loadTransactionHistory() {
                 const historyList = document.getElementById('historyList');
+                if (!historyList) return;
                 
                 if (!this.currentUser.transactions || this.currentUser.transactions.length === 0) {
                     historyList.innerHTML = `
@@ -1811,11 +1899,11 @@
                         </div>
                         <div class="history-details">
                             <div class="history-title">${transaction.title}</div>
-                            <div class="history-date">${Utils.formatDateTime(transaction.date)}</div>
+                            <div class="history-date">${SharedUtils.formatDateTime(transaction.date)}</div>
                             <div class="history-info">${transaction.description || ''}</div>
                         </div>
                         <div class="history-amount ${amountClass}">
-                            ${amountPrefix}${Utils.formatPrice(transaction.amount)}
+                            ${amountPrefix}${SharedUtils.formatPrice(transaction.amount)}
                         </div>
                     </div>
                 `;
@@ -1831,9 +1919,12 @@
                 });
 
                 // Deposit functionality
-                document.getElementById('depositBtn').addEventListener('click', () => {
-                    showModal('depositModal');
-                });
+                const depositBtn = document.getElementById('depositBtn');
+                if (depositBtn) {
+                    depositBtn.addEventListener('click', () => {
+                        SharedUtils.showModal('depositModal');
+                    });
+                }
 
                 // Quick amounts
                 document.querySelectorAll('.quick-amount').forEach(btn => {
@@ -1846,10 +1937,11 @@
                         
                         // Set amount in modal
                         const amount = e.target.dataset.amount;
-                        document.getElementById('cardAmount').value = amount;
+                        const cardAmountSelect = document.getElementById('cardAmount');
+                        if (cardAmountSelect) cardAmountSelect.value = amount;
                         
                         // Open deposit modal
-                        showModal('depositModal');
+                        SharedUtils.showModal('depositModal');
                     });
                 });
 
@@ -1865,7 +1957,7 @@
                 document.querySelectorAll('.method-card').forEach(card => {
                     card.addEventListener('click', (e) => {
                         if (e.currentTarget.classList.contains('coming-soon')) {
-                            Utils.showToast('Tính năng này sẽ sớm ra mắt', 'info');
+                            SharedUtils.showToast('Tính năng này sẽ sớm ra mắt', 'info');
                             return;
                         }
                         
@@ -1873,74 +1965,119 @@
                         e.currentTarget.classList.add('active');
                         
                         if (e.currentTarget.dataset.method === 'card') {
-                            showModal('depositModal');
+                            SharedUtils.showModal('depositModal');
                         }
                     });
                 });
 
                 // Forms
-                document.getElementById('depositForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.processDeposit();
-                });
+                const depositForm = document.getElementById('depositForm');
+                if (depositForm) {
+                    depositForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.processDeposit();
+                    });
+                }
 
-                document.getElementById('editProfileForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.saveProfile();
-                });
+                const editProfileForm = document.getElementById('editProfileForm');
+                if (editProfileForm) {
+                    editProfileForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.saveProfile();
+                    });
+                }
 
-                document.getElementById('changePasswordForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.changePassword();
-                });
+                const changePasswordForm = document.getElementById('changePasswordForm');
+                if (changePasswordForm) {
+                    changePasswordForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.changePassword();
+                    });
+                }
 
                 // Edit profile button
-                document.getElementById('editProfileBtn').addEventListener('click', () => {
-                    this.openEditProfile();
-                });
+                const editProfileBtn = document.getElementById('editProfileBtn');
+                if (editProfileBtn) {
+                    editProfileBtn.addEventListener('click', () => {
+                        this.openEditProfile();
+                    });
+                }
 
                 // Change password button
-                document.getElementById('changePasswordBtn').addEventListener('click', () => {
-                    showModal('changePasswordModal');
-                });
+                const changePasswordBtn = document.getElementById('changePasswordBtn');
+                if (changePasswordBtn) {
+                    changePasswordBtn.addEventListener('click', () => {
+                        SharedUtils.showModal('changePasswordModal');
+                    });
+                }
 
                 // Security buttons
-                document.getElementById('enable2FABtn').addEventListener('click', () => {
-                    Utils.showToast('Tính năng xác thực 2 bước sẽ sớm ra mắt', 'info');
-                });
+                const enable2FABtn = document.getElementById('enable2FABtn');
+                if (enable2FABtn) {
+                    enable2FABtn.addEventListener('click', () => {
+                        SharedUtils.showToast('Tính năng xác thực 2 bước sẽ sớm ra mắt', 'info');
+                    });
+                }
 
-                document.getElementById('manageDevicesBtn').addEventListener('click', () => {
-                    Utils.showToast('Tính năng quản lý thiết bị sẽ sớm ra mắt', 'info');
-                });
+                const manageDevicesBtn = document.getElementById('manageDevicesBtn');
+                if (manageDevicesBtn) {
+                    manageDevicesBtn.addEventListener('click', () => {
+                        SharedUtils.showToast('Tính năng quản lý thiết bị sẽ sớm ra mắt', 'info');
+                    });
+                }
 
-                document.getElementById('logoutAllBtn').addEventListener('click', () => {
-                    logout();
-                });
+                const logoutAllBtn = document.getElementById('logoutAllBtn');
+                if (logoutAllBtn) {
+                    logoutAllBtn.addEventListener('click', () => {
+                        SharedUtils.logout();
+                    });
+                }
 
                 // History filters
-                document.getElementById('filterHistoryBtn').addEventListener('click', () => {
-                    this.filterHistory();
-                });
+                const filterHistoryBtn = document.getElementById('filterHistoryBtn');
+                if (filterHistoryBtn) {
+                    filterHistoryBtn.addEventListener('click', () => {
+                        this.filterHistory();
+                    });
+                }
 
                 // Input formatting
                 this.setupInputFormatting();
+
+                // Close modal when clicking outside
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            SharedUtils.closeModal(modal.id);
+                        }
+                    });
+                });
             }
 
             setupInputFormatting() {
                 // Card number input (numbers only)
-                document.getElementById('cardNumber').addEventListener('input', (e) => {
-                    e.target.value = e.target.value.replace(/\D/g, '');
-                });
+                const cardNumberInput = document.getElementById('cardNumber');
+                if (cardNumberInput) {
+                    cardNumberInput.addEventListener('input', (e) => {
+                        e.target.value = e.target.value.replace(/\D/g, '');
+                    });
+                }
 
                 // Card serial input (numbers only)
-                document.getElementById('cardSerial').addEventListener('input', (e) => {
-                    e.target.value = e.target.value.replace(/\D/g, '');
-                });
+                const cardSerialInput = document.getElementById('cardSerial');
+                if (cardSerialInput) {
+                    cardSerialInput.addEventListener('input', (e) => {
+                        e.target.value = e.target.value.replace(/\D/g, '');
+                    });
+                }
 
                 // Phone input (numbers only)
-                document.getElementById('editPhone').addEventListener('input', (e) => {
-                    e.target.value = e.target.value.replace(/\D/g, '');
-                });
+                const editPhoneInput = document.getElementById('editPhone');
+                if (editPhoneInput) {
+                    editPhoneInput.addEventListener('input', (e) => {
+                        e.target.value = e.target.value.replace(/\D/g, '');
+                    });
+                }
             }
 
             switchTab(tabId) {
@@ -1948,13 +2085,15 @@
                 document.querySelectorAll('.menu-item').forEach(item => {
                     item.classList.remove('active');
                 });
-                document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+                const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
+                if (activeTab) activeTab.classList.add('active');
 
                 // Update tab content
                 document.querySelectorAll('.tab-content').forEach(tab => {
                     tab.classList.remove('active');
                 });
-                document.getElementById(tabId + 'Tab').classList.add('active');
+                const activeContent = document.getElementById(tabId + 'Tab');
+                if (activeContent) activeContent.classList.add('active');
             }
 
             async processDeposit() {
@@ -1967,12 +2106,12 @@
 
                 // Validation
                 if (!cardNumber || !cardSerial || !cardAmount || !selectedCard) {
-                    Utils.showToast('Vui lòng điền đầy đủ thông tin', 'error');
+                    SharedUtils.showToast('Vui lòng điền đầy đủ thông tin', 'error');
                     return;
                 }
 
-                if (!Utils.validateCard(cardNumber, cardSerial)) {
-                    Utils.showToast('Mã thẻ hoặc số serial không đúng định dạng', 'error');
+                if (!SharedUtils.validateCard(cardNumber, cardSerial)) {
+                    SharedUtils.showToast('Mã thẻ hoặc số serial không đúng định dạng', 'error');
                     return;
                 }
 
@@ -1981,7 +2120,13 @@
                 submitBtn.disabled = true;
 
                 try {
-                    // Simulate API call
+                    // Thử gọi hàm processDeposit từ main.js trước
+                    if (typeof window.processDeposit === 'function') {
+                        await window.processDeposit();
+                        return;
+                    }
+
+                    // Fallback: Simulate API call
                     await new Promise(resolve => setTimeout(resolve, 2000));
 
                     // Random success rate (85% success)
@@ -2006,21 +2151,26 @@
                         StorageManager.updateUser(this.currentUser);
 
                         // Update UI
-                        document.getElementById('balanceAmount').textContent = Utils.formatPrice(this.currentUser.balance);
+                        const balanceElement = document.getElementById('balanceAmount');
+                        if (balanceElement) {
+                            balanceElement.textContent = SharedUtils.formatPrice(this.currentUser.balance);
+                        }
                         this.loadTransactionHistory();
 
                         // Clear form
                         form.reset();
                         document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
-                        document.querySelector('.card-type[data-type="viettel"]').classList.add('selected');
+                        const viettelCard = document.querySelector('.card-type[data-type="viettel"]');
+                        if (viettelCard) viettelCard.classList.add('selected');
 
-                        Utils.showToast(`Nạp tiền thành công ${Utils.formatPrice(parseInt(cardAmount))}`, 'success');
-                        closeModal('depositModal');
+                        SharedUtils.showToast(`Nạp tiền thành công ${SharedUtils.formatPrice(parseInt(cardAmount))}`, 'success');
+                        SharedUtils.closeModal('depositModal');
                     } else {
-                        Utils.showToast('Thẻ cào không hợp lệ hoặc đã được sử dụng', 'error');
+                        SharedUtils.showToast('Thẻ cào không hợp lệ hoặc đã được sử dụng', 'error');
                     }
                 } catch (error) {
-                    Utils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
+                    console.error('Deposit error:', error);
+                    SharedUtils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
                 } finally {
                     submitBtn.classList.remove('loading');
                     submitBtn.disabled = false;
@@ -2028,10 +2178,15 @@
             }
 
             openEditProfile() {
-                document.getElementById('editName').value = this.currentUser.name || '';
-                document.getElementById('editPhone').value = this.currentUser.phone || '';
-                document.getElementById('editAddress').value = this.currentUser.address || '';
-                showModal('editProfileModal');
+                const editName = document.getElementById('editName');
+                const editPhone = document.getElementById('editPhone');
+                const editAddress = document.getElementById('editAddress');
+                
+                if (editName) editName.value = this.currentUser.name || '';
+                if (editPhone) editPhone.value = this.currentUser.phone || '';
+                if (editAddress) editAddress.value = this.currentUser.address || '';
+                
+                SharedUtils.showModal('editProfileModal');
             }
 
             async saveProfile() {
@@ -2042,7 +2197,7 @@
                 const address = document.getElementById('editAddress').value.trim();
 
                 if (!name) {
-                    Utils.showToast('Vui lòng nhập họ và tên', 'error');
+                    SharedUtils.showToast('Vui lòng nhập họ và tên', 'error');
                     return;
                 }
 
@@ -2063,10 +2218,11 @@
                     this.loadUserData();
                     this.updateUserDisplay();
 
-                    Utils.showToast('Cập nhật thông tin thành công', 'success');
-                    closeModal('editProfileModal');
+                    SharedUtils.showToast('Cập nhật thông tin thành công', 'success');
+                    SharedUtils.closeModal('editProfileModal');
                 } catch (error) {
-                    Utils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
+                    console.error('Save profile error:', error);
+                    SharedUtils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
                 } finally {
                     submitBtn.classList.remove('loading');
                     submitBtn.disabled = false;
@@ -2082,22 +2238,22 @@
 
                 // Validation
                 if (!currentPassword || !newPassword || !confirmNewPassword) {
-                    Utils.showToast('Vui lòng điền đầy đủ thông tin', 'error');
+                    SharedUtils.showToast('Vui lòng điền đầy đủ thông tin', 'error');
                     return;
                 }
 
                 if (currentPassword !== this.currentUser.password) {
-                    Utils.showToast('Mật khẩu hiện tại không đúng', 'error');
+                    SharedUtils.showToast('Mật khẩu hiện tại không đúng', 'error');
                     return;
                 }
 
-                if (!Utils.validatePassword(newPassword)) {
-                    Utils.showToast('Mật khẩu mới phải có ít nhất 6 ký tự', 'error');
+                if (!SharedUtils.validatePassword(newPassword)) {
+                    SharedUtils.showToast('Mật khẩu mới phải có ít nhất 6 ký tự', 'error');
                     return;
                 }
 
                 if (newPassword !== confirmNewPassword) {
-                    Utils.showToast('Mật khẩu mới không khớp', 'error');
+                    SharedUtils.showToast('Mật khẩu mới không khớp', 'error');
                     return;
                 }
 
@@ -2116,10 +2272,11 @@
                     // Clear form
                     form.reset();
 
-                    Utils.showToast('Đổi mật khẩu thành công', 'success');
-                    closeModal('changePasswordModal');
+                    SharedUtils.showToast('Đổi mật khẩu thành công', 'success');
+                    SharedUtils.closeModal('changePasswordModal');
                 } catch (error) {
-                    Utils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
+                    console.error('Change password error:', error);
+                    SharedUtils.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
                 } finally {
                     submitBtn.classList.remove('loading');
                     submitBtn.disabled = false;
@@ -2155,6 +2312,8 @@
 
                 // Update display
                 const historyList = document.getElementById('historyList');
+                if (!historyList) return;
+                
                 if (filteredTransactions.length === 0) {
                     historyList.innerHTML = `
                         <div class="empty-state">
@@ -2168,79 +2327,14 @@
                     historyList.innerHTML = historyHTML;
                 }
 
-                Utils.showToast(`Tìm thấy ${filteredTransactions.length} giao dịch`, 'info');
+                SharedUtils.showToast(`Tìm thấy ${filteredTransactions.length} giao dịch`, 'info');
             }
         }
 
-        // Modal Functions
-        function showModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'flex';
-                setTimeout(() => modal.classList.add('show'), 10);
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('show');
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }, 300);
-            }
-        }
-
-        // Password Toggle Function
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const icon = document.querySelector(`[onclick="togglePassword('${inputId}')"] i`);
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
-
-        // Global logout function
-        function logout() {
-            StorageManager.clearCurrentUser();
-            Utils.showToast('Đăng xuất thành công', 'success');
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1000);
-        }
-
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            // Debug: Kiểm tra dữ liệu đăng nhập
-            console.log('Checking login status...');
-            console.log('localStorage currentUser:', localStorage.getItem('currentUser'));
-            console.log('sessionStorage currentUser:', sessionStorage.getItem('currentUser'));
-            
-            new AccountManager();
-
-            // Close modal when clicking outside
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        closeModal(modal.id);
-                    }
-                });
-            });
-        });
-
-        // Demo data for testing (remove in production)
+        // ===== DEMO FUNCTIONS =====
         function createDemoUser() {
             const demoUser = {
-                id: Utils.generateId(),
+                id: SharedUtils.generateId(),
                 name: 'Nguyễn Văn Demo',
                 email: 'demo@example.com',
                 phone: '0123456789',
@@ -2249,7 +2343,7 @@
                 registerDate: new Date().toISOString(),
                 transactions: [
                     {
-                        id: Utils.generateId(),
+                        id: SharedUtils.generateId(),
                         type: 'deposit',
                         title: 'Nạp tiền thẻ cào',
                         description: 'Nạp tiền qua thẻ Viettel',
@@ -2260,7 +2354,7 @@
                         date: new Date(Date.now() - 86400000).toISOString()
                     },
                     {
-                        id: Utils.generateId(),
+                        id: SharedUtils.generateId(),
                         type: 'deposit',
                         title: 'Nạp tiền thẻ cào',
                         description: 'Nạp tiền qua thẻ Mobifone',
@@ -2271,7 +2365,7 @@
                         date: new Date(Date.now() - 172800000).toISOString()
                     },
                     {
-                        id: Utils.generateId(),
+                        id: SharedUtils.generateId(),
                         type: 'purchase',
                         title: 'Mua sản phẩm',
                         description: 'Giống cây hoa hồng',
@@ -2297,29 +2391,9 @@
             location.reload();
         }
 
-        // Add demo button for testing và nút fix login
-        const demoBtn = document.createElement('button');
-        demoBtn.textContent = 'Demo Login';
-        demoBtn.className = 'btn btn-outline';
-        demoBtn.style.position = 'fixed';
-        demoBtn.style.bottom = '20px';
-        demoBtn.style.right = '20px';
-        demoBtn.style.zIndex = '9999';
-        demoBtn.onclick = createDemoUser;
-        document.body.appendChild(demoBtn);
-
-        // Thêm nút force login để test
-        const forceLoginBtn = document.createElement('button');
-        forceLoginBtn.textContent = 'Force Login';
-        forceLoginBtn.className = 'btn btn-primary';
-        forceLoginBtn.style.position = 'fixed';
-        forceLoginBtn.style.bottom = '70px';
-        forceLoginBtn.style.right = '20px';
-        forceLoginBtn.style.zIndex = '9999';
-        forceLoginBtn.onclick = () => {
-            // Tạo user giả và force login
+        function createTestUser() {
             const user = {
-                id: Utils.generateId(),
+                id: SharedUtils.generateId(),
                 name: 'User Test',
                 email: 'test@example.com',
                 phone: '0987654321',
@@ -2330,8 +2404,47 @@
             };
             StorageManager.saveCurrentUser(user);
             location.reload();
-        };
-        document.body.appendChild(forceLoginBtn);
+        }
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Account page loading...');
+            console.log('localStorage currentUser:', localStorage.getItem('currentUser'));
+            console.log('sessionStorage currentUser:', sessionStorage.getItem('currentUser'));
+            
+            // Initialize account manager
+            new AccountManager();
+
+            // Add demo buttons for testing
+            const demoBtn = document.createElement('button');
+            demoBtn.textContent = 'Demo Login';
+            demoBtn.className = 'btn btn-outline';
+            demoBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999;';
+            demoBtn.onclick = createDemoUser;
+            document.body.appendChild(demoBtn);
+
+            const testBtn = document.createElement('button');
+            testBtn.textContent = 'Test Login';
+            testBtn.className = 'btn btn-primary';
+            testBtn.style.cssText = 'position: fixed; bottom: 70px; right: 20px; z-index: 9999;';
+            testBtn.onclick = createTestUser;
+            document.body.appendChild(testBtn);
+
+            // Debug: Check for conflicts
+            if (typeof window.currentUser !== 'undefined') {
+                console.log('Found global currentUser from main.js:', window.currentUser);
+            }
+            if (typeof window.userBalance !== 'undefined') {
+                console.log('Found global userBalance from main.js:', window.userBalance);
+            }
+        });
+
+        // ===== PREVENT CONFLICTS =====
+        // Không ghi đè các function từ main.js
+        window.AccountPageUtils = SharedUtils;
+        
+        // Export functions để main.js có thể sử dụng
+        window.AccountManager = AccountManager;
     </script>
 <script src="main.js"></script>   <!-- Nạp "bộ não" chung trước -->
 </body>
