@@ -705,7 +705,292 @@
             background: var(--warning-color);
         }
 
-        /* Responsive */
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--gray-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--primary-color);
+            transform: rotate(90deg);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            text-align: center;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+        }
+
+        .form-group.has-error input,
+        .form-group.has-error select {
+            border-color: var(--danger-color);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-group.has-error .error-message {
+            display: block;
+        }
+
+        .password-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 35px;
+            cursor: pointer;
+            color: var(--gray-color);
+            transition: var(--transition);
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        .btn-submit.loading .spinner {
+            display: inline-block;
+        }
+
+        /* Card Types */
+        .card-types {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .card-type {
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .card-type:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .card-type.selected {
+            border-color: var(--primary-color);
+            background: rgba(230, 57, 70, 0.05);
+        }
+
+        .card-type .card-logo {
+            width: 100%;
+            max-width: 40px;
+            height: 30px;
+            border-radius: 4px;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .card-type[data-type="viettel"] .card-logo {
+            background: #d70018;
+        }
+
+        .card-type[data-type="mobifone"] .card-logo {
+            background: #1f7a3e;
+        }
+
+        .card-type[data-type="vinaphone"] .card-logo {
+            background: #662d91;
+        }
+
+        .card-type[data-type="gate"] .card-logo {
+            background: #ff6600;
+        }
+
+        .card-type span {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .form-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(42, 157, 143, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            color: var(--success-color);
+        }
+
+        .form-note i {
+            color: var(--success-color);
+        }
+
+        /* Device Manager Styles */
+        .device-list {
+            margin-top: 20px;
+        }
+
+        .device-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            transition: var(--transition);
+        }
+
+        .device-item:hover {
+            background-color: rgba(0,0,0,0.02);
+        }
+
+        .device-item.current {
+            border-color: var(--success-color);
+            background-color: rgba(42, 157, 143, 0.05);
+        }
+
+        .device-details {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .device-details i {
+            font-size: 24px;
+            color: var(--secondary-color);
+        }
+
+        .device-info p {
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .device-info small {
+            color: var(--gray-color);
+        }
+
+        /* 2FA Content */
+        .two-fa-content {
+            text-align: center;
+        }
+
+        .two-fa-content p {
+            margin-bottom: 15px;
+            color: var(--gray-color);
+        }
         @media (max-width: 992px) {
             .account-layout {
                 grid-template-columns: 1fr;
@@ -1174,10 +1459,347 @@
         </div>
     </footer>
 
+    <!-- Deposit Modal -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('depositModal')">×</button>
+            <h2 class="modal-title">Nạp tiền bằng thẻ cào</h2>
+            
+            <div class="card-types">
+                <div class="card-type selected" data-type="viettel">
+                    <div class="card-logo">VT</div>
+                    <span>Viettel</span>
+                </div>
+                <div class="card-type" data-type="mobifone">
+                    <div class="card-logo">MB</div>
+                    <span>Mobifone</span>
+                </div>
+                <div class="card-type" data-type="vinaphone">
+                    <div class="card-logo">VP</div>
+                    <span>Vinaphone</span>
+                </div>
+                <div class="card-type" data-type="gate">
+                    <div class="card-logo">GT</div>
+                    <span>Gate</span>
+                </div>
+            </div>
+            
+            <form id="depositForm">
+                <div class="form-group">
+                    <label for="cardNumber">Mã thẻ</label>
+                    <input type="text" id="cardNumber" placeholder="Nhập mã thẻ" required>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cardSerial">Số serial</label>
+                    <input type="text" id="cardSerial" placeholder="Nhập số serial" required>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cardAmount">Mệnh giá</label>
+                    <select id="cardAmount" required>
+                        <option value="">-- Chọn mệnh giá --</option>
+                        <option value="10000">10,000đ</option>
+                        <option value="20000">20,000đ</option>
+                        <option value="50000">50,000đ</option>
+                        <option value="100000">100,000đ</option>
+                        <option value="200000">200,000đ</option>
+                        <option value="500000">500,000đ</option>
+                    </select>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-note">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Vui lòng chọn đúng mệnh giá, sai mệnh giá sẽ mất thẻ.</span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-submit">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Nạp tiền</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('withdrawModal')">×</button>
+            <h2 class="modal-title">Rút tiền</h2>
+            
+            <form id="withdrawForm">
+                <div class="form-group">
+                    <label for="bankAccount">Ngân hàng</label>
+                    <select id="bankAccount" required>
+                        <option value="">-- Chọn ngân hàng --</option>
+                        <option value="mbbank">MB Bank</option>
+                        <option value="vietcombank">Vietcombank</option>
+                        <option value="techcombank">Techcombank</option>
+                        <option value="acb">ACB</option>
+                        <option value="momo">Ví Momo</option>
+                        <option value="zalopay">ZaloPay</option>
+                    </select>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="accountNumber">Số tài khoản / Số điện thoại</label>
+                    <input type="text" id="accountNumber" placeholder="Nhập số tài khoản hoặc SĐT" required>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="accountName">Tên chủ tài khoản</label>
+                    <input type="text" id="accountName" placeholder="Nhập tên chủ tài khoản" required>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="withdrawAmount">Số tiền rút</label>
+                    <input type="number" id="withdrawAmount" placeholder="Nhập số tiền" required min="50000" step="1000">
+                    <small style="color: var(--gray-color);">Số tiền rút tối thiểu là 50,000đ</small>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-note" style="background-color: rgba(244, 162, 97, 0.1); color: var(--warning-color);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Phí rút tiền là 2%. Yêu cầu sẽ được xử lý trong 5-10 phút.</span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-submit">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Gửi yêu cầu</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('changePasswordModal')">×</button>
+            <h2 class="modal-title">Đổi mật khẩu</h2>
+            
+            <form id="changePasswordForm">
+                <div class="form-group password-group">
+                    <label for="currentPassword">Mật khẩu hiện tại</label>
+                    <input type="password" id="currentPassword" placeholder="Nhập mật khẩu hiện tại" required>
+                    <span class="password-toggle" onclick="togglePassword('currentPassword')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group password-group">
+                    <label for="newPassword">Mật khẩu mới</label>
+                    <input type="password" id="newPassword" placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)" required minlength="6">
+                    <span class="password-toggle" onclick="togglePassword('newPassword')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group password-group">
+                    <label for="confirmNewPassword">Nhập lại mật khẩu mới</label>
+                    <input type="password" id="confirmNewPassword" placeholder="Nhập lại mật khẩu mới" required>
+                    <span class="password-toggle" onclick="togglePassword('confirmNewPassword')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <div class="error-message"></div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-submit">
+                    <i class="fas fa-key"></i>
+                    <span>Đổi mật khẩu</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2FA Setup Modal -->
+    <div class="modal" id="2faModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('2faModal')">×</button>
+            <h2 class="modal-title">Thiết lập Xác thực 2 bước</h2>
+            
+            <div class="two-fa-content">
+                <p>Quét mã QR này bằng ứng dụng xác thực của bạn (Google Authenticator, Authy...):</p>
+                
+                <div class="qr-code-container" style="text-align: center; margin: 20px 0;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=otpauth://totp/ShopGrowAGarden:user?secret=JBSWY3DPEHPK3PXP&issuer=ShopGrowAGarden" 
+                         alt="QR Code" 
+                         style="max-width: 180px; border: 5px solid var(--border-color); border-radius: var(--border-radius); padding: 10px; background: white;">
+                </div>
+                
+                <p>Hoặc nhập mã này thủ công:</p>
+                <div style="background: var(--light-color); padding: 15px; margin: 15px 0; border-radius: var(--border-radius); font-family: monospace; font-weight: bold; text-align: center; letter-spacing: 2px;">
+                    JBSWY3DPEHPK3PXP
+                </div>
+                
+                <div class="form-group">
+                    <label for="verify2faCode">Nhập mã xác thực 6 số để hoàn tất:</label>
+                    <input type="text" id="verify2faCode" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required>
+                    <div class="error-message"></div>
+                </div>
+                
+                <button type="button" class="btn btn-primary btn-submit" onclick="verify2FASetup()">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Xác nhận và bật 2FA</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Manager Modal -->
+    <div class="modal" id="deviceManagerModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('deviceManagerModal')">×</button>
+            <h2 class="modal-title">Quản lý Thiết bị</h2>
+            
+            <div class="device-list">
+                <div class="device-item current">
+                    <div class="device-details">
+                        <i class="fas fa-desktop"></i>
+                        <div class="device-info">
+                            <p>Chrome trên Windows</p>
+                            <small>Thiết bị hiện tại - Đang hoạt động</small>
+                        </div>
+                    </div>
+                    <span class="current-badge" style="color: var(--success-color); font-weight: bold; font-size: 12px;">HIỆN TẠI</span>
+                </div>
+                
+                <div class="device-item">
+                    <div class="device-details">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div class="device-info">
+                            <p>Safari trên iPhone</p>
+                            <small>Hoạt động 2 giờ trước</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline" style="border-color: var(--danger-color); color: var(--danger-color); padding: 5px 10px; font-size: 12px;" onclick="removeDevice(this)">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Đăng xuất
+                    </button>
+                </div>
+                
+                <div class="device-item">
+                    <div class="device-details">
+                        <i class="fas fa-tablet-alt"></i>
+                        <div class="device-info">
+                            <p>Chrome trên Android</p>
+                            <small>Hoạt động 1 ngày trước</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline" style="border-color: var(--danger-color); color: var(--danger-color); padding: 5px 10px; font-size: 12px;" onclick="removeDevice(this)">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Đăng xuất
+                    </button>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <button class="btn btn-outline" onclick="logoutAllDevices()" style="width: 100%; border-color: var(--danger-color); color: var(--danger-color);">
+                    <i class="fas fa-power-off"></i>
+                    Đăng xuất tất cả thiết bị khác
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global function for showing coming soon messages
         function showComingSoon(feature) {
             Utils.showToast(`Tính năng ${feature} sẽ được cập nhật sớm!`, 'info');
+        }
+
+        // Global modal functions
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    
+                    // Reset form if exists
+                    const form = modal.querySelector('form');
+                    if (form) {
+                        form.reset();
+                        form.querySelectorAll('.form-group.has-error').forEach(group => {
+                            group.classList.remove('has-error');
+                        });
+                        const submitBtn = form.querySelector('.btn-submit');
+                        if (submitBtn) {
+                            submitBtn.classList.remove('loading');
+                            submitBtn.disabled = false;
+                        }
+                    }
+                }, 300);
+            }
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.querySelector(`[onclick*="${inputId}"] i`);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function removeDevice(button) {
+            if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi thiết bị này?')) {
+                button.closest('.device-item').remove();
+                Utils.showToast('Đã đăng xuất khỏi thiết bị', 'success');
+            }
+        }
+
+        function logoutAllDevices() {
+            if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi tất cả thiết bị khác?')) {
+                document.querySelectorAll('.device-item:not(.current)').forEach(item => item.remove());
+                Utils.showToast('Đã đăng xuất khỏi tất cả thiết bị khác', 'success');
+            }
+        }
+
+        function verify2FASetup() {
+            const code = document.getElementById('verify2faCode').value;
+            if (code.length !== 6 || !/^\d{6}$/.test(code)) {
+                Utils.showError(document.getElementById('verify2faCode'), 'Vui lòng nhập mã 6 số');
+                return;
+            }
+            
+            // Simulate verification
+            Utils.showToast('Xác thực 2 bước đã được bật thành công!', 'success');
+            localStorage.setItem('is2FAEnabled', 'true');
+            
+            // Update UI
+            const accountManager = window.accountManagerInstance;
+            if (accountManager) {
+                accountManager.update2FAStatus(true);
+            }
+            
+            closeModal('2faModal');
         }
 
         // Utility Functions
@@ -1202,6 +1824,108 @@
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
                 toast.innerHTML = `
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 10px; cursor: pointer; font-size: 16px;">×</button>
+                `;
+                
+                document.body.appendChild(toast);
+                
+                setTimeout(() => toast.classList.add('show'), 100);
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 500);
+                }, duration);
+            }
+
+            static validateInput(input, message, pattern) {
+                if (!input.value.trim()) {
+                    this.showError(input, `Vui lòng nhập ${input.labels[0]?.textContent.toLowerCase() || 'thông tin'}.`);
+                    return false;
+                }
+                if (pattern && !pattern.test(input.value)) {
+                    this.showError(input, message);
+                    return false;
+                }
+                this.clearError(input);
+                return true;
+            }
+
+            static showError(input, message) {
+                const formGroup = input.closest('.form-group');
+                formGroup.classList.add('has-error');
+                const errorElement = formGroup.querySelector('.error-message');
+                if (errorElement) errorElement.textContent = message;
+            }
+
+            static clearError(input) {
+                const formGroup = input.closest('.form-group');
+                formGroup.classList.remove('has-error');
+            }
+        }
+
+        // Dropdown Manager
+        class DropdownManager {
+            constructor() {
+                this.setupDropdownEvents();
+            }
+
+            setupDropdownEvents() {
+                const userDropdown = document.getElementById('userDropdown');
+                const dropdownMenu = document.getElementById('dropdownMenu');
+                const chevronIcon = userDropdown?.querySelector('.fa-chevron-down');
+
+                if (!userDropdown || !dropdownMenu) return;
+
+                // Toggle dropdown on click
+                userDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleDropdown(userDropdown, chevronIcon);
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!userDropdown.contains(e.target)) {
+                        this.closeDropdown(userDropdown, chevronIcon);
+                    }
+                });
+
+                // Prevent dropdown from closing when clicking inside
+                dropdownMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+
+                // Close dropdown when pressing Escape
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.closeDropdown(userDropdown, chevronIcon);
+                    }
+                });
+            }
+
+            toggleDropdown(dropdown, chevron) {
+                const isActive = dropdown.classList.contains('active');
+                if (isActive) {
+                    this.closeDropdown(dropdown, chevron);
+                } else {
+                    this.openDropdown(dropdown, chevron);
+                }
+            }
+
+            openDropdown(dropdown, chevron) {
+                dropdown.classList.add('active');
+                if (chevron) {
+                    chevron.style.transform = 'rotate(180deg)';
+                }
+            }
+
+            closeDropdown(dropdown, chevron) {
+                dropdown.classList.remove('active');
+                if (chevron) {
+                    chevron.style.transform = 'rotate(0deg)';
+                }
+            }
+        }innerHTML = `
                     <span>${message}</span>
                     <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 10px; cursor: pointer; font-size: 16px;">×</button>
                 `;
@@ -1526,15 +2250,15 @@
             }
 
             simulateDeposit() {
-                Utils.showToast('Tính năng nạp tiền sẽ được cập nhật sớm!', 'info');
+                showModal('depositModal');
             }
 
             simulateWithdraw() {
-                Utils.showToast('Tính năng rút tiền sẽ được cập nhật sớm!', 'info');
+                showModal('withdrawModal');
             }
 
             simulateChangePassword() {
-                Utils.showToast('Tính năng đổi mật khẩu sẽ được cập nhật sớm!', 'info');
+                showModal('changePasswordModal');
             }
 
             toggle2FA() {
@@ -1547,14 +2271,291 @@
                         Utils.showToast('Xác thực 2 bước đã được tắt.', 'info');
                     }
                 } else {
-                    localStorage.setItem('is2FAEnabled', 'true');
-                    this.update2FAStatus(true);
-                    Utils.showToast('Xác thực 2 bước đã được bật thành công!', 'success');
+                    showModal('2faModal');
                 }
             }
 
             simulateManageDevices() {
-                Utils.showToast('Tính năng quản lý thiết bị sẽ được cập nhật sớm!', 'info');
+                showModal('deviceManagerModal');
+            }
+
+            async processDeposit() {
+                const form = document.getElementById('depositForm');
+                const submitBtn = form.querySelector('.btn-submit');
+                const cardNumber = document.getElementById('cardNumber').value.trim();
+                const cardSerial = document.getElementById('cardSerial').value.trim();
+                const cardAmount = document.getElementById('cardAmount').value;
+                const cardType = document.querySelector('.card-type.selected')?.getAttribute('data-type');
+
+                // Validate form
+                let isValid = true;
+                
+                if (!Utils.validateInput(document.getElementById('cardNumber'), 'Mã thẻ phải có ít nhất 10 chữ số', /^\d{10,15}$/)) {
+                    isValid = false;
+                }
+                
+                if (!Utils.validateInput(document.getElementById('cardSerial'), 'Số serial phải có ít nhất 5 chữ số', /^\d{5,12}$/)) {
+                    isValid = false;
+                }
+                
+                if (!cardAmount) {
+                    Utils.showError(document.getElementById('cardAmount'), 'Vui lòng chọn mệnh giá');
+                    isValid = false;
+                } else {
+                    Utils.clearError(document.getElementById('cardAmount'));
+                }
+                
+                if (!cardType) {
+                    Utils.showToast('Vui lòng chọn loại thẻ', 'error');
+                    isValid = false;
+                }
+                
+                if (!isValid) return;
+
+                // Show loading state
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('https://shop-4mlk.onrender.com/api/v1/users/deposit', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            cardNumber,
+                            cardSerial,
+                            cardType,
+                            amount: parseInt(cardAmount)
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Có lỗi xảy ra khi xử lý thẻ');
+                    }
+
+                    // Update balance
+                    const newBalance = data.data.user.balance;
+                    this.updateElement('balanceAmount', Utils.formatPrice(newBalance));
+                    
+                    // Add to transaction history
+                    const newTransaction = {
+                        type: 'deposit',
+                        amount: parseInt(cardAmount),
+                        info: cardType,
+                        date: new Date().toISOString()
+                    };
+                    
+                    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+                    transactions.push(newTransaction);
+                    localStorage.setItem('transactions', JSON.stringify(transactions));
+                    
+                    this.loadTransactionHistory();
+
+                    Utils.showToast(`Nạp thành công ${Utils.formatPrice(cardAmount)} vào tài khoản`, 'success');
+                    closeModal('depositModal');
+
+                } catch (error) {
+                    Utils.showToast(error.message || 'Có lỗi xảy ra khi xử lý thẻ. Vui lòng thử lại', 'error');
+                } finally {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }
+
+            async processWithdraw() {
+                const form = document.getElementById('withdrawForm');
+                const submitBtn = form.querySelector('.btn-submit');
+                const bankAccount = document.getElementById('bankAccount').value;
+                const accountNumber = document.getElementById('accountNumber').value.trim();
+                const accountName = document.getElementById('accountName').value.trim();
+                const withdrawAmount = parseInt(document.getElementById('withdrawAmount').value);
+
+                // Validate form
+                let isValid = true;
+                
+                if (!bankAccount) {
+                    Utils.showError(document.getElementById('bankAccount'), 'Vui lòng chọn ngân hàng');
+                    isValid = false;
+                } else {
+                    Utils.clearError(document.getElementById('bankAccount'));
+                }
+                
+                if (!Utils.validateInput(document.getElementById('accountNumber'), 'Số tài khoản không hợp lệ', /^\d{6,20}$/)) {
+                    isValid = false;
+                }
+                
+                if (!Utils.validateInput(document.getElementById('accountName'), 'Tên chủ tài khoản không được để trống')) {
+                    isValid = false;
+                }
+                
+                if (!withdrawAmount || withdrawAmount < 50000) {
+                    Utils.showError(document.getElementById('withdrawAmount'), 'Số tiền rút tối thiểu là 50,000đ');
+                    isValid = false;
+                } else {
+                    Utils.clearError(document.getElementById('withdrawAmount'));
+                }
+
+                if (!isValid) return;
+
+                // Check balance
+                const currentBalance = parseInt(localStorage.getItem('userBalance')) || 0;
+                if (withdrawAmount > currentBalance) {
+                    Utils.showToast('Số dư không đủ để thực hiện giao dịch', 'error');
+                    return;
+                }
+
+                // Show loading state
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+
+                try {
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    // Update balance
+                    const newBalance = currentBalance - withdrawAmount;
+                    localStorage.setItem('userBalance', newBalance);
+                    this.updateElement('balanceAmount', Utils.formatPrice(newBalance));
+                    
+                    // Add to transaction history
+                    const newTransaction = {
+                        type: 'withdraw',
+                        amount: withdrawAmount,
+                        info: `${bankAccount.toUpperCase()} - ${accountNumber}`,
+                        date: new Date().toISOString()
+                    };
+                    
+                    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+                    transactions.push(newTransaction);
+                    localStorage.setItem('transactions', JSON.stringify(transactions));
+                    
+                    this.loadTransactionHistory();
+
+                    Utils.showToast('Yêu cầu rút tiền đã được gửi thành công!', 'success');
+                    closeModal('withdrawModal');
+
+                } catch (error) {
+                    Utils.showToast('Có lỗi xảy ra. Vui lòng thử lại', 'error');
+                } finally {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }
+
+            async processChangePassword() {
+                const form = document.getElementById('changePasswordForm');
+                const submitBtn = form.querySelector('.btn-submit');
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+                // Validate form
+                let isValid = true;
+                
+                if (!Utils.validateInput(document.getElementById('currentPassword'), 'Vui lòng nhập mật khẩu hiện tại')) {
+                    isValid = false;
+                }
+                
+                if (!Utils.validateInput(document.getElementById('newPassword'), 'Mật khẩu phải có ít nhất 6 ký tự', /^.{6,}$/)) {
+                    isValid = false;
+                }
+                
+                if (newPassword !== confirmNewPassword) {
+                    Utils.showError(document.getElementById('confirmNewPassword'), 'Mật khẩu không khớp');
+                    isValid = false;
+                } else {
+                    Utils.clearError(document.getElementById('confirmNewPassword'));
+                }
+
+                if (!isValid) return;
+
+                // Show loading state
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('https://shop-4mlk.onrender.com/api/v1/users/updateMyPassword', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            passwordCurrent: currentPassword,
+                            password: newPassword,
+                            passwordConfirm: confirmNewPassword
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Đổi mật khẩu thất bại');
+                    }
+
+                    Utils.showToast('Đổi mật khẩu thành công!', 'success');
+                    closeModal('changePasswordModal');
+
+                } catch (error) {
+                    Utils.showToast(error.message || 'Có lỗi xảy ra. Vui lòng thử lại', 'error');
+                } finally {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }
+
+            setupFormEvents() {
+                // Deposit form
+                const depositForm = document.getElementById('depositForm');
+                if (depositForm) {
+                    depositForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.processDeposit();
+                    });
+                }
+
+                // Withdraw form
+                const withdrawForm = document.getElementById('withdrawForm');
+                if (withdrawForm) {
+                    withdrawForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.processWithdraw();
+                    });
+                }
+
+                // Change password form
+                const changePasswordForm = document.getElementById('changePasswordForm');
+                if (changePasswordForm) {
+                    changePasswordForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.processChangePassword();
+                    });
+                }
+
+                // Card type selection
+                document.querySelectorAll('.card-type').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
+                        e.currentTarget.classList.add('selected');
+                    });
+                });
+
+                // Close modal when clicking outside
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            closeModal(modal.id);
+                        }
+                    });
+                });
             }
 
             logout() {
@@ -1632,6 +2633,9 @@
                 if (sidebarLogoutBtn) {
                     sidebarLogoutBtn.addEventListener('click', () => this.logout());
                 }
+
+                // Setup form events
+                this.setupFormEvents();
             }
         }
 
@@ -1639,7 +2643,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             try {
                 new DropdownManager();
-                new AccountManager();
+                window.accountManagerInstance = new AccountManager();
             } catch (error) {
                 console.error('Initialization error:', error);
                 Utils.showToast('Có lỗi xảy ra khi khởi tạo trang', 'error');
