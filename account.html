@@ -1635,11 +1635,16 @@
             }
         };
 
-        // Storage Manager - Sử dụng sessionStorage thay vì localStorage để tránh lỗi
+        // Storage Manager - Đọc từ localStorage (như trang chủ)
         const StorageManager = {
             getCurrentUser: () => {
                 try {
-                    const user = JSON.parse(sessionStorage.getItem('currentUser'));
+                    // Thử đọc từ localStorage trước (từ trang chủ)
+                    let user = JSON.parse(localStorage.getItem('currentUser'));
+                    if (!user) {
+                        // Nếu không có, thử sessionStorage
+                        user = JSON.parse(sessionStorage.getItem('currentUser'));
+                    }
                     return user;
                 } catch (e) {
                     return null;
@@ -1647,22 +1652,33 @@
             },
             
             saveCurrentUser: (user) => {
+                // Lưu vào cả localStorage và sessionStorage
+                localStorage.setItem('currentUser', JSON.stringify(user));
                 sessionStorage.setItem('currentUser', JSON.stringify(user));
             },
             
             clearCurrentUser: () => {
+                localStorage.removeItem('currentUser');
                 sessionStorage.removeItem('currentUser');
             },
 
             getUsers: () => {
                 try {
-                    return JSON.parse(sessionStorage.getItem('users')) || [];
+                    // Thử đọc từ localStorage trước
+                    let users = JSON.parse(localStorage.getItem('users'));
+                    if (!users) {
+                        // Nếu không có, thử sessionStorage
+                        users = JSON.parse(sessionStorage.getItem('users'));
+                    }
+                    return users || [];
                 } catch (e) {
                     return [];
                 }
             },
             
             saveUsers: (users) => {
+                // Lưu vào cả localStorage và sessionStorage
+                localStorage.setItem('users', JSON.stringify(users));
                 sessionStorage.setItem('users', JSON.stringify(users));
             },
 
@@ -2204,6 +2220,11 @@
 
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
+            // Debug: Kiểm tra dữ liệu đăng nhập
+            console.log('Checking login status...');
+            console.log('localStorage currentUser:', localStorage.getItem('currentUser'));
+            console.log('sessionStorage currentUser:', sessionStorage.getItem('currentUser'));
+            
             new AccountManager();
 
             // Close modal when clicking outside
@@ -2276,18 +2297,41 @@
             location.reload();
         }
 
-        // Add demo button for testing (remove in production)
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            const demoBtn = document.createElement('button');
-            demoBtn.textContent = 'Demo Login';
-            demoBtn.className = 'btn btn-outline';
-            demoBtn.style.position = 'fixed';
-            demoBtn.style.bottom = '20px';
-            demoBtn.style.right = '20px';
-            demoBtn.style.zIndex = '9999';
-            demoBtn.onclick = createDemoUser;
-            document.body.appendChild(demoBtn);
-        }
+        // Add demo button for testing và nút fix login
+        const demoBtn = document.createElement('button');
+        demoBtn.textContent = 'Demo Login';
+        demoBtn.className = 'btn btn-outline';
+        demoBtn.style.position = 'fixed';
+        demoBtn.style.bottom = '20px';
+        demoBtn.style.right = '20px';
+        demoBtn.style.zIndex = '9999';
+        demoBtn.onclick = createDemoUser;
+        document.body.appendChild(demoBtn);
+
+        // Thêm nút force login để test
+        const forceLoginBtn = document.createElement('button');
+        forceLoginBtn.textContent = 'Force Login';
+        forceLoginBtn.className = 'btn btn-primary';
+        forceLoginBtn.style.position = 'fixed';
+        forceLoginBtn.style.bottom = '70px';
+        forceLoginBtn.style.right = '20px';
+        forceLoginBtn.style.zIndex = '9999';
+        forceLoginBtn.onclick = () => {
+            // Tạo user giả và force login
+            const user = {
+                id: Utils.generateId(),
+                name: 'User Test',
+                email: 'test@example.com',
+                phone: '0987654321',
+                password: '123456',
+                balance: 500000,
+                registerDate: new Date().toISOString(),
+                transactions: []
+            };
+            StorageManager.saveCurrentUser(user);
+            location.reload();
+        };
+        document.body.appendChild(forceLoginBtn);
     </script>
 <script src="main.js"></script>   <!-- Nạp "bộ não" chung trước -->
 </body>
