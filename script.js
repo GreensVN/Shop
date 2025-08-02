@@ -8,11 +8,11 @@
 const localSampleProducts = [
     {
         id: 1,
-        title: "Gói VIP 1 Tháng",
-        description: "Tài khoản VIP Grow A Garden với đầy đủ đặc quyền",
-        price: 150000,
-        oldPrice: 200000,
-        image: "images/product1.jpg",
+        title: "Raccoon",
+        description: "Raccoon",
+        price: 250000,
+        oldPrice: 300000,
+        image: "https://i.ibb.co/Vc8YddCj/s-l1200.png",
         sales: 100,
         badge: "HOT",
         details: {
@@ -22,11 +22,11 @@ const localSampleProducts = [
     },
     {
         id: 2,
-        title: "Gói Premium 3 Tháng",
-        description: "Tài khoản Premium Grow A Garden với nhiều ưu đãi",
-        price: 400000,
-        oldPrice: 450000,
-        image: "images/product2.jpg",
+        title: "Mimic Octopus",
+        description: "Mimic Octopus",
+        price: 70000,
+        oldPrice: 100000,
+        image: "https://i.ibb.co/d02TTqSw/ab66bab0-c4f1-4130-bb23-b689337484a2.jpg",
         sales: 75,
         badge: null,
         details: {
@@ -127,3 +127,4 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('resetButton').addEventListener('click', resetFilters);
     }
 });
+
