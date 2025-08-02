@@ -1,4 +1,139 @@
-<!DOCTYPE html>
+setupEventListeners() {
+                // Tab switching
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const tabId = e.currentTarget.dataset.tab;
+                        this.switchTab(tabId);
+                    });
+                });
+
+                // Deposit functionality
+                const depositBtn = document.getElementById('depositBtn');
+                if (depositBtn) {
+                    depositBtn.addEventListener('click', () => {
+                        showModal('depositModal');
+                    });
+                }
+
+                // Quick amounts
+                document.querySelectorAll('.quick-amount').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // Remove previous selections
+                        document.querySelectorAll('.quick-amount').forEach(b => b.classList.remove('selected'));
+                        
+                        // Select current
+                        e.target.classList.add('selected');
+                        
+                        // Set amount in modal
+                        const amount = e.target.dataset.amount;
+                        const cardAmountSelect = document.getElementById('cardAmount');
+                        if (cardAmountSelect) cardAmountSelect.value = amount;
+                        
+                        // Open deposit modal
+                        showModal('depositModal');
+                    });
+                });
+
+                // Card type selection
+                document.querySelectorAll('.card-type').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
+                        e.currentTarget.classList.add('selected');
+                    });
+                });
+
+                // Change password button
+                const changePasswordBtn = document.getElementById('changePasswordBtn');
+                if (changePasswordBtn) {
+                    changePasswordBtn.addEventListener('click', () => {
+                        showModal('changePasswordModal');
+                    });
+                }
+
+                // Deposit form
+                const depositForm = document.getElementById('depositForm');
+                if (depositForm) {
+                    depositForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.processDeposit();
+                    });
+                }
+
+                // Change password form
+                const changePasswordForm = document.getElementById('changePasswordForm');
+                if (changePasswordForm) {
+                    changePasswordForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.changePassword();
+                    });
+                }
+
+                // Input formatting
+                this.setupInputFormatting();
+
+                // Close modal when clicking outside
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            closeModal(modal.id);
+                        }
+                    });
+                });
+
+                // Security buttons (only for coming soon features)
+                document.querySelectorAll('.security-item .btn').forEach(btn => {
+                    if (btn.id !== 'changePasswordBtn') {
+                        btn.addEventListener('click', () => {
+                            Utils.showToast('Tính năng này sẽ sớm ra mắt', 'info');
+                        });
+                    }
+                });
+            }
+
+            setupInputFormatting() {
+                // Card number input (numbers only)
+                const cardNumberInput = document.getElementById('cardNumber');
+                if (cardNumberInput) {
+                    cardNumberInput.addEventListener('input', (e) => {
+                        e.target.value = e.target.value.replace(/\D/g, '');
+                    });
+                }
+
+                // Card serial input (numbers only)
+                const cardSerialInput = document.getElementById('cardSerial');
+                if (cardSerialInput) {
+                    cardSerialInput.addEventListener('input', (e) => {
+                        e.target.value = e.target.value.replace(/\D/g, '');
+                    });
+                }
+            }
+
+            async processDeposit() {
+                const form = document.getElementById('depositForm');
+                const submitBtn = form.querySelector('.btn-submit');
+                const cardNumber = document.getElementById('cardNumber').value.trim();
+                const cardSerial = document.getElementById('cardSerial').value.trim();
+                const cardAmount = document.getElementById('cardAmount').value;
+                const selectedCard = document.querySelector('.card-type.selected');
+
+                // Clear previous errors
+                form.querySelectorAll('.form-group').forEach(group => {
+                    Utils.clearError(group.querySelector('input, select'));
+                });
+
+                // Validate form
+                let isValid = true;
+                
+                if (!cardNumber) {
+                    Utils.showError(document.getElementById('cardNumber'), 'Vui lòng nhập mã thẻ');
+                    isValid = false;
+                } else if (!Utils.validateCard(cardNumber, '123456')) {
+                    Utils.showError(document.getElementById('cardNumber'), 'Mã thẻ phải có 10-15 chữ số');
+                    isValid = false;
+                }
+                
+                if (!cardSerial) {
+                    Utils.showError(document.getElementById('cardSerial'), 'Vui lòng nhập<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -627,6 +762,269 @@
             color: #999;
         }
 
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--gray-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--primary-color);
+            transform: rotate(90deg);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            text-align: center;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+        }
+
+        .form-group.has-error input,
+        .form-group.has-error select {
+            border-color: var(--danger-color);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-group.has-error .error-message {
+            display: block;
+        }
+
+        .password-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--gray-color);
+            transition: var(--transition);
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        .btn-submit.loading .spinner {
+            display: inline-block;
+        }
+
+        /* Card Types */
+        .card-types {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .card-type {
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .card-type:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .card-type.selected {
+            border-color: var(--primary-color);
+            background: rgba(230, 57, 70, 0.05);
+        }
+
+        .card-type .card-logo {
+            width: 100%;
+            max-width: 40px;
+            height: 30px;
+            border-radius: 4px;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .card-type[data-type="viettel"] .card-logo {
+            background: #d70018;
+        }
+
+        .card-type[data-type="mobifone"] .card-logo {
+            background: #1f7a3e;
+        }
+
+        .card-type[data-type="vinaphone"] .card-logo {
+            background: #662d91;
+        }
+
+        .card-type[data-type="gate"] .card-logo {
+            background: #ff6600;
+        }
+
+        .card-type span {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .form-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(42, 157, 143, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            color: var(--success-color);
+        }
+
+        .form-note i {
+            color: var(--success-color);
+        }
+
+        /* Quick Amounts */
+        .quick-amounts {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .quick-amount {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .quick-amount:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: rgba(230, 57, 70, 0.05);
+        }
+
+        .quick-amount.selected {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: rgba(230, 57, 70, 0.1);
+        }
+
         /* Toast */
         .toast {
             position: fixed;
@@ -749,6 +1147,10 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -905,14 +1307,26 @@
                         <div class="balance-card">
                             <div class="balance-amount" id="balanceAmount">0đ</div>
                             <div class="balance-actions">
-                                <button class="btn">
+                                <button class="btn" id="depositBtn">
                                     <i class="fas fa-money-bill-wave"></i>
-                                    Nạp tiền (Sớm ra mắt)
+                                    Nạp tiền
                                 </button>
                                 <button class="btn" disabled>
                                     <i class="fas fa-hand-holding-usd"></i>
                                     Rút tiền (Sớm ra mắt)
                                 </button>
+                            </div>
+                        </div>
+                        
+                        <div class="quick-deposit">
+                            <h3>Nạp nhanh theo mệnh giá</h3>
+                            <div class="quick-amounts">
+                                <button class="quick-amount" data-amount="10000">10,000đ</button>
+                                <button class="quick-amount" data-amount="20000">20,000đ</button>
+                                <button class="quick-amount" data-amount="50000">50,000đ</button>
+                                <button class="quick-amount" data-amount="100000">100,000đ</button>
+                                <button class="quick-amount" data-amount="200000">200,000đ</button>
+                                <button class="quick-amount" data-amount="500000">500,000đ</button>
                             </div>
                         </div>
                     </div>
@@ -948,9 +1362,9 @@
                                         <small>Bảo mật tài khoản của bạn</small>
                                     </div>
                                 </div>
-                                <button class="btn btn-outline">
+                                <button class="btn btn-outline" id="changePasswordBtn">
                                     <i class="fas fa-edit"></i>
-                                    Đổi mật khẩu (Sớm ra mắt)
+                                    Đổi mật khẩu
                                 </button>
                             </div>
                             
@@ -1048,6 +1462,115 @@
         </div>
     </footer>
 
+    <!-- Deposit Modal -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('depositModal')">&times;</button>
+            <h2 class="modal-title">Nạp tiền bằng thẻ cào</h2>
+            
+            <div class="card-types">
+                <div class="card-type selected" data-type="viettel">
+                    <div class="card-logo">VT</div>
+                    <span>Viettel</span>
+                </div>
+                <div class="card-type" data-type="mobifone">
+                    <div class="card-logo">MB</div>
+                    <span>Mobifone</span>
+                </div>
+                <div class="card-type" data-type="vinaphone">
+                    <div class="card-logo">VP</div>
+                    <span>Vinaphone</span>
+                </div>
+                <div class="card-type" data-type="gate">
+                    <div class="card-logo">GT</div>
+                    <span>Gate</span>
+                </div>
+            </div>
+            
+            <form id="depositForm">
+                <div class="form-group">
+                    <label for="cardNumber">Mã thẻ <small>(10-15 chữ số)</small></label>
+                    <input type="text" id="cardNumber" placeholder="Nhập mã thẻ" required maxlength="15">
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cardSerial">Số serial <small>(5-12 chữ số)</small></label>
+                    <input type="text" id="cardSerial" placeholder="Nhập số serial" required maxlength="12">
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cardAmount">Mệnh giá</label>
+                    <select id="cardAmount" required>
+                        <option value="">-- Chọn mệnh giá --</option>
+                        <option value="10000">10,000đ</option>
+                        <option value="20000">20,000đ</option>
+                        <option value="50000">50,000đ</option>
+                        <option value="100000">100,000đ</option>
+                        <option value="200000">200,000đ</option>
+                        <option value="500000">500,000đ</option>
+                    </select>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-note">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Mã thẻ và số serial nằm ở mặt sau thẻ cào</span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-submit">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Nạp tiền</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('changePasswordModal')">&times;</button>
+            <h2 class="modal-title">Đổi mật khẩu</h2>
+            
+            <form id="changePasswordForm">
+                <div class="form-group password-group">
+                    <label for="currentPassword">Mật khẩu hiện tại</label>
+                    <input type="password" id="currentPassword" placeholder="Nhập mật khẩu hiện tại" required>
+                    <span class="password-toggle" onclick="togglePassword('currentPassword')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group password-group">
+                    <label for="newPassword">Mật khẩu mới</label>
+                    <input type="password" id="newPassword" placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)" required minlength="6">
+                    <span class="password-toggle" onclick="togglePassword('newPassword')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group password-group">
+                    <label for="confirmNewPassword">Nhập lại mật khẩu mới</label>
+                    <input type="password" id="confirmNewPassword" placeholder="Nhập lại mật khẩu mới" required>
+                    <span class="password-toggle" onclick="togglePassword('confirmNewPassword')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <div class="error-message"></div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-submit">
+                    <i class="fas fa-key"></i>
+                    <span>Đổi mật khẩu</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
         // ===== UTILITY FUNCTIONS =====
         const Utils = {
@@ -1095,6 +1618,80 @@
                     toast.classList.remove('show');
                     setTimeout(() => toast.remove(), 300);
                 }, duration);
+            },
+
+            validateCard: (number, serial) => {
+                const cardRegex = /^[0-9]{10,15}$/;
+                const serialRegex = /^[0-9]{5,12}$/;
+                return cardRegex.test(number) && serialRegex.test(serial);
+            },
+
+            validatePassword: (password) => {
+                return password && password.length >= 6;
+            },
+
+            showError: (input, message) => {
+                const formGroup = input.closest('.form-group');
+                formGroup.classList.add('has-error');
+                const errorElement = formGroup.querySelector('.error-message');
+                if (errorElement) {
+                    errorElement.textContent = message;
+                }
+            },
+
+            clearError: (input) => {
+                const formGroup = input.closest('.form-group');
+                formGroup.classList.remove('has-error');
+            }
+        };
+
+        // ===== MODAL FUNCTIONS =====
+        window.showModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
+                document.body.style.overflow = 'hidden';
+            }
+        };
+
+        window.closeModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    
+                    // Reset forms
+                    const form = modal.querySelector('form');
+                    if (form) {
+                        form.reset();
+                        form.querySelectorAll('.form-group').forEach(group => {
+                            group.classList.remove('has-error');
+                        });
+                        const submitBtn = form.querySelector('.btn-submit');
+                        if (submitBtn) {
+                            submitBtn.classList.remove('loading');
+                            submitBtn.disabled = false;
+                        }
+                    }
+                }, 300);
+            }
+        };
+
+        window.togglePassword = function(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.querySelector(`[onclick*="${inputId}"] i`);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
         };
 
@@ -1284,19 +1881,265 @@
                     });
                 });
 
-                // Security buttons (show coming soon message)
-                document.querySelectorAll('.security-item .btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        Utils.showToast('Tính năng này sẽ sớm ra mắt', 'info');
+                // Deposit functionality
+                const depositBtn = document.getElementById('depositBtn');
+                if (depositBtn) {
+                    depositBtn.addEventListener('click', () => {
+                        showModal('depositModal');
+                    });
+                }
+
+                // Quick amounts
+                document.querySelectorAll('.quick-amount').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // Remove previous selections
+                        document.querySelectorAll('.quick-amount').forEach(b => b.classList.remove('selected'));
+                        
+                        // Select current
+                        e.target.classList.add('selected');
+                        
+                        // Set amount in modal
+                        const amount = e.target.dataset.amount;
+                        const cardAmountSelect = document.getElementById('cardAmount');
+                        if (cardAmountSelect) cardAmountSelect.value = amount;
+                        
+                        // Open deposit modal
+                        showModal('depositModal');
                     });
                 });
 
-                // Balance actions (show coming soon message)
-                document.querySelectorAll('.balance-actions .btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        Utils.showToast('Tính năng này sẽ sớm ra mắt', 'info');
+                // Card type selection
+                document.querySelectorAll('.card-type').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
+                        e.currentTarget.classList.add('selected');
                     });
                 });
+
+                // Change password button
+                const changePasswordBtn = document.getElementById('changePasswordBtn');
+                if (changePasswordBtn) {
+                    changePasswordBtn.addEventListener('click', () => {
+                        showModal('changePasswordModal');
+                    });
+                }
+
+                // Deposit form
+                const depositForm = document.getElementById('depositForm');
+                if (depositForm) {
+                    depositForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.processDeposit();
+                    });
+                }
+
+                // Change password form
+                const changePasswordForm = document.getElementById('changePasswordForm');
+                if (changePasswordForm) {
+                    changePasswordForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.changePassword();
+                    });
+                }
+
+                // Input formatting
+                this.setupInputFormatting();
+
+                // Close modal when clicking outside
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            closeModal(modal.id);
+                        }
+                    });
+                });
+
+                // Security buttons (only for coming soon features)
+                document.querySelectorAll('.security-item .btn').forEach(btn => {
+                    if (btn.id !== 'changePasswordBtn') {
+                        btn.addEventListener('click', () => {
+                            Utils.showToast('Tính năng này sẽ sớm ra mắt', 'info');
+                        });
+                    }
+                });
+            }
+
+            setupInputFormatting() {
+                // Card number input (numbers only)
+                const cardNumberInput = document.getElementById('cardNumber');
+                if (cardNumberInput) {
+                    cardNumberInput.addEventListener('input', (e) => {
+                        e.target.value = e.target.value.replace(/\D/g, '');
+                    });
+                }
+
+                // Card serial input (numbers only)
+                const cardSerialInput = document.getElementById('cardSerial');
+                if (cardSerialInput) {
+                    cardSerialInput.addEventListener('input', (e) => {
+                        e.target.value = e.target.value.replace(/\D/g, '');
+                    });
+                }
+            }
+
+            async processDeposit() {
+                const form = document.getElementById('depositForm');
+                const submitBtn = form.querySelector('.btn-submit');
+                const cardNumber = document.getElementById('cardNumber').value.trim();
+                const cardSerial = document.getElementById('cardSerial').value.trim();
+                const cardAmount = document.getElementById('cardAmount').value;
+                const selectedCard = document.querySelector('.card-type.selected');
+
+                // Clear previous errors
+                form.querySelectorAll('.form-group').forEach(group => {
+                    Utils.clearError(group.querySelector('input, select'));
+                });
+
+                // Validate form
+                let isValid = true;
+                
+                if (!cardNumber) {
+                    Utils.showError(document.getElementById('cardNumber'), 'Vui lòng nhập mã thẻ');
+                    isValid = false;
+                } else if (!Utils.validateCard(cardNumber, '123456')) {
+                    Utils.showError(document.getElementById('cardNumber'), 'Mã thẻ phải có 10-15 chữ số');
+                    isValid = false;
+                }
+                
+                if (!cardSerial) {
+                    Utils.showError(document.getElementById('cardSerial'), 'Vui lòng nhập số serial');
+                    isValid = false;
+                } else if (!Utils.validateCard('1234567890', cardSerial)) {
+                    Utils.showError(document.getElementById('cardSerial'), 'Số serial phải có 5-12 chữ số');
+                    isValid = false;
+                }
+                
+                if (!cardAmount) {
+                    Utils.showError(document.getElementById('cardAmount'), 'Vui lòng chọn mệnh giá');
+                    isValid = false;
+                }
+                
+                if (!selectedCard) {
+                    Utils.showToast('Vui lòng chọn loại thẻ', 'error');
+                    isValid = false;
+                }
+                
+                if (!isValid) return;
+
+                // Show loading state
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+
+                try {
+                    // Try to use main.js processDeposit function first
+                    if (typeof window.processDeposit === 'function') {
+                        await window.processDeposit(cardNumber, cardSerial, selectedCard.dataset.type, parseInt(cardAmount));
+                    } else {
+                        // Simulate API call
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        // Random success rate (85% success)
+                        const isSuccess = Math.random() > 0.15;
+
+                        if (isSuccess) {
+                            // Update balance (simulated)
+                            const currentBalance = parseInt(document.getElementById('balanceAmount').textContent.replace(/[^\d]/g, '')) || 0;
+                            const newBalance = currentBalance + parseInt(cardAmount);
+                            
+                            document.getElementById('balanceAmount').textContent = Utils.formatPrice(newBalance);
+                            
+                            Utils.showToast(`Nạp tiền thành công ${Utils.formatPrice(parseInt(cardAmount))}`, 'success');
+                            
+                            // Reload transaction history
+                            this.loadTransactionHistory();
+                            
+                            closeModal('depositModal');
+                        } else {
+                            Utils.showToast('Thẻ cào không hợp lệ hoặc đã được sử dụng', 'error');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Deposit error:', error);
+                    Utils.showToast(error.message || 'Có lỗi xảy ra, vui lòng thử lại', 'error');
+                } finally {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }
+
+            async changePassword() {
+                const form = document.getElementById('changePasswordForm');
+                const submitBtn = form.querySelector('.btn-submit');
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+                // Clear previous errors
+                form.querySelectorAll('.form-group').forEach(group => {
+                    Utils.clearError(group.querySelector('input'));
+                });
+
+                // Validate form
+                let isValid = true;
+                
+                if (!currentPassword) {
+                    Utils.showError(document.getElementById('currentPassword'), 'Vui lòng nhập mật khẩu hiện tại');
+                    isValid = false;
+                }
+                
+                if (!newPassword) {
+                    Utils.showError(document.getElementById('newPassword'), 'Vui lòng nhập mật khẩu mới');
+                    isValid = false;
+                } else if (!Utils.validatePassword(newPassword)) {
+                    Utils.showError(document.getElementById('newPassword'), 'Mật khẩu phải có ít nhất 6 ký tự');
+                    isValid = false;
+                }
+                
+                if (!confirmNewPassword) {
+                    Utils.showError(document.getElementById('confirmNewPassword'), 'Vui lòng nhập lại mật khẩu mới');
+                    isValid = false;
+                } else if (newPassword !== confirmNewPassword) {
+                    Utils.showError(document.getElementById('confirmNewPassword'), 'Mật khẩu mới không khớp');
+                    isValid = false;
+                }
+                
+                if (!isValid) return;
+
+                // Show loading state
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+
+                try {
+                    // Try to use main.js API function first
+                    if (typeof window.callApi === 'function') {
+                        await window.callApi('/users/updateMyPassword', 'PATCH', {
+                            passwordCurrent: currentPassword,
+                            password: newPassword,
+                            passwordConfirm: confirmNewPassword
+                        });
+                    } else {
+                        // Simulate API call
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        
+                        // Simulate validation (in real app, API validates current password)
+                        if (currentPassword.length < 6) {
+                            throw new Error('Mật khẩu hiện tại không đúng');
+                        }
+                    }
+
+                    Utils.showToast('Đổi mật khẩu thành công', 'success');
+                    closeModal('changePasswordModal');
+                } catch (error) {
+                    console.error('Change password error:', error);
+                    if (error.message.includes('password') || error.message.includes('Password')) {
+                        Utils.showError(document.getElementById('currentPassword'), error.message);
+                    } else {
+                        Utils.showToast(error.message || 'Có lỗi xảy ra, vui lòng thử lại', 'error');
+                    }
+                } finally {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
             }
 
             switchTab(tabId) {
