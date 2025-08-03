@@ -1,4 +1,9 @@
-<!DOCTYPE html>
+document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const submitBtn = this.querySelector('.btn-submit');
+                const email = document.getElementById('forgotEmail').value;
+                
+                if (!email<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -858,7 +863,302 @@
             color: #a0aec0;
         }
 
-        /* Welcome Animation */
+        /* Enhanced Animations */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+            backdrop-filter: blur(15px);
+            z-index: 10002;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
+            backdrop-filter: blur(15px);
+            z-index: 10002;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .logout-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(79, 70, 229, 0.95));
+            backdrop-filter: blur(15px);
+            z-index: 10002;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .success-overlay.show,
+        .error-overlay.show,
+        .logout-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .animation-content {
+            text-align: center;
+            color: white;
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        .animation-icon {
+            font-size: 5rem;
+            margin-bottom: 25px;
+            animation: pulseIcon 1.5s ease-out;
+        }
+
+        .animation-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            animation: slideInFromTop 0.8s ease-out 0.3s both;
+        }
+
+        .animation-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            animation: slideInFromBottom 0.8s ease-out 0.6s both;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3) rotate(-10deg);
+                opacity: 0;
+            }
+            30% {
+                transform: scale(1.15) rotate(5deg);
+            }
+            60% {
+                transform: scale(0.9) rotate(-2deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulseIcon {
+            0%, 100% {
+                transform: scale(1);
+            }
+            25% {
+                transform: scale(1.2) rotate(5deg);
+            }
+            50% {
+                transform: scale(1.1) rotate(-5deg);
+            }
+            75% {
+                transform: scale(1.15) rotate(3deg);
+            }
+        }
+
+        @keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInFromBottom {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .sparkle-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: sparkleFloat 4s linear infinite;
+        }
+
+        @keyframes sparkleFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(90vh) rotate(45deg) scale(1);
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(-10vh) rotate(315deg) scale(1);
+            }
+            100% {
+                transform: translateY(-20vh) rotate(360deg) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Enhanced Favorite Button */
+        .btn-favorite {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.95);
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-favorite::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.3), transparent);
+            border-radius: 50%;
+            transition: all 0.4s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn-favorite:hover {
+            background: rgba(255, 255, 255, 1);
+            color: #ef4444;
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-favorite:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+
+        .btn-favorite.active {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-favorite.active::before {
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent);
+            width: 100%;
+            height: 100%;
+        }
+
+        .btn-favorite i {
+            font-size: 18px;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-favorite.active i {
+            animation: heartBeat 0.6s ease;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { 
+                transform: scale(1); 
+            }
+            25% { 
+                transform: scale(1.3) rotate(-5deg); 
+            }
+            50% { 
+                transform: scale(1.1) rotate(5deg); 
+            }
+            75% { 
+                transform: scale(1.2) rotate(-3deg); 
+            }
+        }
+
+        /* Enhanced Product Card Hover */
+        .product-card:hover .btn-favorite {
+            transform: scale(1.05);
+        }
+
+        .product-card:hover .btn-view {
+            transform: scale(1.05);
+        }
+
+        /* Form Loading States */
+        .btn-submit.loading {
+            pointer-events: none;
+            opacity: 0.8;
+            position: relative;
+        }
+
+        .btn-submit.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: buttonSpin 1s linear infinite;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn-submit.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-submit.loading span {
+            opacity: 0.5;
+        }
+
+        @keyframes buttonSpin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
         .welcome-overlay {
             position: fixed;
             top: 0;
@@ -1410,13 +1710,40 @@
         <img src="https://i.imgur.com/G7i5D02.png" alt="Nhắn tin với chúng tôi qua Messenger" loading="lazy">
     </a>
 
-    <!-- Welcome Animation -->
+    <!-- Enhanced Animation Overlays -->
     <div class="welcome-overlay" id="welcomeOverlay">
         <div class="welcome-particles" id="welcomeParticles"></div>
         <div class="welcome-content">
             <div class="welcome-icon">🎉</div>
             <h2 class="welcome-title" id="welcomeTitle">Chào mừng!</h2>
             <p class="welcome-subtitle" id="welcomeSubtitle">Đăng nhập thành công</p>
+        </div>
+    </div>
+
+    <div class="success-overlay" id="successOverlay">
+        <div class="sparkle-container" id="successSparkles"></div>
+        <div class="animation-content">
+            <div class="animation-icon" id="successIcon">✅</div>
+            <h2 class="animation-title" id="successTitle">Thành công!</h2>
+            <p class="animation-subtitle" id="successSubtitle">Hành động đã được thực hiện</p>
+        </div>
+    </div>
+
+    <div class="error-overlay" id="errorOverlay">
+        <div class="sparkle-container" id="errorSparkles"></div>
+        <div class="animation-content">
+            <div class="animation-icon" id="errorIcon">❌</div>
+            <h2 class="animation-title" id="errorTitle">Có lỗi xảy ra!</h2>
+            <p class="animation-subtitle" id="errorSubtitle">Vui lòng thử lại</p>
+        </div>
+    </div>
+
+    <div class="logout-overlay" id="logoutOverlay">
+        <div class="sparkle-container" id="logoutSparkles"></div>
+        <div class="animation-content">
+            <div class="animation-icon" id="logoutIcon">👋</div>
+            <h2 class="animation-title" id="logoutTitle">Tạm biệt!</h2>
+            <p class="animation-subtitle" id="logoutSubtitle">Đăng xuất thành công</p>
         </div>
     </div>
 
@@ -1579,6 +1906,57 @@
                 });
             });
 
+            // Form submissions
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const submitBtn = this.querySelector('.btn-submit');
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                // Add loading state
+                submitBtn.classList.add('loading');
+                
+                // Simulate API call
+                setTimeout(() => {
+                    // Check if user already exists (in real app, this would be server-side)
+                    let existingUser = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
+                    let displayName;
+                    
+                    if (existingUser[email]) {
+                        // User exists, use their registered name
+                        displayName = existingUser[email].name;
+                    } else {
+                        // New user logging in, create name from email
+                        const emailUsername = email.split('@')[0];
+                        displayName = emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1);
+                        
+                        // Save this user for future logins
+                        existingUser[email] = {
+                            name: displayName,
+                            email: email
+                        };
+                        localStorage.setItem('registeredUsers', JSON.stringify(existingUser));
+                    }
+                    
+                    // Store current user data
+                    userData = {
+                        name: displayName,
+                        email: email
+                    };
+                    localStorage.setItem('userData', JSON.stringify(userData));
+                    localStorage.setItem('isLoggedIn', 'true');
+                    isLoggedIn = true;
+                    
+                    // Update UI
+                    updateUIForLoginStatus();
+                    hideModal(authModal);
+                    submitBtn.classList.remove('loading');
+                    
+                    // Show welcome animation with correct name
+                    showWelcomeAnimation(displayName);
+                }, 1500);
+            });
+
             // Welcome animation
             function showWelcomeAnimation(userName) {
                 const welcomeOverlay = document.getElementById('welcomeOverlay');
@@ -1615,42 +1993,6 @@
                 }, 3000);
             }
 
-            // Form submissions
-            document.getElementById('loginForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const submitBtn = this.querySelector('.btn-submit');
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                
-                // Add loading state
-                submitBtn.classList.add('loading');
-                
-                // Simulate API call
-                setTimeout(() => {
-                    // Extract name from email (part before @)
-                    const emailUsername = email.split('@')[0];
-                    // Capitalize first letter
-                    const displayName = emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1);
-                    
-                    // Store user data
-                    userData = {
-                        name: displayName,
-                        email: email
-                    };
-                    localStorage.setItem('userData', JSON.stringify(userData));
-                    localStorage.setItem('isLoggedIn', 'true');
-                    isLoggedIn = true;
-                    
-                    // Update UI
-                    updateUIForLoginStatus();
-                    hideModal(authModal);
-                    submitBtn.classList.remove('loading');
-                    
-                    // Show welcome animation
-                    showWelcomeAnimation(displayName);
-                }, 1500);
-            });
-
             document.getElementById('registerForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 const submitBtn = this.querySelector('.btn-submit');
@@ -1659,9 +2001,19 @@
                 const password = document.getElementById('registerPassword').value;
                 const confirmPassword = document.getElementById('registerConfirmPassword').value;
                 
-                // Validate passwords
+                // Validation
+                if (!name || !email || !password || !confirmPassword) {
+                    showAnimationOverlay('errorOverlay', '⚠️', 'Thiếu thông tin!', 'Vui lòng điền đầy đủ tất cả các trường');
+                    return;
+                }
+                
                 if (password !== confirmPassword) {
-                    alert('Mật khẩu không khớp!');
+                    showAnimationOverlay('errorOverlay', '🔒', 'Mật khẩu không khớp!', 'Vui lòng kiểm tra lại mật khẩu xác nhận');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    showAnimationOverlay('errorOverlay', '🔐', 'Mật khẩu quá ngắn!', 'Mật khẩu phải có ít nhất 6 ký tự');
                     return;
                 }
                 
@@ -1670,24 +2022,149 @@
                 
                 // Simulate API call
                 setTimeout(() => {
-                    // Store user data with real name
-                    userData = {
-                        name: name, // Use actual name from form
-                        email: email
-                    };
-                    localStorage.setItem('userData', JSON.stringify(userData));
-                    localStorage.setItem('isLoggedIn', 'true');
-                    isLoggedIn = true;
-                    
-                    // Update UI
-                    updateUIForLoginStatus();
-                    hideModal(authModal);
-                    submitBtn.classList.remove('loading');
-                    
-                    // Show welcome animation with real name
-                    showWelcomeAnimation(name);
+                    try {
+                        // Check if user already exists
+                        let existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
+                        
+                        if (existingUsers[email]) {
+                            submitBtn.classList.remove('loading');
+                            showAnimationOverlay('errorOverlay', '👤', 'Email đã tồn tại!', 'Vui lòng sử dụng email khác hoặc đăng nhập');
+                            return;
+                        }
+                        
+                        // Store user in registered users database
+                        existingUsers[email] = {
+                            name: name,
+                            email: email,
+                            password: password // In real app, this should be hashed
+                        };
+                        localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
+                        
+                        // Store current user data
+                        userData = {
+                            name: name,
+                            email: email
+                        };
+                        localStorage.setItem('userData', JSON.stringify(userData));
+                        localStorage.setItem('isLoggedIn', 'true');
+                        isLoggedIn = true;
+                        
+                        // Update UI
+                        updateUIForLoginStatus();
+                        hideModal(authModal);
+                        submitBtn.classList.remove('loading');
+                        
+                        // Show success animation first
+                        showAnimationOverlay('successOverlay', '🎊', 'Đăng ký thành công!', `Chào mừng ${name} đến với Shop Grow A Garden`, 2000);
+                        
+                        // Then show welcome animation
+                        setTimeout(() => {
+                            showWelcomeAnimation(name);
+                        }, 2200);
+                        
+                    } catch (error) {
+                        submitBtn.classList.remove('loading');
+                        showAnimationOverlay('errorOverlay', '❌', 'Đăng ký thất bại!', 'Có lỗi xảy ra, vui lòng thử lại');
+                    }
                 }, 1500);
             });
+
+            document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const submitBtn = this.querySelector('.btn-submit');
+                const email = document.getElementById('forgotEmail').value;
+                
+                if (!email) {
+                    showAnimationOverlay('errorOverlay', '📧', 'Thiếu email!', 'Vui lòng nhập địa chỉ email của bạn');
+                    return;
+                }
+                
+                // Add loading state
+                submitBtn.classList.add('loading');
+                
+                // Simulate API call
+                setTimeout(() => {
+                    submitBtn.classList.remove('loading');
+                    hideModal(forgotPasswordModal);
+                    showAnimationOverlay('successOverlay', '📨', 'Email đã được gửi!', 'Vui lòng kiểm tra hộp thư của bạn');
+                }, 1500);
+            });
+
+            // Enhanced logout functionality
+            logoutButton.addEventListener('click', () => {
+                // Show logout animation
+                showAnimationOverlay('logoutOverlay', '👋', 'Tạm biệt!', 'Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi', 2000);
+                
+                // Clear data after animation
+                setTimeout(() => {
+                    localStorage.removeItem('userData');
+                    localStorage.removeItem('isLoggedIn');
+                    isLoggedIn = false;
+                    userData = {};
+                    updateUIForLoginStatus();
+                }, 1000);
+            });
+
+            // Enhanced product interactions with better favorite handling
+            document.querySelectorAll('.btn-favorite').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    this.classList.toggle('active');
+                    const icon = this.querySelector('i');
+                    
+                    if (this.classList.contains('active')) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        
+                        // Add to favorites
+                        const productCard = this.closest('.product-card');
+                        const productId = productCard.dataset.id;
+                        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                        if (!favorites.includes(productId)) {
+                            favorites.push(productId);
+                            localStorage.setItem('favorites', JSON.stringify(favorites));
+                        }
+                        
+                        // Show success feedback
+                        this.style.transform = 'scale(1.2)';
+                        setTimeout(() => {
+                            this.style.transform = '';
+                        }, 200);
+                        
+                    } else {
+                        icon.classList.remove('fas');
+                        icon.classList.add('far');
+                        
+                        // Remove from favorites
+                        const productCard = this.closest('.product-card');
+                        const productId = productCard.dataset.id;
+                        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                        favorites = favorites.filter(id => id !== productId);
+                        localStorage.setItem('favorites', JSON.stringify(favorites));
+                    }
+                });
+            });
+
+            // Load favorite states on page load
+            function loadFavoriteStates() {
+                const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                document.querySelectorAll('.product-card').forEach(card => {
+                    const productId = card.dataset.id;
+                    const favoriteBtn = card.querySelector('.btn-favorite');
+                    const icon = favoriteBtn.querySelector('i');
+                    
+                    if (favorites.includes(productId)) {
+                        favoriteBtn.classList.add('active');
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                    }
+                });
+            }
+
+            // Initialize favorite states
+            loadFavoriteStates();
 
             document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -1763,6 +2240,8 @@
                 const searchPrice = document.getElementById('searchPrice').value;
                 const searchNote = document.getElementById('searchNote').value.toLowerCase();
 
+                let visibleCount = 0;
+
                 productCards.forEach(card => {
                     const cardId = card.dataset.id.toLowerCase();
                     const cardPrice = parseInt(card.dataset.price);
@@ -1801,9 +2280,29 @@
                         showCard = false;
                     }
 
-                    // Show/hide card
-                    card.style.display = showCard ? 'block' : 'none';
+                    // Show/hide card with animation
+                    if (showCard) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                        setTimeout(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, 50);
+                    } else {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)';
+                        setTimeout(() => {
+                            card.style.display = 'none';
+                        }, 300);
+                    }
                 });
+
+                // Show result feedback
+                if (visibleCount === 0) {
+                    showAnimationOverlay('errorOverlay', '🔍', 'Không tìm thấy sản phẩm!', 'Vui lòng thử với từ khóa khác', 2000);
+                } else {
+                    showAnimationOverlay('successOverlay', '🎯', `Tìm thấy ${visibleCount} sản phẩm!`, 'Kết quả lọc thành công', 1500);
+                }
             });
 
             resetButton.addEventListener('click', () => {
@@ -1813,7 +2312,11 @@
                 
                 productCards.forEach(card => {
                     card.style.display = 'block';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
                 });
+
+                showAnimationOverlay('successOverlay', '🔄', 'Đã xóa bộ lọc!', 'Hiển thị tất cả sản phẩm', 1500);
             });
 
             // Smooth scroll animation
@@ -1839,6 +2342,9 @@
                 observer.observe(el);
             });
         });
+    </script>
+</body>
+</html>
     </script>
 </body>
 </html>
