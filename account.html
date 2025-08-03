@@ -128,10 +128,14 @@
             align-items: center;
             gap: 15px;
         }
+        
+        #loginButton {
+            display: flex;
+        }
 
         .user-dropdown {
             position: relative;
-            display: flex;
+            display: none; /* Initially hidden */
             align-items: center;
             gap: 10px;
             cursor: pointer;
@@ -578,74 +582,7 @@
             transform: translateY(-3px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
-
-        /* History */
-        .history-item {
-            display: flex;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid var(--border-color);
-            transition: var(--transition);
-            border-radius: var(--border-radius);
-            margin-bottom: 10px;
-            background: rgba(248, 249, 250, 0.5);
-        }
-
-        .history-item:hover {
-            background: rgba(230, 57, 70, 0.05);
-            transform: translateX(5px);
-        }
-
-        .history-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            font-size: 18px;
-        }
-
-        .history-icon.success {
-            background: linear-gradient(135deg, rgba(42, 157, 143, 0.2), rgba(42, 157, 143, 0.1));
-            color: var(--success-color);
-        }
-
-        .history-icon.purchase {
-            background: linear-gradient(135deg, rgba(230, 57, 70, 0.2), rgba(230, 57, 70, 0.1));
-            color: var(--primary-color);
-        }
-
-        .history-details {
-            flex: 1;
-        }
-
-        .history-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-
-        .history-date, .history-info {
-            font-size: 14px;
-            color: var(--gray-color);
-            margin-bottom: 2px;
-        }
-
-        .history-amount {
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .history-amount.success {
-            color: var(--success-color);
-        }
-
-        .history-amount.purchase {
-            color: var(--primary-color);
-        }
-
+        
         /* Security Settings */
         .security-item {
             display: flex;
@@ -659,72 +596,32 @@
             background: rgba(248, 249, 250, 0.5);
         }
 
-        .security-item:hover {
-            background: rgba(230, 57, 70, 0.02);
-            border-color: rgba(230, 57, 70, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .security-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .security-info i {
-            font-size: 24px;
-            color: var(--primary-color);
-            width: 40px;
-            text-align: center;
-        }
-
-        .security-info h4 {
-            margin-bottom: 5px;
-            font-size: 18px;
-            color: var(--secondary-color);
-        }
-
-        .security-info p {
-            font-size: 14px;
-            color: var(--gray-color);
-            margin: 0;
-        }
-
         /* Empty States */
         .empty-state {
             text-align: center;
             padding: 80px 20px;
             color: var(--gray-color);
         }
-
+        
         .empty-state i {
             font-size: 64px;
             margin-bottom: 20px;
             opacity: 0.5;
-            background: linear-gradient(135deg, var(--primary-color), #ff6b6b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
-
+        
         .empty-state h3 {
-            margin-bottom: 10px;
-            color: var(--secondary-color);
             font-size: 24px;
         }
 
-        .empty-state p {
-            font-size: 16px;
-        }
 
         /* Login Prompt */
         .login-prompt {
             text-align: center;
             padding: 80px 30px;
-            background: linear-gradient(135deg, rgba(230, 57, 70, 0.1), rgba(29, 53, 87, 0.1));
+            background: white;
             border-radius: var(--border-radius);
             margin: 50px 0;
-            border: 2px dashed rgba(230, 57, 70, 0.3);
+            box-shadow: var(--shadow-lg);
         }
 
         .login-prompt i {
@@ -753,93 +650,6 @@
             gap: 15px;
             justify-content: center;
             flex-wrap: wrap;
-        }
-
-        /* Footer */
-        .footer {
-            background: linear-gradient(135deg, var(--dark-color) 0%, #2c2c2c 100%);
-            color: white;
-            padding: 50px 0 20px;
-            margin-top: 50px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .footer-logo {
-            text-align: center;
-            padding: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--border-radius);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .footer-logo img {
-            max-width: 150px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-        }
-
-        .footer-title {
-            font-size: 20px;
-            margin-bottom: 20px;
-            position: relative;
-            padding-bottom: 10px;
-        }
-
-        .footer-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 50px;
-            height: 2px;
-            background: linear-gradient(90deg, var(--primary-color), #ff6b6b);
-        }
-
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-link {
-            margin-bottom: 10px;
-        }
-
-        .footer-link a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: var(--transition);
-        }
-
-        .footer-link a:hover {
-            color: white;
-            transform: translateX(5px);
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.6);
         }
 
         /* Messenger Chat Button */
@@ -873,42 +683,11 @@
         }
 
         /* Toast Notifications */
-        .toast {
+        #toastContainer {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 15px 20px;
-            border-radius: var(--border-radius);
-            color: white;
-            font-weight: 500;
-            box-shadow: var(--shadow-lg);
-            transform: translateX(120%);
-            opacity: 0;
-            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            z-index: 10000;
-            max-width: 350px;
-            backdrop-filter: blur(10px);
-        }
-
-        .toast.show {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        .toast.success {
-            background: linear-gradient(135deg, var(--success-color), #38d9a9);
-        }
-
-        .toast.error {
-            background: linear-gradient(135deg, var(--danger-color), #ff6b6b);
-        }
-
-        .toast.info {
-            background: linear-gradient(135deg, var(--secondary-color), #495057);
-        }
-
-        .toast.warning {
-            background: linear-gradient(135deg, var(--warning-color), #ffd43b);
+            z-index: 10003;
         }
 
         /* Modal Styles */
@@ -1012,43 +791,7 @@
             box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
             background: white;
         }
-
-        .form-group.has-error input,
-        .form-group.has-error select {
-            border-color: var(--danger-color);
-            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
-        }
-
-        .error-message {
-            color: var(--danger-color);
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .form-group.has-error .error-message {
-            display: block;
-        }
-
-        .password-group {
-            position: relative;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: var(--gray-color);
-            transition: var(--transition);
-            padding: 5px;
-        }
-
-        .password-toggle:hover {
-            color: var(--primary-color);
-        }
-
+        
         .btn-submit {
             width: 100%;
             padding: 18px;
@@ -1056,12 +799,7 @@
             font-weight: 600;
             position: relative;
         }
-
-        .btn-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
+        
         .spinner {
             display: none;
             width: 20px;
@@ -1081,354 +819,15 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Card Types */
-        .card-types {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .card-type {
-            border: 2px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 20px 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            background: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card-type::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transition: left 0.5s;
-        }
-
-        .card-type:hover::before {
-            left: 100%;
-        }
-
-        .card-type:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .card-type.selected {
-            border-color: var(--primary-color);
-            background: rgba(230, 57, 70, 0.05);
-            transform: translateY(-3px);
-        }
-
-        .card-type .card-logo {
-            width: 50px;
-            height: 35px;
-            border-radius: 6px;
-            margin: 0 auto 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .card-type[data-type="viettel"] .card-logo {
-            background: linear-gradient(135deg, #d70018, #ff4757);
-        }
-
-        .card-type[data-type="mobifone"] .card-logo {
-            background: linear-gradient(135deg, #1f7a3e, #2ed573);
-        }
-
-        .card-type[data-type="vinaphone"] .card-logo {
-            background: linear-gradient(135deg, #662d91, #a55eea);
-        }
-
-        .card-type[data-type="gate"] .card-logo {
-            background: linear-gradient(135deg, #ff6600, #ffa502);
-        }
-
-        .card-type span {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--secondary-color);
-        }
-
-        .form-note {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(42, 157, 143, 0.1);
-            border-radius: var(--border-radius);
-            font-size: 14px;
-            color: var(--success-color);
-            border-left: 4px solid var(--success-color);
-        }
-
-        .form-note i {
-            color: var(--success-color);
-        }
-
-        /* Device Manager Styles */
-        .device-list {
-            margin-top: 20px;
-        }
-
-        .device-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            margin-bottom: 15px;
-            transition: var(--transition);
-            background: rgba(248, 249, 250, 0.5);
-        }
-
-        .device-item:hover {
-            background: rgba(230, 57, 70, 0.02);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .device-item.current {
-            border-color: var(--success-color);
-            background: rgba(42, 157, 143, 0.05);
-        }
-
-        .device-details {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .device-details i {
-            font-size: 28px;
-            color: var(--secondary-color);
-        }
-
-        .device-info p {
-            font-weight: bold;
-            margin: 0;
-            font-size: 16px;
-        }
-
-        .device-info small {
-            color: var(--gray-color);
-            font-size: 14px;
-        }
-
-        /* 2FA Content */
-        .two-fa-content {
-            text-align: center;
-        }
-
-        .two-fa-content p {
-            margin-bottom: 20px;
-            color: var(--gray-color);
-            font-size: 16px;
-        }
-
-        .qr-code-container {
-            margin: 30px 0;
-            padding: 20px;
-            background: rgba(248, 249, 250, 0.8);
-            border-radius: var(--border-radius);
-            border: 2px dashed var(--border-color);
-        }
-
         /* Responsive Design */
         @media (max-width: 992px) {
             .account-layout {
                 grid-template-columns: 1fr;
-                gap: 20px;
             }
-
-            .account-sidebar {
-                padding: 25px 20px;
-            }
-
-            .sidebar-header {
-                display: flex;
-                align-items: center;
-                text-align: left;
-                margin-bottom: 25px;
-            }
-
-            .account-avatar {
-                margin: 0 20px 0 0;
-                width: 60px;
-                height: 60px;
-                font-size: 24px;
-            }
-
-            .sidebar-menu {
-                display: flex;
-                gap: 10px;
-                flex-wrap: wrap;
-                margin: 0;
-            }
-
-            .menu-item {
-                margin: 0;
-                padding: 10px 15px;
-                border-radius: 25px;
-                white-space: nowrap;
-                font-size: 14px;
-                flex: 1;
-                min-width: 120px;
-            }
-
-            .menu-item i {
-                display: none;
-            }
-
-            .account-content {
-                padding: 30px 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header-container {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .nav-menu {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 10px;
-            }
-
-            .nav-link {
-                padding: 8px 15px;
-                font-size: 14px;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .balance-actions {
-                flex-direction: column;
-            }
-
-            .login-actions {
-                flex-direction: column;
-            }
-
-            .card-types {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .sidebar-header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .account-avatar {
-                margin: 0 0 15px 0;
-            }
-
-            .sidebar-menu {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .menu-item {
-                min-width: auto;
-            }
-
-            .menu-item i {
-                display: inline-block;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .container {
-                padding: 0 10px;
-            }
-
-            .main-content {
-                padding: 20px 0;
-            }
-
-            .account-content {
-                padding: 20px 15px;
-            }
-
-            .content-title {
-                font-size: 24px;
-            }
-
-            .balance-card {
-                padding: 30px 20px;
-            }
-
-            .balance-amount {
-                font-size: 32px;
-            }
-
-            .modal-content {
-                padding: 30px 20px;
-            }
-
-            .card-types {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Loading Animation */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .loading-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(230, 57, 70, 0.2);
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-    </div>
-
     <!-- Header -->
     <header class="header">
         <div class="container header-container">
@@ -1436,27 +835,46 @@
                 <img src="https://i.ibb.co/q3r1hTft/8574d186247eba75669b7d50d42bd650.png" alt="Shop Grow A Garden" class="logo">
             </a>
             
-            <nav class="nav-menu">
+             <nav class="nav-menu">
                 <a href="index.html" class="nav-link">
                     <i class="fas fa-home"></i>
                     <span>Trang Chủ</span>
                 </a>
-                <a href="#" class="nav-link" onclick="showComingSoon('Giống Cây')">
+                <a href="index.html" class="nav-link">
                     <i class="fas fa-seedling"></i>
-                    <span>Giống Cây</span>
-                </a>
-                <a href="#" class="nav-link" onclick="showComingSoon('Thú Cưng')">
-                    <i class="fas fa-paw"></i>
-                    <span>Thú Cưng</span>
-                </a>
-                <a href="#" class="nav-link" onclick="showComingSoon('Tài Khoản Game')">
-                    <i class="fas fa-gamepad"></i>
-                    <span>Tài Khoản Game</span>
+                    <span>Sản phẩm</span>
                 </a>
             </nav>
 
-            <div class="user-actions" id="userActions">
-                <!-- User dropdown will be injected here -->
+            <div class="user-actions">
+                <button class="btn btn-primary" id="loginButton">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Đăng Nhập</span>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-avatar" id="headerAvatar">U</div>
+                    <span class="user-name" id="headerName">User</span>
+                    <i class="fas fa-chevron-down" style="margin-left: 8px; font-size: 12px; transition: transform 0.3s ease;"></i>
+                    <div class="dropdown-menu">
+                        <a href="account.html" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Tài khoản</span>
+                        </a>
+                        <a href="favorite.html" class="dropdown-item">
+                            <i class="fas fa-heart"></i>
+                            <span>Yêu thích</span>
+                        </a>
+                        <a href="cart.html" class="dropdown-item">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Giỏ hàng</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" id="headerLogoutBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -1473,9 +891,9 @@
         <div class="login-prompt" id="loginPrompt" style="display: none;">
             <i class="fas fa-user-lock"></i>
             <h2>Vui lòng đăng nhập</h2>
-            <p>Bạn cần đăng nhập để xem thông tin tài khoản</p>
+            <p>Bạn cần đăng nhập để xem thông tin tài khoản của mình.</p>
             <div class="login-actions">
-                <button class="btn btn-primary" onclick="window.location.href='index.html'">
+                <button class="btn btn-primary" id="promptLoginButton">
                     <i class="fas fa-sign-in-alt"></i>
                     Đăng nhập ngay
                 </button>
@@ -1485,7 +903,7 @@
         <!-- Account Content -->
         <div class="account-layout" id="accountLayout" style="display: none;">
             <!-- Sidebar -->
-            <div class="account-sidebar">
+            <aside class="account-sidebar">
                 <div class="sidebar-header">
                     <div class="account-avatar" id="accountAvatar">U</div>
                     <div>
@@ -1495,1420 +913,419 @@
                 </div>
                 
                 <nav class="sidebar-menu">
-                    <button class="menu-item active" data-tab="info">
-                        <i class="fas fa-user"></i>
-                        Thông tin tài khoản
-                    </button>
-                    <button class="menu-item" data-tab="balance">
-                        <i class="fas fa-wallet"></i>
-                        Số dư & Nạp tiền
-                    </button>
-                    <button class="menu-item" data-tab="history">
-                        <i class="fas fa-history"></i>
-                        Lịch sử giao dịch
-                    </button>
-                    <button class="menu-item" data-tab="security">
-                        <i class="fas fa-shield-alt"></i>
-                        Bảo mật
-                    </button>
+                    <button class="menu-item active" data-tab="info"><i class="fas fa-user"></i>Thông tin tài khoản</button>
+                    <button class="menu-item" data-tab="balance"><i class="fas fa-wallet"></i>Số dư & Nạp tiền</button>
+                    <button class="menu-item" data-tab="security"><i class="fas fa-shield-alt"></i>Bảo mật</button>
                 </nav>
                 
-                <button class="btn btn-outline" id="sidebarLogoutBtn" style="width: 100%;">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Đăng xuất
-                </button>
-            </div>
+                <button class="btn btn-outline" id="sidebarLogoutBtn" style="width: 100%;"><i class="fas fa-sign-out-alt"></i>Đăng xuất</button>
+            </aside>
             
             <!-- Content -->
-            <div class="account-content">
+            <section class="account-content">
                 <!-- Account Info Tab -->
                 <div class="tab-content active" id="infoTab">
-                    <div class="content-header">
-                        <h2 class="content-title">Thông tin tài khoản</h2>
-                    </div>
-                    
+                    <div class="content-header"><h2 class="content-title">Thông tin tài khoản</h2></div>
                     <div class="info-grid">
-                        <div class="info-item">
-                            <label class="info-label">Họ và tên</label>
-                            <div class="info-value" id="userFullName">Loading...</div>
-                        </div>
-                        <div class="info-item">
-                            <label class="info-label">Email</label>
-                            <div class="info-value" id="userEmail">Loading...</div>
-                        </div>
-                        <div class="info-item">
-                            <label class="info-label">Số điện thoại</label>
-                            <div class="info-value" id="userPhone">Chưa cập nhật</div>
-                        </div>
-                        <div class="info-item">
-                            <label class="info-label">Ngày đăng ký</label>
-                            <div class="info-value" id="userRegisterDate">Loading...</div>
-                        </div>
-                        <div class="info-item">
-                            <label class="info-label">ID tài khoản</label>
-                            <div class="info-value" id="userAccountId">------</div>
-                        </div>
-                        <div class="info-item">
-                            <label class="info-label">Trạng thái</label>
-                            <div class="info-value" style="color: var(--success-color);">
-                                <i class="fas fa-check-circle"></i> Đã xác thực
-                            </div>
-                        </div>
+                        <div class="info-item"><label class="info-label">Họ và tên</label><div class="info-value" id="userFullName">Loading...</div></div>
+                        <div class="info-item"><label class="info-label">Email</label><div class="info-value" id="userEmail">Loading...</div></div>
+                        <div class="info-item"><label class="info-label">Ngày đăng ký</label><div class="info-value" id="userRegisterDate">Loading...</div></div>
+                        <div class="info-item"><label class="info-label">ID tài khoản</label><div class="info-value" id="userAccountId">------</div></div>
                     </div>
                 </div>
                 
                 <!-- Balance Tab -->
                 <div class="tab-content" id="balanceTab">
-                    <div class="content-header">
-                        <h2 class="content-title">Số dư tài khoản</h2>
-                    </div>
-                    
+                    <div class="content-header"><h2 class="content-title">Số dư tài khoản</h2></div>
                     <div class="balance-card">
                         <div class="balance-amount" id="balanceAmount">0đ</div>
-                        <div class="balance-actions">
-                            <button class="btn" id="depositBtn">
-                                <i class="fas fa-money-bill-wave"></i>
-                                Nạp tiền
-                            </button>
-                            <button class="btn" id="withdrawBtn">
-                                <i class="fas fa-hand-holding-usd"></i>
-                                Rút tiền
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- History Tab -->
-                <div class="tab-content" id="historyTab">
-                    <div class="content-header">
-                        <h2 class="content-title">Lịch sử giao dịch</h2>
-                    </div>
-                    
-                    <div class="history-list" id="historyList">
-                        <div class="empty-state">
-                            <i class="fas fa-history"></i>
-                            <h3>Chưa có giao dịch nào</h3>
-                            <p>Lịch sử giao dịch sẽ hiển thị tại đây.</p>
-                        </div>
+                        <div class="balance-actions"><button class="btn" id="depositBtn"><i class="fas fa-money-bill-wave"></i>Nạp tiền</button></div>
                     </div>
                 </div>
                 
                 <!-- Security Tab -->
                 <div class="tab-content" id="securityTab">
-                    <div class="content-header">
-                        <h2 class="content-title">Bảo mật tài khoản</h2>
-                    </div>
-                    
+                    <div class="content-header"><h2 class="content-title">Bảo mật tài khoản</h2></div>
                     <div class="security-settings">
                         <div class="security-item">
-                            <div class="security-info">
-                                <i class="fas fa-lock"></i>
-                                <div>
-                                    <h4>Mật khẩu</h4>
-                                    <p>Đã thiết lập - Bảo mật tài khoản của bạn</p>
-                                </div>
-                            </div>
-                            <button class="btn btn-outline" id="changePasswordBtn">
-                                <i class="fas fa-edit"></i>
-                                Đổi mật khẩu
-                            </button>
-                        </div>
-                        
-                        <div class="security-item">
-                            <div class="security-info">
-                                <i class="fas fa-shield-alt"></i>
-                                <div>
-                                    <h4>Xác thực 2 bước (2FA)</h4>
-                                    <p id="2faStatus">Chưa bật - Tăng cường bảo mật cho tài khoản</p>
-                                </div>
-                            </div>
-                            <button class="btn btn-outline" id="toggle2faBtn">
-                                <i class="fas fa-toggle-off"></i>
-                                <span>Bật</span>
-                            </button>
-                        </div>
-                        
-                        <div class="security-item">
-                            <div class="security-info">
-                                <i class="fas fa-laptop-house"></i>
-                                <div>
-                                    <h4>Thiết bị đã đăng nhập</h4>
-                                    <p>Quản lý các phiên đăng nhập - Xem và đăng xuất khỏi các thiết bị khác</p>
-                                </div>
-                            </div>
-                            <button class="btn btn-outline" id="manageDevicesBtn">
-                                <i class="fas fa-cog"></i>
-                                Quản lý
-                            </button>
+                            <div class="security-info"><i class="fas fa-lock"></i><div><h4>Mật khẩu</h4><p>Thay đổi mật khẩu của bạn bất kỳ lúc nào.</p></div></div>
+                            <button class="btn btn-outline" id="changePasswordBtn"><i class="fas fa-edit"></i>Đổi mật khẩu</button>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
     </main>
     
     <!-- Messenger Chat Button -->
-    <a href="https://www.messenger.com/e2ee/t/6933504863440412" target="_blank" class="messenger-chat">
-        <i class="fab fa-facebook-messenger"></i>
-    </a>
+    <a href="https://www.messenger.com/t/8645401405544278" target="_blank" class="messenger-chat"><i class="fab fa-facebook-messenger"></i></a>
     
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-logo">
-                    <img src="https://i.ibb.co/k6BvctRR/t-i-xu-ng.jpg" alt="Shop Grow A Garden">
-                    <span>Shop Grow A Garden - Giống Cây - Thú Cưng</span>
-                </div>
-                
-                <div>
-                    <h3 class="footer-title">Về Chúng Tôi</h3>
-                    <p>Chuyên cung cấp dịch vụ, giống cây và thú cưng chất lượng. Giao dịch nhanh chóng, uy tín.</p>
-                </div>
-                
-                <div>
-                    <h3 class="footer-title">Liên Hệ</h3>
-                    <ul class="footer-links">
-                        <li class="footer-link">
-                            <a href="mailto:support@shopgrowgarden.com">
-                                <i class="fas fa-envelope"></i>
-                                <span>Email: support@shopgrowgarden.com</span>
-                            </a>
-                        </li>
-                        <li class="footer-link">
-                            <a href="tel:0123456789">
-                                <i class="fas fa-phone"></i>
-                                <span>Hotline: 0123 456 789</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>© 2025 Shop Grow A Garden. All Rights Reserved.</p>
-            </div>
-        </div>
-    </footer>
-
     <!-- Modals -->
-    <!-- Deposit Modal -->
     <div class="modal" id="depositModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('depositModal')">×</button>
-            <h2 class="modal-title">Nạp tiền bằng thẻ cào</h2>
-            
-            <div class="card-types">
-                <div class="card-type selected" data-type="viettel">
-                    <div class="card-logo">VT</div>
-                    <span>Viettel</span>
-                </div>
-                <div class="card-type" data-type="mobifone">
-                    <div class="card-logo">MB</div>
-                    <span>Mobifone</span>
-                </div>
-                <div class="card-type" data-type="vinaphone">
-                    <div class="card-logo">VP</div>
-                    <span>Vinaphone</span>
-                </div>
-                <div class="card-type" data-type="gate">
-                    <div class="card-logo">GT</div>
-                    <span>Gate</span>
-                </div>
-            </div>
-            
-            <form id="depositForm">
-                <div class="form-group">
-                    <label for="cardNumber">Mã thẻ</label>
-                    <input type="text" id="cardNumber" placeholder="Nhập mã thẻ" required>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="cardSerial">Số serial</label>
-                    <input type="text" id="cardSerial" placeholder="Nhập số serial" required>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="cardAmount">Mệnh giá</label>
-                    <select id="cardAmount" required>
-                        <option value="">-- Chọn mệnh giá --</option>
-                        <option value="10000">10,000đ</option>
-                        <option value="20000">20,000đ</option>
-                        <option value="50000">50,000đ</option>
-                        <option value="100000">100,000đ</option>
-                        <option value="200000">200,000đ</option>
-                        <option value="500000">500,000đ</option>
-                    </select>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="form-note">
-                    <i class="fas fa-info-circle"></i>
-                    <span>Vui lòng chọn đúng mệnh giá, sai mệnh giá sẽ mất thẻ.</span>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-submit">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Nạp tiền</span>
-                    <div class="spinner"></div>
-                </button>
-            </form>
+            <button class="modal-close">×</button>
+            <h2 class="modal-title">Nạp tiền (Demo)</h2>
+            <p style="text-align:center; color: var(--gray-color);">Đây là chức năng demo, không có giao dịch thật.</p>
         </div>
     </div>
 
-    <!-- Withdraw Modal -->
-    <div class="modal" id="withdrawModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('withdrawModal')">×</button>
-            <h2 class="modal-title">Rút tiền</h2>
-            
-            <form id="withdrawForm">
-                <div class="form-group">
-                    <label for="bankAccount">Ngân hàng</label>
-                    <select id="bankAccount" required>
-                        <option value="">-- Chọn ngân hàng --</option>
-                        <option value="mbbank">MB Bank</option>
-                        <option value="vietcombank">Vietcombank</option>
-                        <option value="techcombank">Techcombank</option>
-                        <option value="acb">ACB</option>
-                        <option value="momo">Ví Momo</option>
-                        <option value="zalopay">ZaloPay</option>
-                    </select>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="accountNumber">Số tài khoản / Số điện thoại</label>
-                    <input type="text" id="accountNumber" placeholder="Nhập số tài khoản hoặc SĐT" required>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="accountName">Tên chủ tài khoản</label>
-                    <input type="text" id="accountName" placeholder="Nhập tên chủ tài khoản" required>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="withdrawAmount">Số tiền rút</label>
-                    <input type="number" id="withdrawAmount" placeholder="Nhập số tiền" required min="50000" step="1000">
-                    <small style="color: var(--gray-color);">Số tiền rút tối thiểu là 50,000đ</small>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="form-note" style="background-color: rgba(244, 162, 97, 0.1); color: var(--warning-color); border-left-color: var(--warning-color);">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Phí rút tiền là 2%. Yêu cầu sẽ được xử lý trong 5-10 phút.</span>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-submit">
-                    <i class="fas fa-paper-plane"></i>
-                    <span>Gửi yêu cầu</span>
-                    <div class="spinner"></div>
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Change Password Modal -->
     <div class="modal" id="changePasswordModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('changePasswordModal')">×</button>
+            <button class="modal-close">×</button>
             <h2 class="modal-title">Đổi mật khẩu</h2>
-            
-            <form id="changePasswordForm">
-                <div class="form-group password-group">
-                    <label for="currentPassword">Mật khẩu hiện tại</label>
-                    <input type="password" id="currentPassword" placeholder="Nhập mật khẩu hiện tại" required>
-                    <span class="password-toggle" onclick="togglePassword('currentPassword')">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="form-group password-group">
-                    <label for="newPassword">Mật khẩu mới</label>
-                    <input type="password" id="newPassword" placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)" required minlength="6">
-                    <span class="password-toggle" onclick="togglePassword('newPassword')">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="form-group password-group">
-                    <label for="confirmNewPassword">Nhập lại mật khẩu mới</label>
-                    <input type="password" id="confirmNewPassword" placeholder="Nhập lại mật khẩu mới" required>
-                    <span class="password-toggle" onclick="togglePassword('confirmNewPassword')">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                    <div class="error-message"></div>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-submit">
-                    <i class="fas fa-key"></i>
-                    <span>Đổi mật khẩu</span>
-                    <div class="spinner"></div>
-                </button>
+            <form id="passwordChangeForm" novalidate>
+                <div class="form-group"><label for="currentPassword">Mật khẩu hiện tại</label><input type="password" id="currentPassword" required></div>
+                <div class="form-group"><label for="newPassword">Mật khẩu mới</label><input type="password" id="newPassword" minlength="6" required></div>
+                <div class="form-group"><label for="newPasswordConfirm">Xác nhận mật khẩu mới</label><input type="password" id="newPasswordConfirm" required></div>
+                <button type="submit" class="btn btn-primary btn-submit"><i class="fas fa-key"></i><span>Lưu thay đổi</span><div class="spinner"></div></button>
             </form>
         </div>
     </div>
-
-    <!-- 2FA Setup Modal -->
-    <div class="modal" id="2faModal">
+    
+    <div id="toastContainer"></div>
+    
+    <!-- AUTH MODAL (for login prompt) -->
+    <div class="modal" id="authModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('2faModal')">×</button>
-            <h2 class="modal-title">Thiết lập Xác thực 2 bước</h2>
-            
-            <div class="two-fa-content">
-                <p>Quét mã QR này bằng ứng dụng xác thực của bạn (Google Authenticator, Authy...):</p>
-                
-                <div class="qr-code-container">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/ShopGrowAGarden:user?secret=JBSWY3DPEHPK3PXP&issuer=ShopGrowAGarden" 
-                         alt="QR Code" 
-                         style="max-width: 200px; border-radius: var(--border-radius);">
-                </div>
-                
-                <p>Hoặc nhập mã này thủ công:</p>
-                <div style="background: var(--light-color); padding: 20px; margin: 20px 0; border-radius: var(--border-radius); font-family: monospace; font-weight: bold; text-align: center; letter-spacing: 3px; font-size: 18px; border: 2px dashed var(--primary-color);">
-                    JBSWY3DPEHPK3PXP
-                </div>
-                
-                <div class="form-group">
-                    <label for="verify2faCode">Nhập mã xác thực 6 số để hoàn tất:</label>
-                    <input type="text" id="verify2faCode" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required style="text-align: center; font-size: 24px; letter-spacing: 5px;">
-                    <div class="error-message"></div>
-                </div>
-                
-                <button type="button" class="btn btn-primary btn-submit" onclick="verify2FASetup()">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Xác nhận và bật 2FA</span>
-                </button>
-            </div>
+            <!-- Content will be injected by JS -->
         </div>
     </div>
 
-    <!-- Device Manager Modal -->
-    <div class="modal" id="deviceManagerModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('deviceManagerModal')">×</button>
-            <h2 class="modal-title">Quản lý Thiết bị</h2>
-            
-            <div class="device-list">
-                <div class="device-item current">
-                    <div class="device-details">
-                        <i class="fas fa-desktop"></i>
-                        <div class="device-info">
-                            <p>Chrome trên Windows</p>
-                            <small>Thiết bị hiện tại - Đang hoạt động</small>
-                        </div>
-                    </div>
-                    <span style="color: var(--success-color); font-weight: bold; font-size: 14px; padding: 5px 10px; background: rgba(42, 157, 143, 0.1); border-radius: 20px;">HIỆN TẠI</span>
-                </div>
-                
-                <div class="device-item">
-                    <div class="device-details">
-                        <i class="fas fa-mobile-alt"></i>
-                        <div class="device-info">
-                            <p>Safari trên iPhone</p>
-                            <small>Hoạt động 2 giờ trước</small>
-                        </div>
-                    </div>
-                    <button class="btn btn-outline" style="border-color: var(--danger-color); color: var(--danger-color); padding: 8px 15px; font-size: 12px;" onclick="removeDevice(this)">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Đăng xuất
-                    </button>
-                </div>
-                
-                <div class="device-item">
-                    <div class="device-details">
-                        <i class="fas fa-tablet-alt"></i>
-                        <div class="device-info">
-                            <p>Chrome trên Android</p>
-                            <small>Hoạt động 1 ngày trước</small>
-                        </div>
-                    </div>
-                    <button class="btn btn-outline" style="border-color: var(--danger-color); color: var(--danger-color); padding: 8px 15px; font-size: 12px;" onclick="removeDevice(this)">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Đăng xuất
-                    </button>
-                </div>
-            </div>
-            
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color);">
-                <button class="btn btn-outline" onclick="logoutAllDevices()" style="width: 100%; border-color: var(--danger-color); color: var(--danger-color);">
-                    <i class="fas fa-power-off"></i>
-                    Đăng xuất tất cả thiết bị khác
-                </button>
-            </div>
-        </div>
-    </div>
 
     <script>
-        // API Configuration
-        const API_BASE_URL = 'https://shop-4mlk.onrender.com/api/v1';
-        
-        // Global variables
-        let currentUser = null;
-        let userBalance = 0;
+    // =================================================================
+    // UNIFIED SCRIPT FOR SHOP GROW A GARDEN - ACCOUNT PAGE
+    // =================================================================
+    "use strict";
 
-        // Utility Functions
-        class Utils {
-            static formatPrice(price) {
-                const num = typeof price === 'string' ? parseInt(price) : price;
-                return new Intl.NumberFormat('vi-VN').format(num);
-            }
-            
-            static formatDate(date) {
-                return new Date(date).toLocaleDateString('vi-VN');
-            }
-            
-            static formatDateTime(date) {
-                return new Date(date).toLocaleString('vi-VN');
-            }
-            
-            static showToast(message, type = 'success', duration = 3000) {
-                // Remove existing toasts
-                document.querySelectorAll('.toast').forEach(toast => toast.remove());
-                
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.innerHTML = `
-                    <span>${message}</span>
-                    <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 15px; cursor: pointer; font-size: 18px; opacity: 0.7;">×</button>
-                `;
-                
-                document.body.appendChild(toast);
-                
-                setTimeout(() => toast.classList.add('show'), 100);
-                
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 500);
-                }, duration);
-            }
+    // =================================================================
+    // CÀI ĐẶT & BIẾN TOÀN CỤC
+    // =================================================================
+    const API_BASE_URL = 'https://shop-4mlk.onrender.com/api/v1';
+    let currentUser = null;
 
-            static validateInput(input, message, pattern) {
-                const value = input.value.trim();
-                if (!value) {
-                    this.showError(input, `Vui lòng nhập ${input.previousElementSibling?.textContent.toLowerCase() || 'thông tin'}.`);
-                    return false;
-                }
-                if (pattern && !pattern.test(value)) {
-                    this.showError(input, message);
-                    return false;
-                }
-                this.clearError(input);
-                return true;
-            }
-
-            static showError(input, message) {
-                const formGroup = input.closest('.form-group');
-                formGroup.classList.add('has-error');
-                const errorElement = formGroup.querySelector('.error-message');
-                if (errorElement) errorElement.textContent = message;
-            }
-
-            static clearError(input) {
-                const formGroup = input.closest('.form-group');
-                formGroup.classList.remove('has-error');
-            }
-
-            static showLoading() {
-                document.getElementById('loadingOverlay').classList.add('show');
-            }
-
-            static hideLoading() {
-                document.getElementById('loadingOverlay').classList.remove('show');
-            }
+    // =================================================================
+    // LỚP TIỆN ÍCH (UTILS)
+    // =================================================================
+    class Utils {
+        static formatPrice(price) {
+            const num = typeof price === 'string' ? parseInt(price, 10) : price;
+            if (isNaN(num)) return '0';
+            return new Intl.NumberFormat('vi-VN').format(num);
         }
 
-        // API Functions
-        async function callApi(endpoint, method = 'GET', body = null, requiresAuth = true) {
-            const headers = {
-                'Content-Type': 'application/json',
-            };
-            
-            if (requiresAuth) {
-                const token = localStorage.getItem('token');
-                if (token) {
-                    headers['Authorization'] = `Bearer ${token}`;
-                }
-            }
-            
-            const options = {
-                method,
-                headers,
-                credentials: 'include'
-            };
-            
-            if (body) {
-                options.body = JSON.stringify(body);
-            }
-            
+        /**
+         * FIX: Handles invalid date strings gracefully.
+         * @param {string} dateString The date string to format.
+         * @returns {string} Formatted date or 'N/A'.
+         */
+        static formatDate(dateString) {
             try {
-                const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.message || 'Something went wrong');
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                // Check if the date is valid
+                if (isNaN(date.getTime())) {
+                    return 'N/A';
                 }
-                
-                return data;
+                return date.toLocaleDateString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
             } catch (error) {
-                console.error('API call failed:', error);
-                throw error;
+                console.error("Error formatting date:", dateString, error);
+                return 'N/A';
             }
         }
 
-        // Global functions for modal management
-        function showModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'flex';
-                setTimeout(() => modal.classList.add('show'), 10);
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('show');
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                    
-                    // Reset form if exists
-                    const form = modal.querySelector('form');
-                    if (form) {
-                        form.reset();
-                        form.querySelectorAll('.form-group.has-error').forEach(group => {
-                            group.classList.remove('has-error');
-                        });
-                        const submitBtn = form.querySelector('.btn-submit');
-                        if (submitBtn) {
-                            submitBtn.classList.remove('loading');
-                            submitBtn.disabled = false;
-                        }
-                    }
-                }, 300);
-            }
-        }
-
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const icon = document.querySelector(`[onclick*="${inputId}"] i`);
+        static showToast(message, type = 'success', duration = 3000) {
+            const toastContainer = document.getElementById('toastContainer') || this.createToastContainer();
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`; // Use a generic class for styling
+            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+            toast.innerHTML = `<div style="display: flex; align-items: center;"><i class="fas ${icons[type] || icons.info}" style="margin-right: 8px;"></i><span>${message}</span></div><button class="toast-close" style="background: none; border: none; color: white; font-size: 16px; cursor: pointer; margin-left: 10px;">×</button>`;
             
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+            const bgColors = { success: '#2a9d8f', error: '#e63946', info: '#1d3557' };
+            toast.style.cssText = `background: ${bgColors[type] || bgColors.info}; color: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 10px; box-shadow: var(--shadow-lg); transform: translateX(120%); opacity: 0; transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); display: flex; align-items: center; justify-content: space-between; min-width: 300px;`;
+            
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.style.transform = 'translateX(0)';
+                toast.style.opacity = '1';
+            }, 100);
+
+            const close = () => {
+                toast.style.transform = 'translateX(120%)';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            };
+            const timer = setTimeout(close, duration);
+            toast.querySelector('.toast-close').addEventListener('click', () => { clearTimeout(timer); close(); });
+        }
+        
+        static createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            document.body.appendChild(container);
+            return container;
+        }
+    }
+
+    // =================================================================
+    // GỌI API
+    // =================================================================
+    async function callApi(endpoint, method = 'GET', body = null) {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = localStorage.getItem('token');
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, { method, headers, body: body ? JSON.stringify(body) : null });
+            if (response.status === 204) return true;
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Có lỗi xảy ra từ máy chủ.');
+            }
+            return data;
+        } catch (error) {
+            console.error(`API Error on ${endpoint}:`, error);
+            throw error;
+        }
+    }
+
+    // =================================================================
+    // QUẢN LÝ XÁC THỰC
+    // =================================================================
+    const AuthManager = {
+        async login(email, password) {
+            const data = await callApi('/users/login', 'POST', { email, password });
+            localStorage.setItem('token', data.token);
+            currentUser = data.data.user;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            return currentUser;
+        },
+        logout() {
+            if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) return;
+            localStorage.removeItem('token');
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            this.updateUIAfterLogout();
+            Utils.showToast('Đăng xuất thành công!', 'success');
+            setTimeout(() => window.location.href = 'index.html', 1500);
+        },
+        async checkAutoLogin() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const data = await callApi('/users/me');
+                    currentUser = data.data.user;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    this.updateUIAfterLogin();
+                    return true;
+                } catch (error) {
+                    console.error('Auto-login failed:', error);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('currentUser');
+                    currentUser = null;
+                    this.updateUIAfterLogout();
+                    return false;
+                }
+            }
+            return false;
+        },
+        updateUIAfterLogin() {
+            if (!currentUser) return;
+            const loginButton = document.getElementById('loginButton');
+            const userDropdown = document.getElementById('userDropdown');
+            if (loginButton) loginButton.style.display = 'none';
+            if (userDropdown) userDropdown.style.display = 'flex';
+            
+            const userName = currentUser.name || 'User';
+            const firstLetter = userName.charAt(0).toUpperCase();
+            
+            document.getElementById('headerName').textContent = userName;
+            document.getElementById('headerAvatar').textContent = firstLetter;
+        },
+        updateUIAfterLogout() {
+            const loginButton = document.getElementById('loginButton');
+            const userDropdown = document.getElementById('userDropdown');
+            if (loginButton) loginButton.style.display = 'flex';
+            if (userDropdown) userDropdown.style.display = 'none';
+        }
+    };
+    
+    // =================================================================
+    // LOGIC TRANG TÀI KHOẢN
+    // =================================================================
+    class AccountPageManager {
+        constructor() {
+            this.init();
+        }
+
+        async init() {
+            const isLoggedIn = await AuthManager.checkAutoLogin();
+            if (isLoggedIn) {
+                this.displayAccountLayout();
+                this.populateUserInfo();
+                this.setupEventListeners();
             } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                this.displayLoginPrompt();
             }
         }
-
-        function removeDevice(button) {
-            if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi thiết bị này?')) {
-                button.closest('.device-item').remove();
-                Utils.showToast('Đã đăng xuất khỏi thiết bị', 'success');
-            }
+        
+        displayLoginPrompt() {
+            document.getElementById('accountLayout').style.display = 'none';
+            document.getElementById('loginPrompt').style.display = 'block';
+            document.getElementById('promptLoginButton')?.addEventListener('click', () => {
+                // Redirect to index page to trigger login modal
+                window.location.href = 'index.html';
+            });
+        }
+        
+        displayAccountLayout() {
+            document.getElementById('loginPrompt').style.display = 'none';
+            document.getElementById('accountLayout').style.display = 'grid';
         }
 
-        function logoutAllDevices() {
-            if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi tất cả thiết bị khác?')) {
-                document.querySelectorAll('.device-item:not(.current)').forEach(item => item.remove());
-                Utils.showToast('Đã đăng xuất khỏi tất cả thiết bị khác', 'success');
+        populateUserInfo() {
+            if (!currentUser) return;
+            
+            const userName = currentUser.name || 'User';
+            const userId = currentUser._id || 'N/A';
+            const userEmail = currentUser.email || 'N/A';
+            const userBalance = currentUser.balance || 0;
+            const userCreatedAt = currentUser.createdAt;
+
+            document.getElementById('accountAvatar').textContent = userName.charAt(0).toUpperCase();
+            document.getElementById('accountName').textContent = userName;
+            document.getElementById('accountId').textContent = `ID: ${userId.slice(-6)}`;
+            document.getElementById('userFullName').textContent = userName;
+            document.getElementById('userEmail').textContent = userEmail;
+            document.getElementById('userRegisterDate').textContent = Utils.formatDate(userCreatedAt);
+            document.getElementById('userAccountId').textContent = userId;
+            document.getElementById('balanceAmount').textContent = `${Utils.formatPrice(userBalance)}đ`;
+        }
+        
+        setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', (e) => this.switchTab(e.currentTarget.dataset.tab));
+            });
+            
+            // Logout buttons
+            document.getElementById('sidebarLogoutBtn')?.addEventListener('click', () => AuthManager.logout());
+            document.getElementById('headerLogoutBtn')?.addEventListener('click', () => AuthManager.logout());
+
+            // Modal triggers
+            document.getElementById('depositBtn')?.addEventListener('click', () => this.openModal('depositModal'));
+            document.getElementById('changePasswordBtn')?.addEventListener('click', () => this.openModal('changePasswordModal'));
+            
+            // Modal close buttons
+            document.querySelectorAll('.modal .modal-close').forEach(btn => {
+                btn.addEventListener('click', (e) => this.closeModal(e.target.closest('.modal').id));
+            });
+            
+            // Close modal on outside click
+             document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', e => {
+                    if (e.target === modal) this.closeModal(modal.id);
+                });
+            });
+
+            // Password change form submission
+            document.getElementById('passwordChangeForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleChangePassword();
+            });
+            
+            // User dropdown toggle
+            const userDropdown = document.querySelector('.user-dropdown');
+            if(userDropdown) {
+                userDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
             }
+            document.addEventListener('click', () => {
+                 document.querySelector('.user-dropdown.active')?.classList.remove('active');
+            });
+        }
+        
+        switchTab(tabId) {
+            document.querySelectorAll('.menu-item.active').forEach(item => item.classList.remove('active'));
+            document.querySelector(`.menu-item[data-tab="${tabId}"]`)?.classList.add('active');
+            
+            document.querySelectorAll('.tab-content.active').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(`${tabId}Tab`)?.classList.add('active');
+        }
+        
+        openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.add('show');
         }
 
-        function verify2FASetup() {
-            const code = document.getElementById('verify2faCode').value;
-            if (code.length !== 6 || !/^\d{6}$/.test(code)) {
-                Utils.showError(document.getElementById('verify2faCode'), 'Vui lòng nhập mã 6 số');
+        closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.remove('show');
+        }
+
+        async handleChangePassword() {
+            const form = document.getElementById('passwordChangeForm');
+            const submitBtn = form.querySelector('.btn-submit');
+            const currentPassword = form.currentPassword.value;
+            const newPassword = form.newPassword.value;
+            const newPasswordConfirm = form.newPasswordConfirm.value;
+
+            // Basic validation
+            if (!currentPassword || !newPassword || !newPasswordConfirm) {
+                Utils.showToast('Vui lòng điền đầy đủ các trường.', 'error');
+                return;
+            }
+            if (newPassword.length < 6) {
+                Utils.showToast('Mật khẩu mới phải có ít nhất 6 ký tự.', 'error');
+                return;
+            }
+            if (newPassword !== newPasswordConfirm) {
+                Utils.showToast('Mật khẩu xác nhận không khớp.', 'error');
                 return;
             }
             
-            // Simulate verification
-            Utils.showToast('Xác thực 2 bước đã được bật thành công!', 'success');
-            localStorage.setItem('is2FAEnabled', 'true');
-            
-            // Update UI
-            update2FAStatus(true);
-            closeModal('2faModal');
-        }
-
-        function showComingSoon(feature) {
-            Utils.showToast(`Tính năng ${feature} sẽ được cập nhật sớm!`, 'info');
-        }
-
-        // Dropdown Manager
-        class DropdownManager {
-            constructor() {
-                this.setupDropdownEvents();
+            // FIX: Prevent using the same password
+            if (currentPassword === newPassword) {
+                Utils.showToast('Mật khẩu mới không được trùng với mật khẩu cũ.', 'error');
+                return;
             }
 
-            setupDropdownEvents() {
-                document.addEventListener('click', (e) => {
-                    const userDropdown = e.target.closest('.user-dropdown');
-                    if (userDropdown) {
-                        e.stopPropagation();
-                        this.toggleDropdown(userDropdown);
-                    } else {
-                        // Close all dropdowns when clicking outside
-                        document.querySelectorAll('.user-dropdown.active').forEach(dropdown => {
-                            this.closeDropdown(dropdown);
-                        });
-                    }
-                });
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
 
-                // Close dropdown when pressing Escape
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') {
-                        document.querySelectorAll('.user-dropdown.active').forEach(dropdown => {
-                            this.closeDropdown(dropdown);
-                        });
-                    }
-                });
-            }
-
-            toggleDropdown(dropdown) {
-                const isActive = dropdown.classList.contains('active');
-                
-                // Close all other dropdowns
-                document.querySelectorAll('.user-dropdown.active').forEach(d => {
-                    if (d !== dropdown) this.closeDropdown(d);
-                });
-                
-                if (isActive) {
-                    this.closeDropdown(dropdown);
-                } else {
-                    this.openDropdown(dropdown);
-                }
-            }
-
-            openDropdown(dropdown) {
-                dropdown.classList.add('active');
-                const chevron = dropdown.querySelector('.fa-chevron-down');
-                if (chevron) {
-                    chevron.style.transform = 'rotate(180deg)';
-                }
-            }
-
-            closeDropdown(dropdown) {
-                dropdown.classList.remove('active');
-                const chevron = dropdown.querySelector('.fa-chevron-down');
-                if (chevron) {
-                    chevron.style.transform = 'rotate(0deg)';
-                }
-            }
-        }
-
-        // Account Manager Class
-        class AccountManager {
-            constructor() {
-                this.currentUser = null;
-                this.init();
-            }
-
-            async init() {
-                Utils.showLoading();
-                
-                try {
-                    await this.loadUserFromToken();
-                    this.setupEventListeners();
-                } catch (error) {
-                    console.error('Initialization error:', error);
-                    this.showLoginPrompt();
-                } finally {
-                    Utils.hideLoading();
-                }
-            }
-
-            async loadUserFromToken() {
-                const token = localStorage.getItem('token');
-                
-                if (!token) {
-                    throw new Error('No token found');
-                }
-
-                try {
-                    // Try to get user data from API
-                    const response = await callApi('/users/me');
-                    this.currentUser = response.data.user;
-                    
-                    // Get balance
-                    try {
-                        const balanceResponse = await callApi('/users/me/balance');
-                        this.currentUser.balance = balanceResponse.data.balance;
-                    } catch (error) {
-                        console.warn('Could not load balance:', error);
-                        this.currentUser.balance = 0;
-                    }
-                    
-                } catch (error) {
-                    console.error('Error loading user:', error);
-                    
-                    // Fallback: try to get from localStorage
-                    const savedUser = localStorage.getItem('currentUser');
-                    if (savedUser) {
-                        this.currentUser = JSON.parse(savedUser);
-                    } else {
-                        throw new Error('No user data available');
-                    }
-                }
-
-                this.loadUserData();
-                this.loadStateFromStorage();
-                this.showAccountLayout();
-            }
-
-            showLoginPrompt() {
-                document.getElementById('loginPrompt').style.display = 'block';
-                document.getElementById('accountLayout').style.display = 'none';
-            }
-
-            showAccountLayout() {
-                document.getElementById('loginPrompt').style.display = 'none';
-                document.getElementById('accountLayout').style.display = 'grid';
-            }
-
-            loadUserData() {
-                if (!this.currentUser) return;
-
-                const firstLetter = this.currentUser.name[0].toUpperCase();
-                
-                // Update user display
-                this.updateElement('accountAvatar', firstLetter);
-                this.updateElement('accountName', this.currentUser.name);
-                this.updateElement('accountId', `ID: ${this.currentUser._id.slice(-6)}`);
-                
-                // Update account info
-                this.updateElement('userFullName', this.currentUser.name);
-                this.updateElement('userEmail', this.currentUser.email);
-                this.updateElement('userPhone', this.currentUser.phone || 'Chưa cập nhật');
-                this.updateElement('userRegisterDate', Utils.formatDate(this.currentUser.createdAt));
-                this.updateElement('userAccountId', this.currentUser._id.slice(-6));
-
-                // Update header user dropdown
-                this.updateHeaderUserDisplay();
-
-                // Save to localStorage for backup
-                localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-            }
-
-            updateHeaderUserDisplay() {
-                const userActions = document.getElementById('userActions');
-                const firstLetter = this.currentUser.name[0].toUpperCase();
-                
-                userActions.innerHTML = `
-                    <div class="user-dropdown">
-                        <div class="user-avatar">${firstLetter}</div>
-                        <span class="user-name">${this.currentUser.name}</span>
-                        <i class="fas fa-chevron-down" style="margin-left: 8px; font-size: 12px; transition: transform 0.3s ease;"></i>
-                        <div class="dropdown-menu">
-                            <a href="account.html" class="dropdown-item">
-                                <i class="fas fa-user"></i>
-                                <span>Tài khoản</span>
-                            </a>
-                            <a href="#" class="dropdown-item" onclick="event.preventDefault(); showComingSoon('Yêu thích')">
-                                <i class="fas fa-heart"></i>
-                                <span>Yêu thích</span>
-                            </a>
-                            <a href="#" class="dropdown-item" onclick="event.preventDefault(); showComingSoon('Giỏ hàng')">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span>Giỏ hàng</span>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <button class="dropdown-item" onclick="accountManager.logout()">
-                                <i class="fas fa-sign-out-alt"></i>
-                                <span>Đăng xuất</span>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            updateElement(id, value) {
-                const element = document.getElementById(id);
-                if (element) {
-                    if (element.tagName === 'INPUT') {
-                        element.value = value;
-                    } else {
-                        element.textContent = value;
-                    }
-                }
-            }
-
-            loadStateFromStorage() {
-                // Load balance
-                let balance = 0;
-                if (this.currentUser && this.currentUser.balance !== undefined) {
-                    balance = this.currentUser.balance;
-                } else {
-                    balance = localStorage.getItem('userBalance') || '0';
-                }
-                
-                this.updateElement('balanceAmount', Utils.formatPrice(balance) + 'đ');
-                
-                // Load 2FA status
-                const is2FAEnabled = localStorage.getItem('is2FAEnabled') === 'true';
-                update2FAStatus(is2FAEnabled);
-                
-                // Load transaction history
-                this.loadTransactionHistory();
-            }
-
-            async loadTransactionHistory() {
-                const historyList = document.getElementById('historyList');
-                if (!historyList) return;
-
-                try {
-                    const token = localStorage.getItem('token');
-                    if (token) {
-                        const response = await callApi('/users/transactions');
-                        const transactions = response.data.transactions || [];
-                        
-                        if (transactions.length === 0) {
-                            this.showEmptyHistory();
-                            return;
-                        }
-
-                        historyList.innerHTML = transactions.slice().reverse().map(this.createHistoryItemHTML).join('');
-                        return;
-                    }
-                } catch (error) {
-                    console.error('Error loading transactions:', error);
-                }
-
-                // Fallback to localStorage
-                const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-                
-                if (transactions.length === 0) {
-                    this.showEmptyHistory();
-                    return;
-                }
-
-                historyList.innerHTML = transactions.slice().reverse().map(this.createHistoryItemHTML).join('');
-            }
-
-            showEmptyHistory() {
-                const historyList = document.getElementById('historyList');
-                historyList.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-history"></i>
-                        <h3>Chưa có giao dịch nào</h3>
-                        <p>Lịch sử giao dịch sẽ hiển thị tại đây.</p>
-                    </div>
-                `;
-            }
-
-            createHistoryItemHTML(transaction) {
-                const iconClass = transaction.type === 'deposit' ? 'success' : 'purchase';
-                const icon = transaction.type === 'deposit' ? 'fa-plus' : 'fa-hand-holding-usd';
-                const amountClass = transaction.type === 'deposit' ? 'success' : 'purchase';
-                const amountPrefix = transaction.type === 'deposit' ? '+' : '-';
-                const title = transaction.type === 'deposit' ? 'Nạp tiền thành công' : 'Yêu cầu rút tiền';
-                const info = transaction.type === 'deposit' ? `Thẻ ${transaction.cardType || transaction.info}` : `Về ${transaction.info}`;
-
-                return `
-                    <div class="history-item">
-                        <div class="history-icon ${iconClass}">
-                            <i class="fas ${icon}"></i>
-                        </div>
-                        <div class="history-details">
-                            <div class="history-title">${title}</div>
-                            <div class="history-date">${Utils.formatDateTime(transaction.date || transaction.createdAt)}</div>
-                            <div class="history-info">${info}</div>
-                        </div>
-                        <div class="history-amount ${amountClass}">
-                            ${amountPrefix}${Utils.formatPrice(transaction.amount)}đ
-                        </div>
-                    </div>
-                `;
-            }
-
-            switchTab(tabId) {
-                // Remove active class from all menu items and tabs
-                document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-                
-                // Add active class to selected items
-                const menuItem = document.querySelector(`[data-tab="${tabId}"]`);
-                const tabContent = document.getElementById(tabId + 'Tab');
-                
-                if (menuItem) menuItem.classList.add('active');
-                if (tabContent) tabContent.classList.add('active');
-            }
-
-            async processDeposit() {
-                const form = document.getElementById('depositForm');
-                const submitBtn = form.querySelector('.btn-submit');
-                const cardNumber = document.getElementById('cardNumber').value.trim();
-                const cardSerial = document.getElementById('cardSerial').value.trim();
-                const cardAmount = document.getElementById('cardAmount').value;
-                const cardType = document.querySelector('.card-type.selected')?.getAttribute('data-type');
-
-                // Validate form
-                let isValid = true;
-                
-                if (!Utils.validateInput(document.getElementById('cardNumber'), 'Mã thẻ phải có ít nhất 10 chữ số', /^\d{10,15}$/)) {
-                    isValid = false;
-                }
-                
-                if (!Utils.validateInput(document.getElementById('cardSerial'), 'Số serial phải có ít nhất 5 chữ số', /^\d{5,12}$/)) {
-                    isValid = false;
-                }
-                
-                if (!cardAmount) {
-                    Utils.showError(document.getElementById('cardAmount'), 'Vui lòng chọn mệnh giá');
-                    isValid = false;
-                } else {
-                    Utils.clearError(document.getElementById('cardAmount'));
-                }
-                
-                if (!cardType) {
-                    Utils.showToast('Vui lòng chọn loại thẻ', 'error');
-                    isValid = false;
-                }
-                
-                if (!isValid) return;
-
-                // Show loading state
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-
-                try {
-                    const response = await callApi('/users/deposit', 'POST', {
-                        cardNumber,
-                        cardSerial,
-                        cardType,
-                        amount: parseInt(cardAmount)
-                    });
-
-                    // Update balance
-                    const newBalance = response.data.user.balance;
-                    this.updateElement('balanceAmount', Utils.formatPrice(newBalance) + 'đ');
-                    
-                    // Add to transaction history
-                    const newTransaction = {
-                        type: 'deposit',
-                        amount: parseInt(cardAmount),
-                        cardType: cardType,
-                        info: cardType,
-                        date: new Date().toISOString()
-                    };
-                    
-                    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-                    transactions.push(newTransaction);
-                    localStorage.setItem('transactions', JSON.stringify(transactions));
-                    
-                    this.loadTransactionHistory();
-
-                    Utils.showToast(`Nạp thành công ${Utils.formatPrice(cardAmount)}đ vào tài khoản`, 'success');
-                    closeModal('depositModal');
-
-                } catch (error) {
-                    Utils.showToast(error.message || 'Có lỗi xảy ra khi xử lý thẻ. Vui lòng thử lại', 'error');
-                } finally {
-                    submitBtn.classList.remove('loading');
-                    submitBtn.disabled = false;
-                }
-            }
-
-            async processWithdraw() {
-                const form = document.getElementById('withdrawForm');
-                const submitBtn = form.querySelector('.btn-submit');
-                const bankAccount = document.getElementById('bankAccount').value;
-                const accountNumber = document.getElementById('accountNumber').value.trim();
-                const accountName = document.getElementById('accountName').value.trim();
-                const withdrawAmount = parseInt(document.getElementById('withdrawAmount').value);
-
-                // Validate form
-                let isValid = true;
-                
-                if (!bankAccount) {
-                    Utils.showError(document.getElementById('bankAccount'), 'Vui lòng chọn ngân hàng');
-                    isValid = false;
-                } else {
-                    Utils.clearError(document.getElementById('bankAccount'));
-                }
-                
-                if (!Utils.validateInput(document.getElementById('accountNumber'), 'Số tài khoản không hợp lệ', /^\d{6,20}$/)) {
-                    isValid = false;
-                }
-                
-                if (!Utils.validateInput(document.getElementById('accountName'), 'Tên chủ tài khoản không được để trống')) {
-                    isValid = false;
-                }
-                
-                if (!withdrawAmount || withdrawAmount < 50000) {
-                    Utils.showError(document.getElementById('withdrawAmount'), 'Số tiền rút tối thiểu là 50,000đ');
-                    isValid = false;
-                } else {
-                    Utils.clearError(document.getElementById('withdrawAmount'));
-                }
-
-                if (!isValid) return;
-
-                // Check balance
-                const currentBalance = this.currentUser.balance || 0;
-                if (withdrawAmount > currentBalance) {
-                    Utils.showToast('Số dư không đủ để thực hiện giao dịch', 'error');
-                    return;
-                }
-
-                // Show loading state
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-
-                try {
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-
-                    // Update balance
-                    const newBalance = currentBalance - withdrawAmount;
-                    this.currentUser.balance = newBalance;
-                    this.updateElement('balanceAmount', Utils.formatPrice(newBalance) + 'đ');
-                    
-                    // Add to transaction history
-                    const newTransaction = {
-                        type: 'withdraw',
-                        amount: withdrawAmount,
-                        info: `${bankAccount.toUpperCase()} - ${accountNumber}`,
-                        date: new Date().toISOString()
-                    };
-                    
-                    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-                    transactions.push(newTransaction);
-                    localStorage.setItem('transactions', JSON.stringify(transactions));
-                    
-                    this.loadTransactionHistory();
-
-                    Utils.showToast('Yêu cầu rút tiền đã được gửi thành công!', 'success');
-                    closeModal('withdrawModal');
-
-                } catch (error) {
-                    Utils.showToast('Có lỗi xảy ra. Vui lòng thử lại', 'error');
-                } finally {
-                    submitBtn.classList.remove('loading');
-                    submitBtn.disabled = false;
-                }
-            }
-
-            async processChangePassword() {
-                const form = document.getElementById('changePasswordForm');
-                const submitBtn = form.querySelector('.btn-submit');
-                const currentPassword = document.getElementById('currentPassword').value;
-                const newPassword = document.getElementById('newPassword').value;
-                const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-
-                // Validate form
-                let isValid = true;
-                
-                if (!Utils.validateInput(document.getElementById('currentPassword'), 'Vui lòng nhập mật khẩu hiện tại')) {
-                    isValid = false;
-                }
-                
-                if (!Utils.validateInput(document.getElementById('newPassword'), 'Mật khẩu phải có ít nhất 6 ký tự', /^.{6,}$/)) {
-                    isValid = false;
-                }
-                
-                if (newPassword !== confirmNewPassword) {
-                    Utils.showError(document.getElementById('confirmNewPassword'), 'Mật khẩu không khớp');
-                    isValid = false;
-                } else {
-                    Utils.clearError(document.getElementById('confirmNewPassword'));
-                }
-
-                if (!isValid) return;
-
-                // Show loading state
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-
-                try {
-                    const response = await callApi('/users/updateMyPassword', 'PATCH', {
-                        passwordCurrent: currentPassword,
-                        password: newPassword,
-                        passwordConfirm: confirmNewPassword
-                    });
-
-                    Utils.showToast('Đổi mật khẩu thành công!', 'success');
-                    closeModal('changePasswordModal');
-
-                } catch (error) {
-                    Utils.showToast(error.message || 'Có lỗi xảy ra. Vui lòng thử lại', 'error');
-                } finally {
-                    submitBtn.classList.remove('loading');
-                    submitBtn.disabled = false;
-                }
-            }
-
-            toggle2FA() {
-                const isEnabled = localStorage.getItem('is2FAEnabled') === 'true';
-                
-                if (isEnabled) {
-                    if (confirm('Bạn có chắc chắn muốn tắt Xác thực 2 bước không?')) {
-                        localStorage.setItem('is2FAEnabled', 'false');
-                        update2FAStatus(false);
-                        Utils.showToast('Xác thực 2 bước đã được tắt.', 'info');
-                    }
-                } else {
-                    showModal('2faModal');
-                }
-            }
-
-            logout() {
-                if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-                    // Clear all user data
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('currentUser');
-                    localStorage.removeItem('userBalance');
-                    localStorage.removeItem('userName');
-                    localStorage.removeItem('userEmail');
-                    localStorage.removeItem('userId');
-                    localStorage.removeItem('is2FAEnabled');
-                    localStorage.removeItem('transactions');
-                    localStorage.removeItem('rememberMe');
-                    
-                    Utils.showToast('Đăng xuất thành công!', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
-                }
-            }
-
-            setupEventListeners() {
-                // Tab switching
-                document.querySelectorAll('.menu-item').forEach(item => {
-                    item.addEventListener('click', (e) => {
-                        const tabId = e.currentTarget.dataset.tab;
-                        if (tabId) {
-                            this.switchTab(tabId);
-                        }
-                    });
-                });
-                
-                // Balance actions
-                const depositBtn = document.getElementById('depositBtn');
-                const withdrawBtn = document.getElementById('withdrawBtn');
-                
-                if (depositBtn) {
-                    depositBtn.addEventListener('click', () => showModal('depositModal'));
-                }
-                
-                if (withdrawBtn) {
-                    withdrawBtn.addEventListener('click', () => showModal('withdrawModal'));
-                }
-                
-                // Security actions
-                const changePasswordBtn = document.getElementById('changePasswordBtn');
-                const toggle2faBtn = document.getElementById('toggle2faBtn');
-                const manageDevicesBtn = document.getElementById('manageDevicesBtn');
-                
-                if (changePasswordBtn) {
-                    changePasswordBtn.addEventListener('click', () => showModal('changePasswordModal'));
-                }
-                
-                if (toggle2faBtn) {
-                    toggle2faBtn.addEventListener('click', () => this.toggle2FA());
-                }
-                
-                if (manageDevicesBtn) {
-                    manageDevicesBtn.addEventListener('click', () => showModal('deviceManagerModal'));
-                }
-                
-                // Logout buttons
-                const sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
-                
-                if (sidebarLogoutBtn) {
-                    sidebarLogoutBtn.addEventListener('click', () => this.logout());
-                }
-
-                // Setup form events
-                this.setupFormEvents();
-            }
-
-            setupFormEvents() {
-                // Deposit form
-                const depositForm = document.getElementById('depositForm');
-                if (depositForm) {
-                    depositForm.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        this.processDeposit();
-                    });
-                }
-
-                // Withdraw form
-                const withdrawForm = document.getElementById('withdrawForm');
-                if (withdrawForm) {
-                    withdrawForm.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        this.processWithdraw();
-                    });
-                }
-
-                // Change password form
-                const changePasswordForm = document.getElementById('changePasswordForm');
-                if (changePasswordForm) {
-                    changePasswordForm.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        this.processChangePassword();
-                    });
-                }
-
-                // Card type selection
-                document.querySelectorAll('.card-type').forEach(card => {
-                    card.addEventListener('click', (e) => {
-                        document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
-                        e.currentTarget.classList.add('selected');
-                    });
-                });
-
-                // Close modal when clicking outside
-                document.querySelectorAll('.modal').forEach(modal => {
-                    modal.addEventListener('click', (e) => {
-                        if (e.target === modal) {
-                            closeModal(modal.id);
-                        }
-                    });
-                });
-            }
-        }
-
-        // Global function to update 2FA status
-        function update2FAStatus(isEnabled) {
-            const statusEl = document.getElementById('2faStatus');
-            const buttonEl = document.getElementById('toggle2faBtn');
-            
-            if (statusEl) {
-                if (isEnabled) {
-                    statusEl.innerHTML = '<span style="color: var(--success-color);">Đã bật</span> - Tăng cường bảo mật cho tài khoản';
-                } else {
-                    statusEl.innerHTML = 'Chưa bật - Tăng cường bảo mật cho tài khoản';
-                }
-            }
-
-            if (buttonEl) {
-                if (isEnabled) {
-                    buttonEl.innerHTML = '<i class="fas fa-toggle-on"></i> <span>Tắt</span>';
-                    buttonEl.style.borderColor = 'var(--success-color)';
-                    buttonEl.style.color = 'var(--success-color)';
-                } else {
-                    buttonEl.innerHTML = '<i class="fas fa-toggle-off"></i> <span>Bật</span>';
-                    buttonEl.style.borderColor = 'var(--border-color)';
-                    buttonEl.style.color = 'var(--dark-color)';
-                }
-            }
-        }
-
-        // Initialize when DOM is loaded
-        let accountManager;
-        let dropdownManager;
-
-        document.addEventListener('DOMContentLoaded', () => {
             try {
-                dropdownManager = new DropdownManager();
-                accountManager = new AccountManager();
-                
-                // Make accountManager global for onclick handlers
-                window.accountManager = accountManager;
-                
+                await callApi('/users/updateMyPassword', 'PATCH', {
+                    passwordCurrent: currentPassword,
+                    password: newPassword,
+                    passwordConfirm: newPasswordConfirm
+                });
+                Utils.showToast('Đổi mật khẩu thành công! Bạn sẽ được đăng xuất.', 'success');
+                setTimeout(() => AuthManager.logout(), 2500);
             } catch (error) {
-                console.error('Initialization error:', error);
-                Utils.hideLoading();
-                Utils.showToast('Có lỗi xảy ra khi khởi tạo trang', 'error');
-                
-                // Show login prompt on error
-                document.getElementById('loginPrompt').style.display = 'block';
-                document.getElementById('accountLayout').style.display = 'none';
+                Utils.showToast(error.message || 'Đổi mật khẩu thất bại, kiểm tra lại mật khẩu hiện tại.', 'error');
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+                form.reset();
+                this.closeModal('changePasswordModal');
             }
-        });
-
-        // Handle page visibility change to refresh data
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && accountManager && accountManager.currentUser) {
-                accountManager.loadTransactionHistory();
-            }
-        });
-
-        // Add smooth scrolling for better UX
-        document.documentElement.style.scrollBehavior = 'smooth';
-
-        // Add keyboard navigation support
-        document.addEventListener('keydown', (e) => {
-            // ESC key closes modals
-            if (e.key === 'Escape') {
-                const openModal = document.querySelector('.modal.show');
-                if (openModal) {
-                    closeModal(openModal.id);
-                }
-            }
-            
-            // Tab navigation enhancement
-            if (e.key === 'Tab') {
-                const focusedElement = document.activeElement;
-                if (focusedElement && focusedElement.classList.contains('menu-item')) {
-                    focusedElement.style.outline = '2px solid var(--primary-color)';
-                    setTimeout(() => {
-                        focusedElement.style.outline = '';
-                    }, 2000);
-                }
-            }
-        });
-
-        // Add loading states for better UX
-        window.addEventListener('beforeunload', () => {
-            Utils.showLoading();
-        });
-
-        window.addEventListener('load', () => {
-            Utils.hideLoading();
-        });
-
-        // Performance optimization: Lazy load non-critical images
-        const images = document.querySelectorAll('img[data-src]');
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.removeAttribute('data-src');
-                    imageObserver.unobserve(img);
-                }
-            });
-        });
-
-        images.forEach(img => imageObserver.observe(img));
-
-        // Add PWA-like features
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('SW registered: ', registration);
-                    })
-                    .catch(registrationError => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
-            });
         }
+    }
 
-        // Add error boundary for better error handling
-        window.addEventListener('error', (e) => {
-            console.error('Global error:', e.error);
-            Utils.showToast('Đã xảy ra lỗi. Vui lòng tải lại trang.', 'error');
-        });
-
-        window.addEventListener('unhandledrejection', (e) => {
-            console.error('Unhandled promise rejection:', e.reason);
-            Utils.showToast('Đã xảy ra lỗi kết nối. Vui lòng thử lại.', 'error');
-        });
+    // =================================================================
+    // KHỞI CHẠY CHÍNH
+    // =================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        new AccountPageManager();
+    });
     </script>
 </body>
 </html>
