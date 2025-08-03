@@ -36,9 +36,7 @@ class AdminPanel {
         this.addFeatureBtn = document.getElementById('addFeatureBtn');
     }
 
-    // Initialize the panel by checking user's authentication and role
     init() {
-        // currentUser is a global variable from main.js
         if (window.currentUser && window.currentUser.role === 'admin') {
             this.showDashboard();
         } else {
@@ -46,7 +44,6 @@ class AdminPanel {
         }
     }
     
-    // Show login screen and set up its event listener
     showLoginScreen() {
         this.loginScreen.style.display = 'flex';
         this.dashboard.style.display = 'none';
@@ -54,7 +51,6 @@ class AdminPanel {
         this.loginForm.addEventListener('submit', this.handleAdminLogin.bind(this));
     }
     
-    // Show the main dashboard and fetch data
     async showDashboard() {
         this.loginScreen.style.display = 'none';
         this.dashboard.style.display = 'block';
@@ -64,18 +60,18 @@ class AdminPanel {
         await this.fetchAndRenderProducts();
     }
     
-    // Set up all event listeners for the dashboard
     setupDashboardEventListeners() {
         this.form.addEventListener('submit', this.handleFormSubmit.bind(this));
         this.productListBody.addEventListener('click', this.handleProductListClick.bind(this));
         this.cancelEditBtn.addEventListener('click', () => this.resetForm());
         this.imagesInput.addEventListener('input', this.renderImagePreviews.bind(this));
         this.addFeatureBtn.addEventListener('click', () => this.addFeatureInput());
-        // Use the global logout function from main.js
         this.logoutBtn.addEventListener('click', () => window.logout());
     }
 
-    // Handle admin login using the global authenticate function
+    // =======================================================
+    // HÀM ĐĂNG NHẬP ĐƯỢC TỐI ƯU HÓA
+    // =======================================================
     async handleAdminLogin(e) {
         e.preventDefault();
         this.loginError.textContent = '';
@@ -85,30 +81,30 @@ class AdminPanel {
         const pass = this.loginForm.querySelector('#adminPass').value;
 
         try {
-            // Use the global authenticate function from main.js
             const user = await window.authenticate(email, pass);
             
-            // IMPORTANT: Check if the logged-in user has the 'admin' role
             if (user && user.role === 'admin') {
                 window.Utils.showToast(`Chào mừng Admin ${user.name}!`, 'success');
                 this.showDashboard();
             } else {
-                // If login is successful but user is not admin, log them out from admin context
-                window.logout(); 
+                // Đăng xuất "thầm lặng" mà không hỏi người dùng.
+                // Vì họ đăng nhập thành công nhưng không có quyền.
+                localStorage.removeItem('token');
+                localStorage.removeItem('currentUser');
+                window.currentUser = null;
                 this.loginError.textContent = 'Tài khoản không có quyền truy cập Admin.';
             }
         } catch (error) {
-            this.loginError.textContent = error.message || 'Tên đăng nhập hoặc mật khẩu không đúng.';
+            this.loginError.textContent = error.message || 'Email hoặc mật khẩu không đúng.';
         } finally {
             this.toggleButtonLoading(this.loginSubmitBtn, false);
         }
     }
+    // =======================================================
 
-    // Fetch products from API and render them
     async fetchAndRenderProducts() {
         this.productListBody.innerHTML = `<tr><td colspan="5" class="loading-spinner-container"><div class="spinner" style="display:inline-block; border-top-color: var(--primary-color);"></div></td></tr>`;
         try {
-            // Use the global callApi function which handles auth tokens
             const response = await window.callApi('/products');
             this.products = response.data.products;
             this.renderProductList();
@@ -117,7 +113,6 @@ class AdminPanel {
         }
     }
 
-    // Render the list of products into the table
     renderProductList() {
         if (!this.products || this.products.length === 0) {
             this.productListBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Chưa có sản phẩm nào.</td></tr>`;
@@ -138,7 +133,6 @@ class AdminPanel {
         `).join('');
     }
 
-    // Handle creating a new product or updating an existing one
     async handleFormSubmit(e) {
         e.preventDefault();
         this.toggleButtonLoading(this.submitBtn, true);
@@ -153,7 +147,6 @@ class AdminPanel {
             const endpoint = this.editingProductId ? `/products/${this.editingProductId}` : '/products';
             const method = this.editingProductId ? 'PATCH' : 'POST';
             
-            // Use the global callApi function
             await window.callApi(endpoint, method, productData);
             
             window.Utils.showToast(this.editingProductId ? 'Cập nhật thành công!' : 'Đăng sản phẩm thành công!', 'success');
@@ -166,7 +159,6 @@ class AdminPanel {
         }
     }
     
-    // Delegate clicks on the product list for edit/delete actions
     handleProductListClick(e) {
         const button = e.target.closest('button');
         if (!button) return;
@@ -178,7 +170,6 @@ class AdminPanel {
         else if (action === 'delete') this.handleDelete(id);
     }
 
-    // Fill the form with data of the product to be edited
     populateFormForEdit(id) {
         const product = this.products.find(p => p._id === id);
         if (!product) return;
@@ -207,14 +198,11 @@ class AdminPanel {
         this.form.scrollIntoView({ behavior: 'smooth' });
     }
 
-    // Handle product deletion
     async handleDelete(id) {
         if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này? Thao tác này không thể hoàn tác.')) {
             try {
-                // Use the global callApi function
                 await window.callApi(`/products/${id}`, 'DELETE');
                 window.Utils.showToast('Đã xóa sản phẩm.', 'success');
-                // Remove the product from the local list to avoid a full re-fetch
                 this.products = this.products.filter(p => p._id !== id);
                 this.renderProductList();
             } catch (error) {
@@ -223,7 +211,6 @@ class AdminPanel {
         }
     }
 
-    // Get and validate data from the product form
     getFormData() {
         const data = {
             title: this.form.querySelector('#title').value.trim(),
@@ -249,7 +236,6 @@ class AdminPanel {
         return data;
     }
 
-    // Render image previews from the image URL input
     renderImagePreviews() {
         this.imagePreview.innerHTML = '';
         const urls = this.imagesInput.value.split(',').map(url => url.trim()).filter(Boolean);
@@ -265,7 +251,6 @@ class AdminPanel {
         });
     }
 
-    // Add a new input field for a product feature
     addFeatureInput(value = '') {
         const div = document.createElement('div');
         div.className = 'feature-item';
@@ -277,7 +262,6 @@ class AdminPanel {
         this.featuresContainer.appendChild(div);
     }
     
-    // Reset the form to its initial state
     resetForm() {
         if (this.editingProductId) {
             const row = document.getElementById(`product-row-${this.editingProductId}`);
@@ -294,7 +278,6 @@ class AdminPanel {
         this.cancelEditBtn.style.display = 'none';
     }
 
-    // Toggle loading state for a button
     toggleButtonLoading(button, isLoading) {
         if(!button) return;
         button.classList.toggle('loading', isLoading);
@@ -306,9 +289,7 @@ class AdminPanel {
     }
 }
 
-// Initialize and run the admin panel logic when the DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    // A small delay to ensure main.js has initialized currentUser
     setTimeout(() => {
         const adminPanel = new AdminPanel();
         adminPanel.init();
