@@ -858,6 +858,90 @@
             color: #a0aec0;
         }
 
+        /* Welcome Animation */
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+            backdrop-filter: blur(10px);
+            z-index: 10001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .welcome-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .welcome-content {
+            text-align: center;
+            color: white;
+            animation: welcomeSlideIn 1s ease-out;
+        }
+
+        .welcome-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: welcomeBounce 1s ease-out 0.3s;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            animation: welcomeFadeIn 1s ease-out 0.6s both;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            animation: welcomeFadeIn 1s ease-out 0.9s both;
+        }
+
+        @keyframes welcomeSlideIn {
+            0% {
+                transform: scale(0.3) rotate(-10deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1) rotate(5deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        @keyframes welcomeBounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes welcomeFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .header-container {
@@ -949,16 +1033,16 @@
                 <div class="user-avatar" id="userAvatar">U</div>
                 <span class="user-name" id="userName">User</span>
                 <div class="dropdown-menu">
-                    <a href="#" class="dropdown-item">
+                    <a href="account.html" class="dropdown-item">
                         <i class="fas fa-user-circle"></i>
                         <span>Tài khoản</span>
                     </a>
-                    <a href="#" class="dropdown-item">
+                    <a href="cart.html" class="dropdown-item">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Giỏ hàng</span>
                         <span class="badge">0</span>
                     </a>
-                    <a href="#" class="dropdown-item">
+                    <a href="favorite.html" class="dropdown-item">
                         <i class="fas fa-heart"></i>
                         <span>Yêu thích</span>
                         <span class="badge">0</span>
@@ -1326,6 +1410,16 @@
         <img src="https://i.imgur.com/G7i5D02.png" alt="Nhắn tin với chúng tôi qua Messenger" loading="lazy">
     </a>
 
+    <!-- Welcome Animation -->
+    <div class="welcome-overlay" id="welcomeOverlay">
+        <div class="welcome-particles" id="welcomeParticles"></div>
+        <div class="welcome-content">
+            <div class="welcome-icon">🎉</div>
+            <h2 class="welcome-title" id="welcomeTitle">Chào mừng!</h2>
+            <p class="welcome-subtitle" id="welcomeSubtitle">Đăng nhập thành công</p>
+        </div>
+    </div>
+
     <script>
         // Main JavaScript functionality
         document.addEventListener('DOMContentLoaded', function() {
@@ -1485,6 +1579,42 @@
                 });
             });
 
+            // Welcome animation
+            function showWelcomeAnimation(userName) {
+                const welcomeOverlay = document.getElementById('welcomeOverlay');
+                const welcomeTitle = document.getElementById('welcomeTitle');
+                const welcomeSubtitle = document.getElementById('welcomeSubtitle');
+                const welcomeParticles = document.getElementById('welcomeParticles');
+                
+                // Update welcome text
+                welcomeTitle.textContent = `Chào mừng, ${userName}!`;
+                welcomeSubtitle.textContent = 'Đăng nhập thành công';
+                
+                // Create particles
+                welcomeParticles.innerHTML = '';
+                for (let i = 0; i < 20; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDelay = Math.random() * 6 + 's';
+                    particle.style.animationDuration = (3 + Math.random() * 3) + 's';
+                    welcomeParticles.appendChild(particle);
+                }
+                
+                // Show welcome overlay
+                welcomeOverlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+                
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    welcomeOverlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                    setTimeout(() => {
+                        welcomeParticles.innerHTML = '';
+                    }, 500);
+                }, 3000);
+            }
+
             // Form submissions
             document.getElementById('loginForm').addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -1497,9 +1627,14 @@
                 
                 // Simulate API call
                 setTimeout(() => {
+                    // Extract name from email (part before @)
+                    const emailUsername = email.split('@')[0];
+                    // Capitalize first letter
+                    const displayName = emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1);
+                    
                     // Store user data
                     userData = {
-                        name: email.split('@')[0],
+                        name: displayName,
                         email: email
                     };
                     localStorage.setItem('userData', JSON.stringify(userData));
@@ -1511,8 +1646,8 @@
                     hideModal(authModal);
                     submitBtn.classList.remove('loading');
                     
-                    // Show success message
-                    alert('Đăng nhập thành công!');
+                    // Show welcome animation
+                    showWelcomeAnimation(displayName);
                 }, 1500);
             });
 
@@ -1535,9 +1670,9 @@
                 
                 // Simulate API call
                 setTimeout(() => {
-                    // Store user data
+                    // Store user data with real name
                     userData = {
-                        name: name,
+                        name: name, // Use actual name from form
                         email: email
                     };
                     localStorage.setItem('userData', JSON.stringify(userData));
@@ -1549,8 +1684,8 @@
                     hideModal(authModal);
                     submitBtn.classList.remove('loading');
                     
-                    // Show success message
-                    alert('Đăng ký thành công!');
+                    // Show welcome animation with real name
+                    showWelcomeAnimation(name);
                 }, 1500);
             });
 
@@ -1595,16 +1730,26 @@
                 });
             });
 
-            document.querySelectorAll('.add-to-cart').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const originalText = this.innerHTML;
-                    this.innerHTML = '<i class="fas fa-check"></i> <span>Đã thêm!</span>';
-                    this.style.background = '#10b981';
+            // View product detail
+            document.querySelectorAll('.btn-view').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productCard = this.closest('.product-card');
+                    const productId = productCard.dataset.id;
                     
-                    setTimeout(() => {
-                        this.innerHTML = originalText;
-                        this.style.background = '';
-                    }, 2000);
+                    // Redirect to product detail page with product ID
+                    window.location.href = `product.html?id=${productId}`;
+                });
+            });
+
+            document.querySelectorAll('.add-to-cart').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productCard = this.closest('.product-card');
+                    const productId = productCard.dataset.id;
+                    
+                    // Redirect to product detail page with product ID
+                    window.location.href = `product.html?id=${productId}`;
                 });
             });
 
