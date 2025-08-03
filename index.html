@@ -1221,7 +1221,64 @@
     <!-- Toast Container -->
     <div id="toastContainer"></div>
 
-    <!-- Include main.js -->
+    <!-- Include main.js first (for auth and core functions) -->
     <script src="main.js"></script>
+    <!-- Include script.js for index page specific functionality -->
+    <script src="script.js"></script>
+    
+    <script>
+        // Override the loadProducts function in main.js to use renderApiProducts from script.js
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for main.js to be ready, then override its loadProducts function
+            setTimeout(() => {
+                if (window.loadProducts) {
+                    window.loadProducts = async function() {
+                        const productsGrid = document.getElementById('productsGrid');
+                        if (!productsGrid) return;
+                        
+                        // Show loading using Utils from main.js
+                        if (window.Utils) {
+                            window.Utils.showLoading(productsGrid, 'Đang tải sản phẩm...');
+                        }
+                        
+                        try {
+                            // Try to load from API first
+                            const data = await window.callApi('/products', 'GET', null, false); // Don't require auth for products
+                            const products = data.data.products || [];
+                            
+                            // Store products globally for script.js to use
+                            window.allProducts = products;
+                            
+                            // Use renderApiProducts from script.js
+                            if (window.renderApiProducts) {
+                                window.renderApiProducts(products);
+                            }
+                            
+                            // Update favorite buttons if user is logged in
+                            if (window.currentUser && window.updateAllFavoriteButtons) {
+                                await window.updateAllFavoriteButtons();
+                            }
+                            
+                        } catch (error) {
+                            console.error('Failed to load products from API:', error);
+                            
+                            // Fallback: Show message that login is required
+                            productsGrid.innerHTML = `
+                                <div class="auth-required-message" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                                    <i class="fas fa-lock" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;"></i>
+                                    <h3 style="color: #1f2937; margin-bottom: 1rem;">Cần đăng nhập để xem sản phẩm</h3>
+                                    <p style="color: #64748b; margin-bottom: 2rem;">Vui lòng đăng nhập để truy cập danh sách sản phẩm của chúng tôi</p>
+                                    <button class="btn btn-primary" onclick="document.getElementById('loginButton').click()">
+                                        <i class="fas fa-user"></i>
+                                        <span>Đăng nhập ngay</span>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    };
+                }
+            }, 100);
+        });
+    </script>
 </body>
 </html>
