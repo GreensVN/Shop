@@ -1,68 +1,49 @@
 // script.js - Fixed 100% - CHỈ DÀNH CHO TRANG INDEX.HTML
-// Tương thích hoàn toàn với main.js
+// Tương thích hoàn toàn với main.js - CHỈ 2 SẢN PHẨM GỐC
 
 "use strict";
 
 // =================================================================
-// DỮ LIỆU SẢN PHẨM MẪU CỤC BỘ
+// DỮ LIỆU SẢN PHẨM MẪU CỤC BỘ - CHỈ 2 SẢN PHẨM GỐC
 // =================================================================
 
 const localSampleProducts = [
     {
         id: "001",
-        _id: "001", // Thêm _id để tương thích với backend
+        _id: "001", // Tương thích với backend
         title: "Raccoon",
-        description: "Thú cưng gấu mèo dễ thương, thông minh và năng động. Được huấn luyện cơ bản, thân thiện với con người.",
+        description: "Thu cung gau meo de thuong, thong minh va nang dong. Duoc huan luyen co ban, than thien voi con nguoi.",
         price: 250000,
         oldPrice: 300000,
         image: "https://i.imgur.com/ZoX9VKo.png",
-        images: ["https://i.imgur.com/ZoX9VKo.png"], // Thêm images array để tương thích
+        images: ["https://i.imgur.com/ZoX9VKo.png"], // Array để tương thích
         sales: 100,
         badge: "HOT",
+        note: "thu cung de thuong",
+        category: "pet",
+        stock: 5,
+        details: {
+            features: ["Than thien voi tre em", "Da tiem vaccine day du", "Duoc huan luyen co ban", "Kem theo giay to hop le"],
+            description: "Raccoon la loai thu cung thong minh va de thuong, phu hop de nuoi lam thu cung gia dinh. Chung rat trung thanh va gan bo voi chu nhan."
+        }
+    },
+    {
+        id: "002", 
+        _id: "002",
+        title: "Mimic Octopus",
+        description: "Bach tuoc mimic co kha nang bat chuoc nhieu loai sinh vat bien khac, rat doc dao va thu vi.",
+        price: 70000,
+        oldPrice: 100000,
+        image: "https://i.imgur.com/8pYhB3m.png", 
+        images: ["https://i.imgur.com/8pYhB3m.png"],
+        sales: 75,
+        badge: "SALE",
         note: "thu cung bien doc dao",
         category: "pet",
         stock: 3,
         details: {
-            features: ["Khả năng bắt chước tuyệt vời", "Dễ chăm sóc", "Thức ăn đặc biệt đi kèm", "Hướng dẫn nuôi chi tiết"],
-            description: "Mimic Octopus là một trong những loài bạch tuộc thông minh nhất, có khả năng bắt chước hình dạng và màu sắc của nhiều loài sinh vật biển khác."
-        }
-    },
-    {
-        id: "003",
-        _id: "003",
-        title: "Mini Garden Kit",
-        description: "Bộ kit trồng cây mini hoàn chỉnh, phù hợp cho người mới bắt đầu học trồng trọt.",
-        price: 150000,
-        oldPrice: 200000,
-        image: "https://i.imgur.com/placeholder1.png",
-        images: ["https://i.imgur.com/placeholder1.png"],
-        sales: 200,
-        badge: "NEW",
-        note: "bo trong cay mini",
-        category: "plant",
-        stock: 10,
-        details: {
-            features: ["Đầy đủ dụng cụ", "Hạt giống chất lượng cao", "Hướng dẫn chi tiết", "Phân bón hữu cơ"],
-            description: "Bộ kit trồng cây mini bao gồm tất cả những gì bạn cần để bắt đầu hành trình trồng trọt của mình."
-        }
-    },
-    {
-        id: "004",
-        _id: "004",
-        title: "Gaming Account Premium",
-        description: "Tài khoản game premium với nhiều skin và item hiếm, đã được verify và bảo mật cao.",
-        price: 500000,
-        oldPrice: 750000,
-        image: "https://i.imgur.com/placeholder2.png",
-        images: ["https://i.imgur.com/placeholder2.png"],
-        sales: 50,
-        badge: "VIP",
-        note: "tai khoan game premium",
-        category: "gaming",
-        stock: 2,
-        details: {
-            features: ["Rank cao", "Nhiều skin hiếm", "Đã verify email và phone", "Bảo hành 6 tháng"],
-            description: "Tài khoản game premium với đầy đủ tính năng VIP, phù hợp cho game thủ chuyên nghiệp."
+            features: ["Kha nang bat chuoc tuyet voi", "De cham soc", "Thuc an dac biet di kem", "Huong dan nuoi chi tiet"],
+            description: "Mimic Octopus la mot trong nhung loai bach tuoc thong minh nhat, co kha nang bat chuoc hinh dang va mau sac cua nhieu loai sinh vat bien khac."
         }
     }
 ];
@@ -102,10 +83,10 @@ function renderLocalProducts() {
                 ${product.badge ? `<span class="product-badge ${product.badge.toLowerCase()}">${product.badge}</span>` : ''}
                 ${discountPercent > 0 ? `<span class="discount-badge">-${discountPercent}%</span>` : ''}
                 <div class="product-overlay">
-                    <button class="btn-favorite" title="Thêm vào yêu thích" data-id="${product.id}">
+                    <button class="btn-favorite" title="Them vao yeu thich" data-id="${product.id}">
                         <i class="far fa-heart"></i>
                     </button>
-                    <a href="product.html?id=${encodeURIComponent(product.id)}" class="btn-view" title="Xem chi tiết">
+                    <a href="product.html?id=${encodeURIComponent(product.id)}" class="btn-view" title="Xem chi tiet">
                         <i class="fas fa-eye"></i>
                     </a>
                 </div>
@@ -170,9 +151,9 @@ function attachProductEventListeners() {
                 
                 // Use Utils.showToast from main.js if available
                 if (window.Utils && window.Utils.showToast) {
-                    window.Utils.showToast('Đã thêm vào giỏ hàng!', 'success');
+                    window.Utils.showToast('Da them vao gio hang!', 'success');
                 } else {
-                    alert('Đã thêm vào giỏ hàng!');
+                    alert('Da them vao gio hang!');
                 }
                 
                 // Add button animation
@@ -187,7 +168,7 @@ function attachProductEventListeners() {
             } catch (error) {
                 console.error('Error adding to cart:', error);
                 if (window.Utils && window.Utils.showToast) {
-                    window.Utils.showToast('Có lỗi xảy ra khi thêm vào giỏ hàng', 'error');
+                    window.Utils.showToast('Co loi xay ra khi them vao gio hang', 'error');
                 }
             }
         });
@@ -215,12 +196,12 @@ function attachProductEventListeners() {
                     if (isFavorite) {
                         await window.FavoriteManager.remove(productId);
                         if (window.Utils && window.Utils.showToast) {
-                            window.Utils.showToast('Đã xóa khỏi yêu thích', 'info');
+                            window.Utils.showToast('Da xoa khoi yeu thich', 'info');
                         }
                     } else {
                         await window.FavoriteManager.add(product);
                         if (window.Utils && window.Utils.showToast) {
-                            window.Utils.showToast('Đã thêm vào yêu thích!', 'success');
+                            window.Utils.showToast('Da them vao yeu thich!', 'success');
                         }
                     }
                 } else {
@@ -234,7 +215,7 @@ function attachProductEventListeners() {
             } catch (error) {
                 console.error('Error toggling favorite:', error);
                 if (window.Utils && window.Utils.showToast) {
-                    window.Utils.showToast('Có lỗi xảy ra', 'error');
+                    window.Utils.showToast('Co loi xay ra', 'error');
                 }
             }
         });
@@ -324,18 +305,27 @@ function loadLocalProducts() {
 
     console.log('Loading local products...');
     
-    // Show loading spinner
+    // Show loading spinner with nice animation
     productsGrid.innerHTML = `
         <div class="loading-container" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
-            <div class="loading-spinner" style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-            <p style="color: #666; font-size: 16px; margin: 0;">Đang tải sản phẩm...</p>
+            <div class="loading-spinner" style="
+                display: inline-block; 
+                width: 40px; 
+                height: 40px; 
+                border: 4px solid #f3f3f3; 
+                border-top: 4px solid #6366f1; 
+                border-radius: 50%; 
+                animation: spin 1s linear infinite; 
+                margin-bottom: 20px;
+            "></div>
+            <p style="color: #666; font-size: 16px; margin: 0;">Dang tai san pham...</p>
+            <style>
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
         </div>
-        <style>
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-        </style>
     `;
     
     // Simulate API call delay and render products
@@ -389,7 +379,7 @@ function filterProducts() {
             }
         }
         
-        // Apply filter
+        // Apply filter with animation
         if (isVisible) {
             card.style.display = 'block';
             card.style.animation = 'fadeInAnimation 0.5s ease-out';
@@ -417,7 +407,7 @@ function resetFilters() {
     if (searchPrice) searchPrice.value = '';
     if (searchNote) searchNote.value = '';
     
-    // Show all products
+    // Show all products with animation
     let totalCount = 0;
     document.querySelectorAll('.product-card').forEach(card => {
         card.style.display = 'block';
@@ -441,10 +431,11 @@ function showFilterResult(count) {
             grid-column: 1/-1;
             text-align: center;
             padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
             margin-bottom: 20px;
-            border-left: 4px solid #007bff;
+            border-left: 4px solid #6366f1;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         `;
         
         const productsGrid = document.getElementById('productsGrid');
@@ -454,8 +445,8 @@ function showFilterResult(count) {
     }
     
     resultMessage.innerHTML = `
-        <i class="fas fa-search" style="margin-right: 8px; color: #007bff;"></i>
-        <strong>Kết quả lọc:</strong> Tìm thấy ${count} sản phẩm phù hợp
+        <i class="fas fa-search" style="margin-right: 8px; color: #6366f1;"></i>
+        <strong>Ket qua loc:</strong> Tim thay ${count} san pham phu hop
     `;
     
     resultMessage.style.display = 'block';
@@ -602,23 +593,4 @@ window.addToWishlist = function(productId) {
     }
 };
 
-console.log('Script.js loaded successfully');thú cưng dễ thương",
-        category: "pet",
-        stock: 5,
-        details: {
-            features: ["Thân thiện với trẻ em", "Đã tiêm vaccine đầy đủ", "Được huấn luyện cơ bản", "Kèm theo giấy tờ hợp lệ"],
-            description: "Raccoon là loại thú cưng thông minh và dễ thương, phù hợp để nuôi làm thú cưng gia đình. Chúng rất trung thành và gắn bó với chủ nhân."
-        }
-    },
-    {
-        id: "002",
-        _id: "002",
-        title: "Mimic Octopus",
-        description: "Bạch tuộc mimic có khả năng bắt chước nhiều loài sinh vật biển khác, rất độc đáo và thú vị.",
-        price: 70000,
-        oldPrice: 100000,
-        image: "https://i.imgur.com/8pYhB3m.png",
-        images: ["https://i.imgur.com/8pYhB3m.png"],
-        sales: 75,
-        badge: "SALE",
-        note: "hehehehehehe"
+console.log('Script.js loaded successfully');
