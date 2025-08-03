@@ -37,7 +37,7 @@
         .modal-content {
             transform: scale(0.9);
             opacity: 0;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Elastic animation */
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
         .modal.show .modal-content {
@@ -45,7 +45,7 @@
             opacity: 1;
         }
 
-        /* SUPER BEAUTIFUL - Animation Overlay System */
+        /* Animation Overlay System */
         .animation-overlay {
             position: fixed;
             top: 0;
@@ -163,6 +163,27 @@
             25% { transform: scale(1.3); }
             50% { transform: scale(1.1); }
         }
+
+        /* Loading State */
+        .loading {
+            position: relative;
+            pointer-events: none;
+        }
+
+        .loading .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -181,7 +202,7 @@
             </nav>
 
             <!-- User Dropdown (Hidden by default) -->
-            <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown" id="userDropdown" style="display: none;">
                 <div class="user-avatar" id="userAvatar">U</div>
                 <span class="user-name" id="userName">User</span>
                 <div class="dropdown-menu">
@@ -295,7 +316,10 @@
                     <input type="password" id="loginPassword" name="password" placeholder="Nhập mật khẩu" required>
                 </div>
                 <div class="modal-actions">
-                    <button type="submit" class="btn btn-primary btn-submit"><span>Đăng nhập</span><div class="spinner"></div></button>
+                    <button type="submit" class="btn btn-primary btn-submit">
+                        <span>Đăng nhập</span>
+                        <div class="spinner" style="display: none;"></div>
+                    </button>
                 </div>
                 <div class="form-footer">Chưa có tài khoản? <a href="#" class="switch-to-register">Đăng ký ngay</a></div>
             </form>
@@ -317,7 +341,12 @@
                     <label for="registerConfirmPassword"><i class="fas fa-key"></i> Xác nhận mật khẩu</label>
                     <input type="password" id="registerConfirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu" required>
                 </div>
-                <button type="submit" class="btn btn-primary btn-submit"><span>Đăng ký</span><div class="spinner"></div></button>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary btn-submit">
+                        <span>Đăng ký</span>
+                        <div class="spinner" style="display: none;"></div>
+                    </button>
+                </div>
                 <div class="form-footer">Đã có tài khoản? <a href="#" class="switch-to-login">Đăng nhập ngay</a></div>
             </form>
         </div>
@@ -339,284 +368,19 @@
         </div>
     </div>
 
-    <script>
-    (function() {
-        "use strict";
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 10001;">
+        <div style="color: white; text-align: center;">
+            <i class="fas fa-spinner fa-spin fa-3x"></i>
+            <p style="margin-top: 20px;">Đang xử lý...</p>
+        </div>
+    </div>
 
-        // =================================================================
-        // STATE & DATA
-        // =================================================================
-        
-        let state = {
-            isLoggedIn: false,
-            user: null,
-            favorites: [],
-        };
-        
-        const localSampleProducts = [
-            { id: "001", title: "Raccoon", description: "Thú cưng gấu mèo dễ thương, thông minh và năng động.", price: 250000, oldPrice: 300000, image: "https://i.imgur.com/ZoX9VKo.png", note: "thú cưng dễ thương" },
-            { id: "002", title: "Mimic Octopus", description: "Bạch tuộc mimic có khả năng bắt chước nhiều loài.", price: 70000, oldPrice: 100000, image: "https://i.imgur.com/8pYhB3m.png", note: "thú cưng biển độc đáo" }
-        ];
+    <!-- Toast Container -->
+    <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 10003;"></div>
 
-        // =================================================================
-        // MANAGERS (Animation, State, UI)
-        // =================================================================
-
-        const AnimationManager = {
-            overlay: document.getElementById('animationOverlay'),
-            iconEl: document.getElementById('animationIcon'),
-            titleEl: document.getElementById('animationTitle'),
-            subtitleEl: document.getElementById('animationSubtitle'),
-            particleContainer: document.getElementById('particleContainer'),
-            
-            show(config) {
-                this.titleEl.textContent = config.title;
-                this.subtitleEl.textContent = config.subtitle;
-                this.iconEl.innerHTML = config.icon;
-                
-                this.overlay.className = 'animation-overlay'; // Reset classes
-                this.overlay.classList.add(config.type, 'show');
-                document.body.style.overflow = 'hidden';
-
-                if (config.type !== 'error') {
-                    this.createParticles();
-                }
-
-                setTimeout(() => {
-                    this.overlay.classList.remove('show');
-                    document.body.style.overflow = '';
-                    setTimeout(() => this.particleContainer.innerHTML = '', 500);
-                }, config.duration || 2500);
-            },
-
-            createParticles() {
-                this.particleContainer.innerHTML = '';
-                for (let i = 0; i < 20; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
-                    const size = Math.random() * 5 + 2;
-                    particle.style.width = `${size}px`;
-                    particle.style.height = `${size}px`;
-                    particle.style.left = `${Math.random() * 100}%`;
-                    particle.style.animationDuration = `${Math.random() * 3 + 4}s`;
-                    particle.style.animationDelay = `${Math.random() * 2}s`;
-                    this.particleContainer.appendChild(particle);
-                }
-            }
-        };
-
-        const UIManager = {
-            updateLoginStatus() {
-                const { isLoggedIn, user } = state;
-                const userDropdown = document.getElementById('userDropdown');
-                const loginButton = document.getElementById('loginButton');
-
-                if (isLoggedIn && user) {
-                    loginButton.style.display = 'none';
-                    userDropdown.style.display = 'flex';
-                    document.getElementById('userName').textContent = user.name;
-                    document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
-                } else {
-                    loginButton.style.display = 'flex';
-                    userDropdown.style.display = 'none';
-                }
-            },
-            updateFavoriteButtons() {
-                document.querySelectorAll('.btn-favorite').forEach(btn => {
-                    const productId = btn.closest('.product-card').dataset.id;
-                    const isFavorite = state.favorites.includes(productId);
-                    btn.classList.toggle('active', isFavorite);
-                    btn.querySelector('i').className = isFavorite ? 'fas fa-heart' : 'far fa-heart';
-                });
-                const favCount = document.querySelector('.favorite-count');
-                if (favCount) {
-                    favCount.textContent = state.favorites.length;
-                    favCount.style.display = state.favorites.length > 0 ? 'inline-flex' : 'none';
-                }
-            },
-            renderProducts(products) {
-                const grid = document.getElementById('productsGrid');
-                if (!grid) return;
-                grid.innerHTML = products.map(p => `
-                    <div class="product-card fade-in" data-id="${p.id}" data-price="${p.price}" data-note="${p.note}">
-                        <div class="product-image">
-                            <img src="${p.image}" alt="${p.title}" loading="lazy">
-                            <div class="product-overlay">
-                                <button class="btn-favorite" title="Thêm vào yêu thích"><i class="far fa-heart"></i></button>
-                                <a href="product.html?id=${p.id}" class="btn-view" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-title">${p.title}</h3>
-                            <p class="product-description">${p.description}</p>
-                            <div class="product-price">${new Intl.NumberFormat('vi-VN').format(p.price)}đ</div>
-                            <div class="product-id">ID: #${p.id}</div>
-                            <button class="btn btn-primary add-to-cart"><i class="fas fa-shopping-cart"></i><span>Mua Ngay</span></button>
-                        </div>
-                    </div>
-                `).join('');
-                this.updateFavoriteButtons();
-            }
-        };
-
-        const StateManager = {
-            load() {
-                state.isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-                state.user = JSON.parse(localStorage.getItem('user'));
-                state.favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-                UIManager.updateLoginStatus();
-                UIManager.updateFavoriteButtons();
-            },
-            login(user) {
-                state.isLoggedIn = true;
-                state.user = user;
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('user', JSON.stringify(user));
-                UIManager.updateLoginStatus();
-            },
-            logout() {
-                state.isLoggedIn = false;
-                state.user = null;
-                localStorage.removeItem('isLoggedIn');
-                localStorage.removeItem('user');
-                UIManager.updateLoginStatus();
-            },
-            toggleFavorite(productId) {
-                const index = state.favorites.indexOf(productId);
-                if (index > -1) {
-                    state.favorites.splice(index, 1);
-                } else {
-                    state.favorites.push(productId);
-                }
-                localStorage.setItem('favorites', JSON.stringify(state.favorites));
-                UIManager.updateFavoriteButtons();
-            }
-        };
-
-        // =================================================================
-        // EVENT HANDLERS & INITIALIZATION
-        // =================================================================
-
-        function handleAuthForms() {
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            const logoutButton = document.getElementById('logoutButton');
-
-            loginForm.addEventListener('submit', e => {
-                e.preventDefault();
-                const email = e.target.email.value;
-                const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
-                
-                // *** LOGIC FIX STARTS HERE ***
-                let userToLogin = registeredUsers[email];
-                
-                // If user doesn't exist, create a temporary one and save it for next time
-                if (!userToLogin) {
-                    const emailUsername = email.split('@')[0];
-                    const tempName = emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1);
-                    
-                    userToLogin = { name: tempName, email: email };
-                    
-                    // Save this new user so they have a proper name next time
-                    registeredUsers[email] = userToLogin;
-                    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-                }
-                // *** LOGIC FIX ENDS HERE ***
-
-                StateManager.login(userToLogin);
-                document.getElementById('authModal').classList.remove('show');
-                AnimationManager.show({ type: 'welcome', icon: '🎉', title: `Chào mừng, ${userToLogin.name}!`, subtitle: 'Đăng nhập thành công' });
-            });
-
-            registerForm.addEventListener('submit', e => {
-                e.preventDefault();
-                const name = e.target.name.value.trim();
-                const email = e.target.email.value;
-                const password = e.target.password.value;
-                const confirmPassword = e.target.confirmPassword.value;
-
-                if (password !== confirmPassword) {
-                    AnimationManager.show({ type: 'error', icon: '🔑', title: 'Lỗi Đăng ký', subtitle: 'Mật khẩu xác nhận không khớp.' });
-                    return;
-                }
-
-                const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
-                if (registeredUsers[email]) {
-                    AnimationManager.show({ type: 'error', icon: '📧', title: 'Lỗi Đăng ký', subtitle: 'Email này đã được sử dụng.' });
-                    return;
-                }
-                
-                const newUser = { name, email, password };
-                registeredUsers[email] = newUser;
-                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-
-                StateManager.login(newUser);
-                document.getElementById('authModal').classList.remove('show');
-                AnimationManager.show({ type: 'success', icon: '✅', title: 'Đăng ký thành công!', subtitle: `Chào mừng ${name} đến với Shop!` });
-            });
-
-            logoutButton.addEventListener('click', () => {
-                AnimationManager.show({ type: 'logout', icon: '👋', title: 'Tạm biệt!', subtitle: 'Đăng xuất thành công. Hẹn gặp lại bạn!', duration: 2000 });
-                setTimeout(() => StateManager.logout(), 500);
-            });
-        }
-
-        function handleProductInteractions() {
-            document.getElementById('productsGrid').addEventListener('click', e => {
-                const favoriteButton = e.target.closest('.btn-favorite');
-                const addToCartButton = e.target.closest('.add-to-cart');
-
-                if (favoriteButton) {
-                    const productId = favoriteButton.closest('.product-card').dataset.id;
-                    StateManager.toggleFavorite(productId);
-                }
-
-                if (addToCartButton) {
-                    AnimationManager.show({ type: 'success', icon: '🛒', title: 'Đã thêm vào giỏ!', subtitle: 'Sản phẩm đã được thêm vào giỏ hàng của bạn.', duration: 2000 });
-                }
-            });
-        }
-
-        function initModals() {
-             const authModal = document.getElementById('authModal');
-             document.getElementById('loginButton').addEventListener('click', () => authModal.classList.add('show'));
-             authModal.querySelector('.modal-close').addEventListener('click', () => authModal.classList.remove('show'));
-             
-             const tabs = authModal.querySelectorAll('.modal-tab');
-             const forms = authModal.querySelectorAll('.modal-form');
-             tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const targetTab = tab.dataset.tab;
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    forms.forEach(form => form.classList.toggle('active', form.id === `${targetTab}Form`));
-                });
-             });
-             document.querySelector('.switch-to-register').addEventListener('click', e => {
-                 e.preventDefault();
-                 document.querySelector('[data-tab="register"]').click();
-             });
-             document.querySelectorAll('.switch-to-login').forEach(el => {
-                el.addEventListener('click', e => {
-                    e.preventDefault();
-                    document.querySelector('[data-tab="login"]').click();
-                });
-             });
-        }
-        
-        function initPage() {
-            StateManager.load();
-            UIManager.renderProducts(localSampleProducts);
-            initModals();
-            handleAuthForms();
-            handleProductInteractions();
-        }
-
-        document.addEventListener('DOMContentLoaded', initPage);
-
-    })();
-    </script>
+    <!-- Scripts -->
+    <script src="main.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
-
-
