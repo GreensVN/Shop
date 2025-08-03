@@ -1,3 +1,4 @@
+html
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -476,6 +477,14 @@
             color: white;
             transform: scale(1.1);
         }
+        
+        .favorite-btn > i {
+            transition: var(--transition);
+        }
+        .favorite-btn:hover > i {
+             transform: scale(1.2);
+        }
+
 
         .product-info {
             padding: 20px;
@@ -870,6 +879,72 @@
             object-fit: cover;
         }
 
+        /* Welcome Overlay */
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(29, 53, 87, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .welcome-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: white;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        .welcome-overlay.show .welcome-message {
+            animation: welcome-animation 3s forwards ease-out;
+        }
+
+        .welcome-message h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .welcome-message p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+        }
+
+        @keyframes welcome-animation {
+            0% {
+                transform: translateY(20px) scale(0.9);
+                opacity: 0;
+            }
+            20% {
+                transform: translateY(0) scale(1.05);
+                opacity: 1;
+            }
+            80% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-20px) scale(0.9);
+                opacity: 0;
+            }
+        }
+
+
         /* Animations */
         @keyframes fadeInUp {
             0% {
@@ -947,6 +1022,10 @@
             .products-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .welcome-message h1 {
+                font-size: 2rem;
+            }
         }
 
         /* Loading Animation */
@@ -978,6 +1057,14 @@
     </style>
 </head>
 <body>
+    <!-- Welcome Overlay -->
+    <div class="welcome-overlay" id="welcomeOverlay">
+        <div class="welcome-message">
+            <h1>Chào mừng trở lại, <span id="welcomeUserName">User</span>!</h1>
+            <p>Chúc bạn một ngày mua sắm vui vẻ!</p>
+        </div>
+    </div>
+    
     <!-- Header -->
     <header class="header">
         <div class="container header-container">
@@ -994,7 +1081,7 @@
                     <i class="fas fa-seedling"></i>
                     <span>Giống Cây</span>
                 </a>
-                <a href="#" class="nav-link" onclick="showComingSoon('thú cưng')">
+                <a href="product.html" class="nav-link">
                     <i class="fas fa-paw"></i>
                     <span>Thú Cưng</span>
                 </a>
@@ -1009,16 +1096,16 @@
                 <span class="user-name" id="userName">User</span>
                 <i class="fas fa-chevron-down" style="margin-left: 8px; font-size: 12px; transition: transform 0.3s ease;"></i>
                 <div class="dropdown-menu">
-                    <a href="#" class="dropdown-item" onclick="showComingSoon('tài khoản')">
+                    <a href="account.html" class="dropdown-item">
                         <i class="fas fa-user"></i>
                         <span>Tài khoản</span>
                     </a>
-                    <a href="#" class="dropdown-item" onclick="showComingSoon('giỏ hàng')">
+                    <a href="cart.html" class="dropdown-item">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Giỏ hàng</span>
                         <span class="cart-count badge" style="display: none;">0</span>
                     </a>
-                    <a href="#" class="dropdown-item" onclick="showComingSoon('yêu thích')">
+                    <a href="favorite.html" class="dropdown-item">
                         <i class="fas fa-heart"></i>
                         <span>Yêu thích</span>
                         <span class="favorite-count badge" style="display: none;">0</span>
@@ -1367,7 +1454,6 @@
         });
     </script>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/main.js/1.0.0/main.min.js" defer></script>
     <script>
         // Main JavaScript will be loaded from external file
         // This is the embedded version that includes all the enhanced functionality
@@ -1554,6 +1640,22 @@
         
         window.showComingSoon = showComingSoon;
         
+        // Welcome Animation
+        function showWelcomeAnimation(userName) {
+            const overlay = document.getElementById('welcomeOverlay');
+            const userNameSpan = document.getElementById('welcomeUserName');
+            
+            if (overlay && userNameSpan) {
+                userNameSpan.textContent = userName;
+                overlay.classList.add('show');
+                
+                // The animation will last 3 seconds (defined in CSS)
+                setTimeout(() => {
+                    overlay.classList.remove('show');
+                }, 3000); 
+            }
+        }
+        
         // Initialize when document is ready
         document.addEventListener('DOMContentLoaded', function() {
             // Load sample products
@@ -1624,7 +1726,7 @@
                     <div class="product-image">
                         <img src="${product.image}" alt="${product.name}" loading="lazy">
                         <div class="product-overlay">
-                            <button class="btn btn-primary add-to-cart" onclick="showComingSoon('mua hàng')">
+                            <button class="btn btn-primary add-to-cart" onclick="showComingSoon('thêm vào giỏ')">
                                 <i class="fas fa-shopping-cart"></i>
                                 Thêm vào giỏ
                             </button>
@@ -1645,7 +1747,7 @@
                                 <i class="fas fa-star"></i>
                                 <i class="fas fa-star"></i>
                                 <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
                             </div>
                             <span class="rating-count">(${Math.floor(Math.random() * 50) + 10})</span>
                         </div>
@@ -1761,9 +1863,9 @@
                         localStorage.setItem('currentUser', JSON.stringify(user));
                         localStorage.setItem('token', 'fake_token_' + Date.now());
                         
-                        Utils.showToast(`Chào mừng ${user.name} trở lại!`, 'success');
                         closeModalFn(authModal, loginForm);
                         updateUIAfterLogin();
+                        showWelcomeAnimation(user.name);
                         
                     } catch (error) {
                         Utils.showToast('Đăng nhập thất bại', 'error');
@@ -1817,9 +1919,9 @@
                         localStorage.setItem('currentUser', JSON.stringify(user));
                         localStorage.setItem('token', 'fake_token_' + Date.now());
                         
-                        Utils.showToast(`Chào mừng ${user.name} đến với Shop Grow A Garden!`, 'success');
                         closeModalFn(authModal, registerForm);
                         updateUIAfterLogin();
+                        showWelcomeAnimation(user.name);
                         
                     } catch (error) {
                         Utils.showToast('Đăng ký thất bại', 'error');
@@ -1855,7 +1957,7 @@
             document.querySelectorAll('.switch-to-login').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
-                    if (forgotModal) {
+                    if (forgotModal.classList.contains('show')) {
                         closeModalFn(forgotModal);
                         setTimeout(() => {
                             openModal(authModal);
@@ -1997,6 +2099,2927 @@
         });
         
         console.log('Shop Grow A Garden initialized successfully - Enhanced Version');
+    </script>
+</body>
+</html>
+```
+
+---
+### `account.html` (Đã cập nhật)
+Các liên kết trong header và dropdown đã được cập nhật để đảm bảo điều hướng nhất quán.
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài khoản - Shop Grow A Garden</title>
+    <link rel="icon" type="image/x-icon" href="https://i.ibb.co/q3r1hTft/8574d186247eba75669b7d50d42bd650.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS Variables */
+        :root {
+            --primary-color: #e63946;
+            --secondary-color: #1d3557;
+            --accent-color: #a8dadc;
+            --light-color: #f1faee;
+            --dark-color: #1b1a1a;
+            --gray-color: #6c757d;
+            --success-color: #2a9d8f;
+            --warning-color: #f4a261;
+            --danger-color: #dc3545;
+            --border-color: #dee2e6;
+            --transition: all 0.3s ease;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--dark-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-lg);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 2px solid rgba(230, 57, 70, 0.1);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            height: 50px;
+            transition: var(--transition);
+            border-radius: 8px;
+        }
+
+        .logo:hover {
+            transform: scale(1.05) rotate(2deg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            color: var(--dark-color);
+            text-decoration: none;
+            border-radius: 50px;
+            transition: var(--transition);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            color: white;
+            background: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: var(--primary-color);
+        }
+
+        /* User Actions */
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-dropdown {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 50px;
+            transition: var(--transition);
+            background: rgba(230, 57, 70, 0.1);
+        }
+
+        .user-dropdown:hover {
+            background: rgba(230, 57, 70, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .user-dropdown.active .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color), #ff6b6b);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .user-name {
+            font-weight: 500;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 15px);
+            right: 0;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            min-width: 250px;
+            padding: 15px 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 1000;
+            border: 1px solid var(--border-color);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(90deg, rgba(230, 57, 70, 0.1), rgba(230, 57, 70, 0.05));
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .dropdown-item i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 10px 0;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #ff6b6b);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(230, 57, 70, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--dark-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 30px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            color: white;
+        }
+
+        .breadcrumb a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb a:hover {
+            color: white;
+        }
+
+        /* Account Layout */
+        .account-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+        }
+
+        /* Sidebar */
+        .account-sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--border-radius);
+            padding: 30px 25px;
+            box-shadow: var(--shadow-lg);
+            height: fit-content;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(230, 57, 70, 0.1);
+        }
+
+        .account-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), #ff6b6b);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 600;
+            margin: 0 auto 15px;
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
+
+        .account-avatar::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            background: linear-gradient(45deg, var(--primary-color), #ff6b6b, var(--accent-color), var(--primary-color));
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .account-name {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+
+        .account-id {
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+
+        .sidebar-menu {
+            margin-bottom: 30px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            color: var(--dark-color);
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            margin-bottom: 8px;
+            transition: var(--transition);
+            font-weight: 500;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 100%;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), rgba(230, 57, 70, 0.8));
+            transition: width 0.3s ease;
+            z-index: -1;
+        }
+
+        .menu-item:hover::before,
+        .menu-item.active::before {
+            width: 100%;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Content Area */
+        .account-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .content-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid rgba(230, 57, 70, 0.1);
+        }
+
+        .content-title {
+            font-size: 28px;
+            color: var(--secondary-color);
+            margin: 0;
+            position: relative;
+        }
+
+        .content-title::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), #ff6b6b);
+            border-radius: 2px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Account Info */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(230, 57, 70, 0.02);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .info-item:hover {
+            background: rgba(230, 57, 70, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .info-label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-color);
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            color: var(--dark-color);
+            word-break: break-word;
+            font-weight: 500;
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #ff6b6b 50%, #ff8e8e 100%);
+            color: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(30deg); }
+        }
+
+        .balance-amount {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .balance-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .balance-actions .btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .balance-actions .btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        /* History */
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            background: rgba(248, 249, 250, 0.5);
+        }
+
+        .history-item:hover {
+            background: rgba(230, 57, 70, 0.05);
+            transform: translateX(5px);
+        }
+
+        .history-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        .history-icon.success {
+            background: linear-gradient(135deg, rgba(42, 157, 143, 0.2), rgba(42, 157, 143, 0.1));
+            color: var(--success-color);
+        }
+
+        .history-icon.purchase {
+            background: linear-gradient(135deg, rgba(230, 57, 70, 0.2), rgba(230, 57, 70, 0.1));
+            color: var(--primary-color);
+        }
+
+        .history-details {
+            flex: 1;
+        }
+
+        .history-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .history-date, .history-info {
+            font-size: 14px;
+            color: var(--gray-color);
+            margin-bottom: 2px;
+        }
+
+        .history-amount {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .history-amount.success {
+            color: var(--success-color);
+        }
+
+        .history-amount.purchase {
+            color: var(--primary-color);
+        }
+
+        /* Security Settings */
+        .security-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            transition: var(--transition);
+            background: rgba(248, 249, 250, 0.5);
+        }
+
+        .security-item:hover {
+            background: rgba(230, 57, 70, 0.02);
+            border-color: rgba(230, 57, 70, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .security-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .security-info i {
+            font-size: 24px;
+            color: var(--primary-color);
+            width: 40px;
+            text-align: center;
+        }
+
+        .security-info h4 {
+            margin-bottom: 5px;
+            font-size: 18px;
+            color: var(--secondary-color);
+        }
+
+        .security-info p {
+            font-size: 14px;
+            color: var(--gray-color);
+            margin: 0;
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--gray-color);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+            background: linear-gradient(135deg, var(--primary-color), #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+            font-size: 24px;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+        }
+
+        /* Login Prompt */
+        .login-prompt {
+            text-align: center;
+            padding: 80px 30px;
+            background: linear-gradient(135deg, rgba(230, 57, 70, 0.1), rgba(29, 53, 87, 0.1));
+            border-radius: var(--border-radius);
+            margin: 50px 0;
+            border: 2px dashed rgba(230, 57, 70, 0.3);
+        }
+
+        .login-prompt i {
+            font-size: 80px;
+            background: linear-gradient(135deg, var(--primary-color), #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .login-prompt h2 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+
+        .login-prompt p {
+            color: var(--gray-color);
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+
+        .login-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, var(--dark-color) 0%, #2c2c2c 100%);
+            color: white;
+            padding: 50px 0 20px;
+            margin-top: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-logo {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-logo img {
+            max-width: 150px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .footer-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), #ff6b6b);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-link {
+            margin-bottom: 10px;
+        }
+
+        .footer-link a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .footer-link a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Messenger Chat Button */
+        .messenger-chat {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #0084ff, #006ce7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(0, 132, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            text-decoration: none;
+            color: white;
+        }
+
+        .messenger-chat:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 12px 35px rgba(0, 132, 255, 0.4);
+            color: white;
+        }
+
+        .messenger-chat i {
+            font-size: 24px;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(120%);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 10000;
+            max-width: 350px;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, var(--success-color), #38d9a9);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, var(--danger-color), #ff6b6b);
+        }
+
+        .toast.info {
+            background: linear-gradient(135deg, var(--secondary-color), #495057);
+        }
+
+        .toast.warning {
+            background: linear-gradient(135deg, var(--warning-color), #ffd43b);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: var(--gray-color);
+            cursor: pointer;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: var(--primary-color);
+            background: rgba(230, 57, 70, 0.1);
+            transform: rotate(90deg);
+        }
+
+        .modal-title {
+            font-size: 28px;
+            margin-bottom: 25px;
+            color: var(--secondary-color);
+            text-align: center;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+            background: white;
+        }
+
+        .form-group.has-error input,
+        .form-group.has-error select {
+            border-color: var(--danger-color);
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-group.has-error .error-message {
+            display: block;
+        }
+
+        .password-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--gray-color);
+            transition: var(--transition);
+            padding: 5px;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            font-size: 16px;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        .btn-submit.loading .spinner {
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Card Types */
+        .card-types {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card-type {
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-type::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .card-type:hover::before {
+            left: 100%;
+        }
+
+        .card-type:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-type.selected {
+            border-color: var(--primary-color);
+            background: rgba(230, 57, 70, 0.05);
+            transform: translateY(-3px);
+        }
+
+        .card-type .card-logo {
+            width: 50px;
+            height: 35px;
+            border-radius: 6px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .card-type[data-type="viettel"] .card-logo {
+            background: linear-gradient(135deg, #d70018, #ff4757);
+        }
+
+        .card-type[data-type="mobifone"] .card-logo {
+            background: linear-gradient(135deg, #1f7a3e, #2ed573);
+        }
+
+        .card-type[data-type="vinaphone"] .card-logo {
+            background: linear-gradient(135deg, #662d91, #a55eea);
+        }
+
+        .card-type[data-type="gate"] .card-logo {
+            background: linear-gradient(135deg, #ff6600, #ffa502);
+        }
+
+        .card-type span {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .form-note {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(42, 157, 143, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            color: var(--success-color);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .form-note i {
+            color: var(--success-color);
+        }
+
+        /* Device Manager Styles */
+        .device-list {
+            margin-top: 20px;
+        }
+
+        .device-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            transition: var(--transition);
+            background: rgba(248, 249, 250, 0.5);
+        }
+
+        .device-item:hover {
+            background: rgba(230, 57, 70, 0.02);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .device-item.current {
+            border-color: var(--success-color);
+            background: rgba(42, 157, 143, 0.05);
+        }
+
+        .device-details {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .device-details i {
+            font-size: 28px;
+            color: var(--secondary-color);
+        }
+
+        .device-info p {
+            font-weight: bold;
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .device-info small {
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+
+        /* 2FA Content */
+        .two-fa-content {
+            text-align: center;
+        }
+
+        .two-fa-content p {
+            margin-bottom: 20px;
+            color: var(--gray-color);
+            font-size: 16px;
+        }
+
+        .qr-code-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(248, 249, 250, 0.8);
+            border-radius: var(--border-radius);
+            border: 2px dashed var(--border-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .account-layout {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .account-sidebar {
+                padding: 25px 20px;
+            }
+
+            .sidebar-header {
+                display: flex;
+                align-items: center;
+                text-align: left;
+                margin-bottom: 25px;
+            }
+
+            .account-avatar {
+                margin: 0 20px 0 0;
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                margin: 0;
+            }
+
+            .menu-item {
+                margin: 0;
+                padding: 10px 15px;
+                border-radius: 25px;
+                white-space: nowrap;
+                font-size: 14px;
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .menu-item i {
+                display: none;
+            }
+
+            .account-content {
+                padding: 30px 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .nav-link {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .balance-actions {
+                flex-direction: column;
+            }
+
+            .login-actions {
+                flex-direction: column;
+            }
+
+            .card-types {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .sidebar-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .account-avatar {
+                margin: 0 0 15px 0;
+            }
+
+            .sidebar-menu {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .menu-item {
+                min-width: auto;
+            }
+
+            .menu-item i {
+                display: inline-block;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 10px;
+            }
+
+            .main-content {
+                padding: 20px 0;
+            }
+
+            .account-content {
+                padding: 20px 15px;
+            }
+
+            .content-title {
+                font-size: 24px;
+            }
+
+            .balance-card {
+                padding: 30px 20px;
+            }
+
+            .balance-amount {
+                font-size: 32px;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+
+            .card-types {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(230, 57, 70, 0.2);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-container">
+            <a href="index.html">
+                <img src="https://i.ibb.co/q3r1hTft/8574d186247eba75669b7d50d42bd650-png.png" alt="Shop Grow A Garden" class="logo">
+            </a>
+            
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Trang Chủ</span>
+                </a>
+                <a href="#" class="nav-link" onclick="showComingSoon('Giống Cây')">
+                    <i class="fas fa-seedling"></i>
+                    <span>Giống Cây</span>
+                </a>
+                <a href="product.html" class="nav-link">
+                    <i class="fas fa-paw"></i>
+                    <span>Thú Cưng</span>
+                </a>
+                <a href="#" class="nav-link" onclick="showComingSoon('Tài Khoản Game')">
+                    <i class="fas fa-gamepad"></i>
+                    <span>Tài Khoản Game</span>
+                </a>
+            </nav>
+
+            <div class="user-actions" id="userActions">
+                <!-- User dropdown will be injected here -->
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="container main-content">
+        <div class="breadcrumb">
+            <a href="index.html">Trang chủ</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Tài khoản</span>
+        </div>
+        
+        <!-- Login Required Message -->
+        <div class="login-prompt" id="loginPrompt" style="display: none;">
+            <i class="fas fa-user-lock"></i>
+            <h2>Vui lòng đăng nhập</h2>
+            <p>Bạn cần đăng nhập để xem thông tin tài khoản</p>
+            <div class="login-actions">
+                <button class="btn btn-primary" onclick="window.location.href='index.html'">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Đăng nhập ngay
+                </button>
+            </div>
+        </div>
+        
+        <!-- Account Content -->
+        <div class="account-layout" id="accountLayout" style="display: none;">
+            <!-- Sidebar -->
+            <div class="account-sidebar">
+                <div class="sidebar-header">
+                    <div class="account-avatar" id="accountAvatar">U</div>
+                    <div>
+                        <h2 class="account-name" id="accountName">Loading...</h2>
+                        <div class="account-id" id="accountId">ID: ------</div>
+                    </div>
+                </div>
+                
+                <nav class="sidebar-menu">
+                    <button class="menu-item active" data-tab="info">
+                        <i class="fas fa-user"></i>
+                        Thông tin tài khoản
+                    </button>
+                    <button class="menu-item" data-tab="balance">
+                        <i class="fas fa-wallet"></i>
+                        Số dư & Nạp tiền
+                    </button>
+                    <button class="menu-item" data-tab="history">
+                        <i class="fas fa-history"></i>
+                        Lịch sử giao dịch
+                    </button>
+                    <button class="menu-item" data-tab="security">
+                        <i class="fas fa-shield-alt"></i>
+                        Bảo mật
+                    </button>
+                </nav>
+                
+                <button class="btn btn-outline" id="sidebarLogoutBtn" style="width: 100%;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Đăng xuất
+                </button>
+            </div>
+            
+            <!-- Content -->
+            <div class="account-content">
+                <!-- Account Info Tab -->
+                <div class="tab-content active" id="infoTab">
+                    <div class="content-header">
+                        <h2 class="content-title">Thông tin tài khoản</h2>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label class="info-label">Họ và tên</label>
+                            <div class="info-value" id="userFullName">Loading...</div>
+                        </div>
+                        <div class="info-item">
+                            <label class="info-label">Email</label>
+                            <div class="info-value" id="userEmail">Loading...</div>
+                        </div>
+                        <div class="info-item">
+                            <label class="info-label">Số điện thoại</label>
+                            <div class="info-value" id="userPhone">Chưa cập nhật</div>
+                        </div>
+                        <div class="info-item">
+                            <label class="info-label">Ngày đăng ký</label>
+                            <div class="info-value" id="userRegisterDate">Loading...</div>
+                        </div>
+                        <div class="info-item">
+                            <label class="info-label">ID tài khoản</label>
+                            <div class="info-value" id="userAccountId">------</div>
+                        </div>
+                        <div class="info-item">
+                            <label class="info-label">Trạng thái</label>
+                            <div class="info-value" style="color: var(--success-color);">
+                                <i class="fas fa-check-circle"></i> Đã xác thực
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Balance Tab -->
+                <div class="tab-content" id="balanceTab">
+                    <div class="content-header">
+                        <h2 class="content-title">Số dư tài khoản</h2>
+                    </div>
+                    
+                    <div class="balance-card">
+                        <div class="balance-amount" id="balanceAmount">0đ</div>
+                        <div class="balance-actions">
+                            <button class="btn" id="depositBtn">
+                                <i class="fas fa-money-bill-wave"></i>
+                                Nạp tiền
+                            </button>
+                            <button class="btn" id="withdrawBtn">
+                                <i class="fas fa-hand-holding-usd"></i>
+                                Rút tiền
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- History Tab -->
+                <div class="tab-content" id="historyTab">
+                    <div class="content-header">
+                        <h2 class="content-title">Lịch sử giao dịch</h2>
+                    </div>
+                    
+                    <div class="history-list" id="historyList">
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <h3>Chưa có giao dịch nào</h3>
+                            <p>Lịch sử giao dịch sẽ hiển thị tại đây.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Tab -->
+                <div class="tab-content" id="securityTab">
+                    <div class="content-header">
+                        <h2 class="content-title">Bảo mật tài khoản</h2>
+                    </div>
+                    
+                    <div class="security-settings">
+                        <div class="security-item">
+                            <div class="security-info">
+                                <i class="fas fa-lock"></i>
+                                <div>
+                                    <h4>Mật khẩu</h4>
+                                    <p>Đã thiết lập - Bảo mật tài khoản của bạn</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline" id="changePasswordBtn">
+                                <i class="fas fa-edit"></i>
+                                Đổi mật khẩu
+                            </button>
+                        </div>
+                        
+                        <div class="security-item">
+                            <div class="security-info">
+                                <i class="fas fa-shield-alt"></i>
+                                <div>
+                                    <h4>Xác thực 2 bước (2FA)</h4>
+                                    <p id="2faStatus">Chưa bật - Tăng cường bảo mật cho tài khoản</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline" id="toggle2faBtn">
+                                <i class="fas fa-toggle-off"></i>
+                                <span>Bật</span>
+                            </button>
+                        </div>
+                        
+                        <div class="security-item">
+                            <div class="security-info">
+                                <i class="fas fa-laptop-house"></i>
+                                <div>
+                                    <h4>Thiết bị đã đăng nhập</h4>
+                                    <p>Quản lý các phiên đăng nhập - Xem và đăng xuất khỏi các thiết bị khác</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline" id="manageDevicesBtn">
+                                <i class="fas fa-cog"></i>
+                                Quản lý
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Messenger Chat Button -->
+    <a href="https://www.messenger.com/e2ee/t/6933504863440412" target="_blank" class="messenger-chat">
+        <i class="fab fa-facebook-messenger"></i>
+    </a>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-logo">
+                    <img src="https://i.ibb.co/k6BvctRR/t-i-xu-ng.jpg" alt="Shop Grow A Garden">
+                    <span>Shop Grow A Garden - Giống Cây - Thú Cưng</span>
+                </div>
+                
+                <div>
+                    <h3 class="footer-title">Về Chúng Tôi</h3>
+                    <p>Chuyên cung cấp dịch vụ, giống cây và thú cưng chất lượng. Giao dịch nhanh chóng, uy tín.</p>
+                </div>
+                
+                <div>
+                    <h3 class="footer-title">Liên Hệ</h3>
+                    <ul class="footer-links">
+                        <li class="footer-link">
+                            <a href="mailto:support@shopgrowgarden.com">
+                                <i class="fas fa-envelope"></i>
+                                <span>Email: support@shopgrowgarden.com</span>
+                            </a>
+                        </li>
+                        <li class="footer-link">
+                            <a href="tel:0123456789">
+                                <i class="fas fa-phone"></i>
+                                <span>Hotline: 0123 456 789</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 Shop Grow A Garden. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Deposit Modal -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('depositModal')">×</button>
+            <h2 class="modal-title">Nạp tiền bằng thẻ cào</h2>
+            
+            <div class="card-types">
+                <div class="card-type selected" data-type="viettel">
+                    <div class="card-logo">VT</div>
+                    <span>Viettel</span>
+                </div>
+                <div class="card-type" data-type="mobifone">
+                    <div class="card-logo">MB</div>
+                    <span>Mobifone</span>
+                </div>
+                <div class="card-type" data-type="vinaphone">
+                    <div class="card-logo">VP</div>
+                    <span>Vinaphone</span>
+                </div>
+                <div class="card-type" data-type="gate">
+                    <div class="card-logo">GT</div>
+                    <span>Gate</span>
+                </div>
+            </div>
+            
+            <form id="depositForm">
+                <div class="form-group">
+                    <label for="cardNumber">Mã thẻ</label>
+                    <input type="text" id="cardNumber" placeholder="Nhập mã thẻ" required>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cardSerial">Số serial</label>
+                    <input type="text" id="cardSerial" placeholder="Nhập số serial" required>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cardAmount">Mệnh giá</label>
+                    <select id="cardAmount" required>
+                        <option value="">-- Chọn mệnh giá --</option>
+                        <option value="10000">10,000đ</option>
+                        <option value="20000">20,000đ</option>
+                        <option value="50000">50,000đ</option>
+                        <option value="100000">100,000đ</option>
+                        <option value="200000">200,000đ</option>
+                        <option value="500000">500,000đ</option>
+                    </select>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-note">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Vui lòng chọn đúng mệnh giá, sai mệnh giá sẽ mất thẻ.</span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-submit">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Nạp tiền</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('withdrawModal')">×</button>
+            <h2 class="modal-title">Rút tiền</h2>
+            
+            <form id="withdrawForm">
+                <div class="form-group">
+                    <label for="bankAccount">Ngân hàng</label>
+                    <select id="bankAccount" required>
+                        <option value="">-- Chọn ngân hàng --</option>
+                        <option value="mbbank">MB Bank</option>
+                        <option value="vietcombank">Vietcombank</option>
+                        <option value="techcombank">Techcombank</option>
+                        <option value="acb">ACB</option>
+                        <option value="momo">Ví Momo</option>
+                        <option value="zalopay">ZaloPay</option>
+                    </select>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="accountNumber">Số tài khoản / Số điện thoại</label>
+                    <input type="text" id="accountNumber" placeholder="Nhập số tài khoản hoặc SĐT" required>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="accountName">Tên chủ tài khoản</label>
+                    <input type="text" id="accountName" placeholder="Nhập tên chủ tài khoản" required>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="withdrawAmount">Số tiền rút</label>
+                    <input type="number" id="withdrawAmount" placeholder="Nhập số tiền" required min="50000" step="1000">
+                    <small style="color: var(--gray-color);">Số tiền rút tối thiểu là 50,000đ</small>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-note" style="background-color: rgba(244, 162, 97, 0.1); color: var(--warning-color); border-left-color: var(--warning-color);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Phí rút tiền là 2%. Yêu cầu sẽ được xử lý trong 5-10 phút.</span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-submit">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Gửi yêu cầu</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('changePasswordModal')">×</button>
+            <h2 class="modal-title">Đổi mật khẩu</h2>
+            
+            <form id="changePasswordForm">
+                <div class="form-group password-group">
+                    <label for="currentPassword">Mật khẩu hiện tại</label>
+                    <input type="password" id="currentPassword" placeholder="Nhập mật khẩu hiện tại" required>
+                    <span class="password-toggle" onclick="togglePassword('currentPassword')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group password-group">
+                    <label for="newPassword">Mật khẩu mới</label>
+                    <input type="password" id="newPassword" placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)" required minlength="6">
+                    <span class="password-toggle" onclick="togglePassword('newPassword')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <div class="error-message"></div>
+                </div>
+                
+                <div class="form-group password-group">
+                    <label for="confirmNewPassword">Nhập lại mật khẩu mới</label>
+                    <input type="password" id="confirmNewPassword" placeholder="Nhập lại mật khẩu mới" required>
+                    <span class="password-toggle" onclick="togglePassword('confirmNewPassword')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <div class="error-message"></div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-submit">
+                    <i class="fas fa-key"></i>
+                    <span>Đổi mật khẩu</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2FA Setup Modal -->
+    <div class="modal" id="2faModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('2faModal')">×</button>
+            <h2 class="modal-title">Thiết lập Xác thực 2 bước</h2>
+            
+            <div class="two-fa-content">
+                <p>Quét mã QR này bằng ứng dụng xác thực của bạn (Google Authenticator, Authy...):</p>
+                
+                <div class="qr-code-container">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=otpauth://totp/ShopGrowAGarden:user?secret=JBSWY3DPEHPK3PXP&issuer=ShopGrowAGarden" 
+                         alt="QR Code" 
+                         style="max-width: 200px; border-radius: var(--border-radius);">
+                </div>
+                
+                <p>Hoặc nhập mã này thủ công:</p>
+                <div style="background: var(--light-color); padding: 20px; margin: 20px 0; border-radius: var(--border-radius); font-family: monospace; font-weight: bold; text-align: center; letter-spacing: 3px; font-size: 18px; border: 2px dashed var(--primary-color);">
+                    JBSWY3DPEHPK3PXP
+                </div>
+                
+                <div class="form-group">
+                    <label for="verify2faCode">Nhập mã xác thực 6 số để hoàn tất:</label>
+                    <input type="text" id="verify2faCode" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required style="text-align: center; font-size: 24px; letter-spacing: 5px;">
+                    <div class="error-message"></div>
+                </div>
+                
+                <button type="button" class="btn btn-primary btn-submit" onclick="verify2FASetup()">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Xác nhận và bật 2FA</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Manager Modal -->
+    <div class="modal" id="deviceManagerModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('deviceManagerModal')">×</button>
+            <h2 class="modal-title">Quản lý Thiết bị</h2>
+            
+            <div class="device-list">
+                <div class="device-item current">
+                    <div class="device-details">
+                        <i class="fas fa-desktop"></i>
+                        <div class="device-info">
+                            <p>Chrome trên Windows</p>
+                            <small>Thiết bị hiện tại - Đang hoạt động</small>
+                        </div>
+                    </div>
+                    <span style="color: var(--success-color); font-weight: bold; font-size: 14px; padding: 5px 10px; background: rgba(42, 157, 143, 0.1); border-radius: 20px;">HIỆN TẠI</span>
+                </div>
+                
+                <div class="device-item">
+                    <div class="device-details">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div class="device-info">
+                            <p>Safari trên iPhone</p>
+                            <small>Hoạt động 2 giờ trước</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline" style="border-color: var(--danger-color); color: var(--danger-color); padding: 8px 15px; font-size: 12px;" onclick="removeDevice(this)">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Đăng xuất
+                    </button>
+                </div>
+                
+                <div class="device-item">
+                    <div class="device-details">
+                        <i class="fas fa-tablet-alt"></i>
+                        <div class="device-info">
+                            <p>Chrome trên Android</p>
+                            <small>Hoạt động 1 ngày trước</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline" style="border-color: var(--danger-color); color: var(--danger-color); padding: 8px 15px; font-size: 12px;" onclick="removeDevice(this)">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Đăng xuất
+                    </button>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <button class="btn btn-outline" onclick="logoutAllDevices()" style="width: 100%; border-color: var(--danger-color); color: var(--danger-color);">
+                    <i class="fas fa-power-off"></i>
+                    Đăng xuất tất cả thiết bị khác
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'https://shop-4mlk.onrender.com/api/v1';
+        
+        // Global variables
+        let currentUser = null;
+        let userBalance = 0;
+
+        // Utility Functions
+        class Utils {
+            static formatPrice(price) {
+                const num = typeof price === 'string' ? parseInt(price) : price;
+                return new Intl.NumberFormat('vi-VN').format(num);
+            }
+            
+            static formatDate(date) {
+                return new Date(date).toLocaleDateString('vi-VN');
+            }
+            
+            static formatDateTime(date) {
+                return new Date(date).toLocaleString('vi-VN');
+            }
+            
+            static showToast(message, type = 'success', duration = 3000) {
+                // Remove existing toasts
+                document.querySelectorAll('.toast').forEach(toast => toast.remove());
+                
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 15px; cursor: pointer; font-size: 18px; opacity: 0.7;">×</button>
+                `;
+                
+                document.body.appendChild(toast);
+                
+                setTimeout(() => toast.classList.add('show'), 100);
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 500);
+                }, duration);
+            }
+
+            static validateInput(input, message, pattern) {
+                const value = input.value.trim();
+                if (!value) {
+                    this.showError(input, `Vui lòng nhập ${input.previousElementSibling?.textContent.toLowerCase() || 'thông tin'}.`);
+                    return false;
+                }
+                if (pattern && !pattern.test(value)) {
+                    this.showError(input, message);
+                    return false;
+                }
+                this.clearError(input);
+                return true;
+            }
+
+            static showError(input, message) {
+                const formGroup = input.closest('.form-group');
+                formGroup.classList.add('has-error');
+                const errorElement = formGroup.querySelector('.error-message');
+                if (errorElement) errorElement.textContent = message;
+            }
+
+            static clearError(input) {
+                const formGroup = input.closest('.form-group');
+                formGroup.classList.remove('has-error');
+            }
+
+            static showLoading() {
+                document.getElementById('loadingOverlay').classList.add('show');
+            }
+
+            static hideLoading() {
+                document.getElementById('loadingOverlay').classList.remove('show');
+            }
+        }
+
+        // API Functions
+        async function callApi(endpoint, method = 'GET', body = null, requiresAuth = true) {
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (requiresAuth) {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+            }
+            
+            const options = {
+                method,
+                headers,
+                credentials: 'include'
+            };
+            
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Something went wrong');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('API call failed:', error);
+                throw error;
+            }
+        }
+
+        // Global functions for modal management
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    
+                    // Reset form if exists
+                    const form = modal.querySelector('form');
+                    if (form) {
+                        form.reset();
+                        form.querySelectorAll('.form-group.has-error').forEach(group => {
+                            group.classList.remove('has-error');
+                        });
+                        const submitBtn = form.querySelector('.btn-submit');
+                        if (submitBtn) {
+                            submitBtn.classList.remove('loading');
+                            submitBtn.disabled = false;
+                        }
+                    }
+                }, 300);
+            }
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.querySelector(`[onclick*="${inputId}"] i`);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function removeDevice(button) {
+            if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi thiết bị này?')) {
+                button.closest('.device-item').remove();
+                Utils.showToast('Đã đăng xuất khỏi thiết bị', 'success');
+            }
+        }
+
+        function logoutAllDevices() {
+            if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi tất cả thiết bị khác?')) {
+                document.querySelectorAll('.device-item:not(.current)').forEach(item => item.remove());
+                Utils.showToast('Đã đăng xuất khỏi tất cả thiết bị khác', 'success');
+            }
+        }
+
+        function verify2FASetup() {
+            const code = document.getElementById('verify2faCode').value;
+            if (code.length !== 6 || !/^\d{6}$/.test(code)) {
+                Utils.showError(document.getElementById('verify2faCode'), 'Vui lòng nhập mã 6 số');
+                return;
+            }
+            
+            // Simulate verification
+            Utils.showToast('Xác thực 2 bước đã được bật thành công!', 'success');
+            localStorage.setItem('is2FAEnabled', 'true');
+            
+            // Update UI
+            update2FAStatus(true);
+            closeModal('2faModal');
+        }
+
+        function showComingSoon(feature) {
+            Utils.showToast(`Tính năng ${feature} sẽ được cập nhật sớm!`, 'info');
+        }
+
+        // Dropdown Manager
+        class DropdownManager {
+            constructor() {
+                this.setupDropdownEvents();
+            }
+
+            setupDropdownEvents() {
+                document.addEventListener('click', (e) => {
+                    const userDropdown = e.target.closest('.user-dropdown');
+                    if (userDropdown) {
+                        e.stopPropagation();
+                        this.toggleDropdown(userDropdown);
+                    } else {
+                        // Close all dropdowns when clicking outside
+                        document.querySelectorAll('.user-dropdown.active').forEach(dropdown => {
+                            this.closeDropdown(dropdown);
+                        });
+                    }
+                });
+
+                // Close dropdown when pressing Escape
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        document.querySelectorAll('.user-dropdown.active').forEach(dropdown => {
+                            this.closeDropdown(dropdown);
+                        });
+                    }
+                });
+            }
+
+            toggleDropdown(dropdown) {
+                const isActive = dropdown.classList.contains('active');
+                
+                // Close all other dropdowns
+                document.querySelectorAll('.user-dropdown.active').forEach(d => {
+                    if (d !== dropdown) this.closeDropdown(d);
+                });
+                
+                if (isActive) {
+                    this.closeDropdown(dropdown);
+                } else {
+                    this.openDropdown(dropdown);
+                }
+            }
+
+            openDropdown(dropdown) {
+                dropdown.classList.add('active');
+                const chevron = dropdown.querySelector('.fa-chevron-down');
+                if (chevron) {
+                    chevron.style.transform = 'rotate(180deg)';
+                }
+            }
+
+            closeDropdown(dropdown) {
+                dropdown.classList.remove('active');
+                const chevron = dropdown.querySelector('.fa-chevron-down');
+                if (chevron) {
+                    chevron.style.transform = 'rotate(0deg)';
+                }
+            }
+        }
+
+        // Account Manager Class
+        class AccountManager {
+            constructor() {
+                this.currentUser = null;
+                this.init();
+            }
+
+            async init() {
+                Utils.showLoading();
+                
+                try {
+                    await this.loadUserFromToken();
+                    this.setupEventListeners();
+                } catch (error) {
+                    console.error('Initialization error:', error);
+                    this.showLoginPrompt();
+                } finally {
+                    Utils.hideLoading();
+                }
+            }
+
+            async loadUserFromToken() {
+                const token = localStorage.getItem('token');
+                
+                if (!token) {
+                    throw new Error('No token found');
+                }
+
+                try {
+                    // Try to get user data from API
+                    const response = await callApi('/users/me');
+                    this.currentUser = response.data.user;
+                    
+                    // Get balance
+                    try {
+                        const balanceResponse = await callApi('/users/me/balance');
+                        this.currentUser.balance = balanceResponse.data.balance;
+                    } catch (error) {
+                        console.warn('Could not load balance:', error);
+                        this.currentUser.balance = 0;
+                    }
+                    
+                } catch (error) {
+                    console.error('Error loading user:', error);
+                    
+                    // Fallback: try to get from localStorage
+                    const savedUser = localStorage.getItem('currentUser');
+                    if (savedUser) {
+                        this.currentUser = JSON.parse(savedUser);
+                    } else {
+                        throw new Error('No user data available');
+                    }
+                }
+
+                this.loadUserData();
+                this.loadStateFromStorage();
+                this.showAccountLayout();
+            }
+
+            showLoginPrompt() {
+                document.getElementById('loginPrompt').style.display = 'block';
+                document.getElementById('accountLayout').style.display = 'none';
+            }
+
+            showAccountLayout() {
+                document.getElementById('loginPrompt').style.display = 'none';
+                document.getElementById('accountLayout').style.display = 'grid';
+            }
+
+            loadUserData() {
+                if (!this.currentUser) return;
+
+                const firstLetter = this.currentUser.name[0].toUpperCase();
+                
+                // Update user display
+                this.updateElement('accountAvatar', firstLetter);
+                this.updateElement('accountName', this.currentUser.name);
+                this.updateElement('accountId', `ID: ${this.currentUser._id.slice(-6)}`);
+                
+                // Update account info
+                this.updateElement('userFullName', this.currentUser.name);
+                this.updateElement('userEmail', this.currentUser.email);
+                this.updateElement('userPhone', this.currentUser.phone || 'Chưa cập nhật');
+                this.updateElement('userRegisterDate', Utils.formatDate(this.currentUser.createdAt));
+                this.updateElement('userAccountId', this.currentUser._id.slice(-6));
+
+                // Update header user dropdown
+                this.updateHeaderUserDisplay();
+
+                // Save to localStorage for backup
+                localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+            }
+
+            updateHeaderUserDisplay() {
+                const userActions = document.getElementById('userActions');
+                const firstLetter = this.currentUser.name[0].toUpperCase();
+                
+                userActions.innerHTML = `
+                    <div class="user-dropdown">
+                        <div class="user-avatar">${firstLetter}</div>
+                        <span class="user-name">${this.currentUser.name}</span>
+                        <i class="fas fa-chevron-down" style="margin-left: 8px; font-size: 12px; transition: transform 0.3s ease;"></i>
+                        <div class="dropdown-menu">
+                            <a href="account.html" class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span>Tài khoản</span>
+                            </a>
+                            <a href="favorite.html" class="dropdown-item">
+                                <i class="fas fa-heart"></i>
+                                <span>Yêu thích</span>
+                            </a>
+                            <a href="cart.html" class="dropdown-item">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Giỏ hàng</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-item" onclick="accountManager.logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Đăng xuất</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            updateElement(id, value) {
+                const element = document.getElementById(id);
+                if (element) {
+                    if (element.tagName === 'INPUT') {
+                        element.value = value;
+                    } else {
+                        element.textContent = value;
+                    }
+                }
+            }
+
+            loadStateFromStorage() {
+                // Load balance
+                let balance = 0;
+                if (this.currentUser && this.currentUser.balance !== undefined) {
+                    balance = this.currentUser.balance;
+                } else {
+                    balance = localStorage.getItem('userBalance') || '0';
+                }
+                
+                this.updateElement('balanceAmount', Utils.formatPrice(balance) + 'đ');
+                
+                // Load 2FA status
+                const is2FAEnabled = localStorage.getItem('is2FAEnabled') === 'true';
+                update2FAStatus(is2FAEnabled);
+                
+                // Load transaction history
+                this.loadTransactionHistory();
+            }
+
+            async loadTransactionHistory() {
+                const historyList = document.getElementById('historyList');
+                if (!historyList) return;
+
+                try {
+                    const token = localStorage.getItem('token');
+                    if (token) {
+                        const response = await callApi('/users/transactions');
+                        const transactions = response.data.transactions || [];
+                        
+                        if (transactions.length === 0) {
+                            this.showEmptyHistory();
+                            return;
+                        }
+
+                        historyList.innerHTML = transactions.slice().reverse().map(this.createHistoryItemHTML).join('');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error loading transactions:', error);
+                }
+
+                // Fallback to localStorage
+                const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+                
+                if (transactions.length === 0) {
+                    this.showEmptyHistory();
+                    return;
+                }
+
+                historyList.innerHTML = transactions.slice().reverse().map(this.createHistoryItemHTML).join('');
+            }
+
+            showEmptyHistory() {
+                const historyList = document.getElementById('historyList');
+                historyList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <h3>Chưa có giao dịch nào</h3>
+                        <p>Lịch sử giao dịch sẽ hiển thị tại đây.</p>
+                    </div>
+                `;
+            }
+
+            createHistoryItemHTML(transaction) {
+                const iconClass = transaction.type === 'deposit' ? 'success' : 'purchase';
+                const icon = transaction.type === 'deposit' ? 'fa-plus' : 'fa-hand-holding-usd';
+                const amountClass = transaction.type === 'deposit' ? 'success' : 'purchase';
+                const amountPrefix = transaction.type === 'deposit' ? '+' : '-';
+                const title = transaction.type === 'deposit' ? 'Nạp tiền thành công' : 'Yêu cầu rút tiền';
+                const info = transaction.type === 'deposit' ? `Thẻ ${transaction.cardType || transaction.info}` : `Về ${transaction.info}`;
+
+                return `
+                    <div class="history-item">
+                        <div class="history-icon ${iconClass}">
+                            <i class="fas ${icon}"></i>
+                        </div>
+                        <div class="history-details">
+                            <div class="history-title">${title}</div>
+                            <div class="history-date">${Utils.formatDateTime(transaction.date || transaction.createdAt)}</div>
+                            <div class="history-info">${info}</div>
+                        </div>
+                        <div class="history-amount ${amountClass}">
+                            ${amountPrefix}${Utils.formatPrice(transaction.amount)}đ
+                        </div>
+                    </div>
+                `;
+            }
+
+            switchTab(tabId) {
+                // Remove active class from all menu items and tabs
+                document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                
+                // Add active class to selected items
+                const menuItem = document.querySelector(`[data-tab="${tabId}"]`);
+                const tabContent = document.getElementById(tabId + 'Tab');
+                
+                if (menuItem) menuItem.classList.add('active');
+                if (tabContent) tabContent.classList.add('active');
+            }
+
+            async processDeposit() {
+                const form = document.getElementById('depositForm');
+                const submitBtn = form.querySelector('.btn-submit');
+                const cardNumber = document.getElementById('cardNumber').value.trim();
+                const cardSerial = document.getElementById('cardSerial').value.trim();
+                const cardAmount = document.getElementById('cardAmount').value;
+                const cardType = document.querySelector('.card-type.selected')?.getAttribute('data-type');
+
+                // Validate form
+                let isValid = true;
+                
+                if (!Utils.validateInput(document.getElementById('cardNumber'), 'Mã thẻ phải có ít nhất 10 chữ số', /^\d{10,15}$/)) {
+                    isValid = false;
+                }
+                
+                if (!Utils.validateInput(document.getElementById('cardSerial'), 'Số serial phải có ít nhất 5 chữ số', /^\d{5,12}$/)) {
+                    isValid = false;
+                }
+                
+                if (!cardAmount) {
+                    Utils.showError(document.getElementById('cardAmount'), 'Vui lòng chọn mệnh giá');
+                    isValid = false;
+                } else {
+                    Utils.clearError(document.getElementById('cardAmount'));
+                }
+                
+                if (!cardType) {
+                    Utils.showToast('Vui lòng chọn loại thẻ', 'error');
+                    isValid = false;
+                }
+                
+                if (!isValid) return;
+
+                // Show loading state
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+
+                try {
+                    const response = await callApi('/users/deposit', 'POST', {
+                        cardNumber,
+                        cardSerial,
+                        cardType,
+                        amount: parseInt(cardAmount)
+                    });
+
+                    // Update balance
+                    const newBalance = response.data.user.balance;
+                    this.updateElement('balanceAmount', Utils.formatPrice(newBalance) + 'đ');
+                    
+                    // Add to transaction history
+                    const newTransaction = {
+                        type: 'deposit',
+                        amount: parseInt(cardAmount),
+                        cardType: cardType,
+                        info: cardType,
+                        date: new Date().toISOString()
+                    };
+                    
+                    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+                    transactions.push(newTransaction);
+                    localStorage.setItem('transactions', JSON.stringify(transactions));
+                    
+                    this.loadTransactionHistory();
+
+                    Utils.showToast(`Nạp thành công ${Utils.formatPrice(cardAmount)}đ vào tài khoản`, 'success');
+                    closeModal('depositModal');
+
+                } catch (error) {
+                    Utils.showToast(error.message || 'Có lỗi xảy ra khi xử lý thẻ. Vui lòng thử lại', 'error');
+                } finally {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }
+
+            async processWithdraw() {
+                const form = document.getElementById('withdrawForm');
+                const submitBtn = form.querySelector('.btn-submit');
+                const bankAccount = document.getElementById('bankAccount').value;
+                const accountNumber = document.getElementById('accountNumber').value.trim();
+                const accountName = document.getElementById('accountName').value.trim();
+                const withdrawAmount = parseInt(document.getElementById('withdrawAmount').value);
+
+                // Validate form
+                let isValid = true;
+                
+                if (!bankAccount) {
+                    Utils.showError(document.getElementById('bankAccount'), 'Vui lòng chọn ngân hàng');
+                    isValid = false;
+                } else {
+                    Utils.clearError(document.getElementById('bankAccount'));
+                }
+                
+                if (!Utils.validateInput(document.getElementById('accountNumber'), 'Số tài khoản không hợp lệ', /^\d{6,20}$/)) {
+                    isValid = false;
+                }
+                
+                if (!Utils.validateInput(document.getElementById('accountName'), 'Tên chủ tài khoản không được để trống')) {
+                    isValid = false;
+                }
+                
+                if (!withdrawAmount || withdrawAmount < 50000) {
+                    Utils.showError(document.getElementById('withdrawAmount'), 'Số tiền rút tối thiểu là 50,000đ');
+                    isValid = false;
+                } else {
+                    Utils.clearError(document.getElementById('withdrawAmount'));
+                }
+
+                if (!isValid) return;
+
+                // Check balance
+                const currentBalance = this.currentUser.balance || 0;
+                if (withdrawAmount > currentBalance) {
+                    Utils.showToast('Số dư không đủ để thực hiện giao dịch', 'error');
+                    return;
+                }
+
+                // Show loading state
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+
+                try {
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    // Update balance
+                    const newBalance = currentBalance - withdrawAmount;
+                    this.currentUser.balance = newBalance;
+                    this.updateElement('balanceAmount', Utils.formatPrice(newBalance) + 'đ');
+                    
+                    // Add to transaction history
+                    const newTransaction = {
+                        type: 'withdraw',
+                        amount: withdrawAmount,
+                        info: `${bankAccount.toUpperCase()} - ${accountNumber}`,
+                        date: new Date().toISOString()
+                    };
+                    
+                    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+                    transactions.push(newTransaction);
+                    localStorage.setItem('transactions', JSON.stringify(transactions));
+                    
+                    this.loadTransactionHistory();
+
+                    Utils.showToast('Yêu cầu rút tiền đã được gửi thành công!', 'success');
+                    closeModal('withdrawModal');
+
+                } catch (error) {
+                    Utils.showToast('Có lỗi xảy ra. Vui lòng thử lại', 'error');
+                } finally {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }
+
+            async processChangePassword() {
+                const form = document.getElementById('changePasswordForm');
+                const submitBtn = form.querySelector('.btn-submit');
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+                // Validate form
+                let isValid = true;
+                
+                if (!Utils.validateInput(document.getElementById('currentPassword'), 'Vui lòng nhập mật khẩu hiện tại')) {
+                    isValid = false;
+                }
+                
+                if (!Utils.validateInput(document.getElementById('newPassword'), 'Mật khẩu phải có ít nhất 6 ký tự', /^.{6,}$/)) {
+                    isValid = false;
+                }
+                
+                if (newPassword !== confirmNewPassword) {
+                    Utils.showError(document.getElementById('confirmNewPassword'), 'Mật khẩu không khớp');
+                    isValid = false;
+                } else {
+                    Utils.clearError(document.getElementById('confirmNewPassword'));
+                }
+
+                if (!isValid) return;
+
+                // Show loading state
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+
+                try {
+                    const response = await callApi('/users/updateMyPassword', 'PATCH', {
+                        passwordCurrent: currentPassword,
+                        password: newPassword,
+                        passwordConfirm: confirmNewPassword
+                    });
+
+                    Utils.showToast('Đổi mật khẩu thành công!', 'success');
+                    closeModal('changePasswordModal');
+
+                } catch (error) {
+                    Utils.showToast(error.message || 'Có lỗi xảy ra. Vui lòng thử lại', 'error');
+                } finally {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }
+
+            toggle2FA() {
+                const isEnabled = localStorage.getItem('is2FAEnabled') === 'true';
+                
+                if (isEnabled) {
+                    if (confirm('Bạn có chắc chắn muốn tắt Xác thực 2 bước không?')) {
+                        localStorage.setItem('is2FAEnabled', 'false');
+                        update2FAStatus(false);
+                        Utils.showToast('Xác thực 2 bước đã được tắt.', 'info');
+                    }
+                } else {
+                    showModal('2faModal');
+                }
+            }
+
+            logout() {
+                if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                    // Clear all user data
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('currentUser');
+                    localStorage.removeItem('userBalance');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userId');
+                    localStorage.removeItem('is2FAEnabled');
+                    localStorage.removeItem('transactions');
+                    localStorage.removeItem('rememberMe');
+                    
+                    Utils.showToast('Đăng xuất thành công!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                }
+            }
+
+            setupEventListeners() {
+                // Tab switching
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const tabId = e.currentTarget.dataset.tab;
+                        if (tabId) {
+                            this.switchTab(tabId);
+                        }
+                    });
+                });
+                
+                // Balance actions
+                const depositBtn = document.getElementById('depositBtn');
+                const withdrawBtn = document.getElementById('withdrawBtn');
+                
+                if (depositBtn) {
+                    depositBtn.addEventListener('click', () => showModal('depositModal'));
+                }
+                
+                if (withdrawBtn) {
+                    withdrawBtn.addEventListener('click', () => showModal('withdrawModal'));
+                }
+                
+                // Security actions
+                const changePasswordBtn = document.getElementById('changePasswordBtn');
+                const toggle2faBtn = document.getElementById('toggle2faBtn');
+                const manageDevicesBtn = document.getElementById('manageDevicesBtn');
+                
+                if (changePasswordBtn) {
+                    changePasswordBtn.addEventListener('click', () => showModal('changePasswordModal'));
+                }
+                
+                if (toggle2faBtn) {
+                    toggle2faBtn.addEventListener('click', () => this.toggle2FA());
+                }
+                
+                if (manageDevicesBtn) {
+                    manageDevicesBtn.addEventListener('click', () => showModal('deviceManagerModal'));
+                }
+                
+                // Logout buttons
+                const sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
+                
+                if (sidebarLogoutBtn) {
+                    sidebarLogoutBtn.addEventListener('click', () => this.logout());
+                }
+
+                // Setup form events
+                this.setupFormEvents();
+            }
+
+            setupFormEvents() {
+                // Deposit form
+                const depositForm = document.getElementById('depositForm');
+                if (depositForm) {
+                    depositForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.processDeposit();
+                    });
+                }
+
+                // Withdraw form
+                const withdrawForm = document.getElementById('withdrawForm');
+                if (withdrawForm) {
+                    withdrawForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.processWithdraw();
+                    });
+                }
+
+                // Change password form
+                const changePasswordForm = document.getElementById('changePasswordForm');
+                if (changePasswordForm) {
+                    changePasswordForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.processChangePassword();
+                    });
+                }
+
+                // Card type selection
+                document.querySelectorAll('.card-type').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
+                        e.currentTarget.classList.add('selected');
+                    });
+                });
+
+                // Close modal when clicking outside
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            closeModal(modal.id);
+                        }
+                    });
+                });
+            }
+        }
+
+        // Global function to update 2FA status
+        function update2FAStatus(isEnabled) {
+            const statusEl = document.getElementById('2faStatus');
+            const buttonEl = document.getElementById('toggle2faBtn');
+            
+            if (statusEl) {
+                if (isEnabled) {
+                    statusEl.innerHTML = '<span style="color: var(--success-color);">Đã bật</span> - Tăng cường bảo mật cho tài khoản';
+                } else {
+                    statusEl.innerHTML = 'Chưa bật - Tăng cường bảo mật cho tài khoản';
+                }
+            }
+
+            if (buttonEl) {
+                if (isEnabled) {
+                    buttonEl.innerHTML = '<i class="fas fa-toggle-on"></i> <span>Tắt</span>';
+                    buttonEl.style.borderColor = 'var(--success-color)';
+                    buttonEl.style.color = 'var(--success-color)';
+                } else {
+                    buttonEl.innerHTML = '<i class="fas fa-toggle-off"></i> <span>Bật</span>';
+                    buttonEl.style.borderColor = 'var(--border-color)';
+                    buttonEl.style.color = 'var(--dark-color)';
+                }
+            }
+        }
+
+        // Initialize when DOM is loaded
+        let accountManager;
+        let dropdownManager;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                dropdownManager = new DropdownManager();
+                accountManager = new AccountManager();
+                
+                // Make accountManager global for onclick handlers
+                window.accountManager = accountManager;
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+                Utils.hideLoading();
+                Utils.showToast('Có lỗi xảy ra khi khởi tạo trang', 'error');
+                
+                // Show login prompt on error
+                document.getElementById('loginPrompt').style.display = 'block';
+                document.getElementById('accountLayout').style.display = 'none';
+            }
+        });
+
+        // Handle page visibility change to refresh data
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && accountManager && accountManager.currentUser) {
+                accountManager.loadTransactionHistory();
+            }
+        });
+
+        // Add smooth scrolling for better UX
+        document.documentElement.style.scrollBehavior = 'smooth';
+
+        // Add keyboard navigation support
+        document.addEventListener('keydown', (e) => {
+            // ESC key closes modals
+            if (e.key === 'Escape') {
+                const openModal = document.querySelector('.modal.show');
+                if (openModal) {
+                    closeModal(openModal.id);
+                }
+            }
+            
+            // Tab navigation enhancement
+            if (e.key === 'Tab') {
+                const focusedElement = document.activeElement;
+                if (focusedElement && focusedElement.classList.contains('menu-item')) {
+                    focusedElement.style.outline = '2px solid var(--primary-color)';
+                    setTimeout(() => {
+                        focusedElement.style.outline = '';
+                    }, 2000);
+                }
+            }
+        });
+
+        // Add loading states for better UX
+        window.addEventListener('beforeunload', () => {
+            Utils.showLoading();
+        });
+
+        window.addEventListener('load', () => {
+            Utils.hideLoading();
+        });
+
+        // Performance optimization: Lazy load non-critical images
+        const images = document.querySelectorAll('img[data-src]');
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.removeAttribute('data-src');
+                    imageObserver.unobserve(img);
+                }
+            });
+        });
+
+        images.forEach(img => imageObserver.observe(img));
+
+        // Add PWA-like features
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+
+        // Add error boundary for better error handling
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e.error);
+            Utils.showToast('Đã xảy ra lỗi. Vui lòng tải lại trang.', 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            Utils.showToast('Đã xảy ra lỗi kết nối. Vui lòng thử lại.', 'error');
+        });
     </script>
 </body>
 </html>
