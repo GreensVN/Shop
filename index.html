@@ -351,7 +351,6 @@
             isLoggedIn: false,
             user: null,
             favorites: [],
-            cart: []
         };
         
         const localSampleProducts = [
@@ -399,7 +398,7 @@
                     particle.style.width = `${size}px`;
                     particle.style.height = `${size}px`;
                     particle.style.left = `${Math.random() * 100}%`;
-                    particle.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                    particle.style.animationDuration = `${Math.random() * 3 + 4}s`;
                     particle.style.animationDelay = `${Math.random() * 2}s`;
                     this.particleContainer.appendChild(particle);
                 }
@@ -499,33 +498,51 @@
         // =================================================================
 
         function handleAuthForms() {
-            // Login Form
-            document.getElementById('loginForm').addEventListener('submit', e => {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const logoutButton = document.getElementById('logoutButton');
+
+            loginForm.addEventListener('submit', e => {
                 e.preventDefault();
                 const email = e.target.email.value;
                 const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
                 
-                // --- FIX: LOOK UP USER BY EMAIL TO GET CORRECT NAME ---
-                if (registeredUsers[email]) {
-                    const user = registeredUsers[email];
-                    StateManager.login(user);
-                    document.getElementById('authModal').classList.remove('show');
-                    AnimationManager.show({ type: 'welcome', icon: '🎉', title: `Chào mừng, ${user.name}!`, subtitle: 'Đăng nhập thành công' });
-                } else {
-                    AnimationManager.show({ type: 'error', icon: '🤔', title: 'Lỗi Đăng nhập', subtitle: 'Email hoặc mật khẩu không đúng. Vui lòng thử lại.' });
+                // *** LOGIC FIX STARTS HERE ***
+                let userToLogin = registeredUsers[email];
+                
+                // If user doesn't exist, create a temporary one and save it for next time
+                if (!userToLogin) {
+                    const emailUsername = email.split('@')[0];
+                    const tempName = emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1);
+                    
+                    userToLogin = { name: tempName, email: email };
+                    
+                    // Save this new user so they have a proper name next time
+                    registeredUsers[email] = userToLogin;
+                    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
                 }
+                // *** LOGIC FIX ENDS HERE ***
+
+                StateManager.login(userToLogin);
+                document.getElementById('authModal').classList.remove('show');
+                AnimationManager.show({ type: 'welcome', icon: '🎉', title: `Chào mừng, ${userToLogin.name}!`, subtitle: 'Đăng nhập thành công' });
             });
 
-            // Register Form
-            document.getElementById('registerForm').addEventListener('submit', e => {
+            registerForm.addEventListener('submit', e => {
                 e.preventDefault();
-                const name = e.target.name.value;
+                const name = e.target.name.value.trim();
                 const email = e.target.email.value;
                 const password = e.target.password.value;
+                const confirmPassword = e.target.confirmPassword.value;
+
+                if (password !== confirmPassword) {
+                    AnimationManager.show({ type: 'error', icon: '🔑', title: 'Lỗi Đăng ký', subtitle: 'Mật khẩu xác nhận không khớp.' });
+                    return;
+                }
 
                 const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
                 if (registeredUsers[email]) {
-                    AnimationManager.show({ type: 'error', icon: '📧', title: 'Lỗi Đăng ký', subtitle: 'Email này đã được sử dụng. Vui lòng chọn email khác.' });
+                    AnimationManager.show({ type: 'error', icon: '📧', title: 'Lỗi Đăng ký', subtitle: 'Email này đã được sử dụng.' });
                     return;
                 }
                 
@@ -538,8 +555,7 @@
                 AnimationManager.show({ type: 'success', icon: '✅', title: 'Đăng ký thành công!', subtitle: `Chào mừng ${name} đến với Shop!` });
             });
 
-            // Logout Button
-            document.getElementById('logoutButton').addEventListener('click', () => {
+            logoutButton.addEventListener('click', () => {
                 AnimationManager.show({ type: 'logout', icon: '👋', title: 'Tạm biệt!', subtitle: 'Đăng xuất thành công. Hẹn gặp lại bạn!', duration: 2000 });
                 setTimeout(() => StateManager.logout(), 500);
             });
@@ -556,7 +572,6 @@
                 }
 
                 if (addToCartButton) {
-                    // Placeholder for adding to cart
                     AnimationManager.show({ type: 'success', icon: '🛒', title: 'Đã thêm vào giỏ!', subtitle: 'Sản phẩm đã được thêm vào giỏ hàng của bạn.', duration: 2000 });
                 }
             });
@@ -567,7 +582,6 @@
              document.getElementById('loginButton').addEventListener('click', () => authModal.classList.add('show'));
              authModal.querySelector('.modal-close').addEventListener('click', () => authModal.classList.remove('show'));
              
-             // Tab switching logic
              const tabs = authModal.querySelectorAll('.modal-tab');
              const forms = authModal.querySelectorAll('.modal-form');
              tabs.forEach(tab => {
@@ -582,9 +596,11 @@
                  e.preventDefault();
                  document.querySelector('[data-tab="register"]').click();
              });
-             document.querySelector('.switch-to-login').addEventListener('click', e => {
-                 e.preventDefault();
-                 document.querySelector('[data-tab="login"]').click();
+             document.querySelectorAll('.switch-to-login').forEach(el => {
+                el.addEventListener('click', e => {
+                    e.preventDefault();
+                    document.querySelector('[data-tab="login"]').click();
+                });
              });
         }
         
@@ -596,7 +612,6 @@
             handleProductInteractions();
         }
 
-        // Run on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', initPage);
 
     })();
