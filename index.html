@@ -6,11 +6,476 @@
     <meta name="description" content="Shop Grow A Garden - Chuyên cung cấp giống cây trồng, thú cưng và tài khoản game chất lượng">
     <title>Shop Grow A Garden - Dịch Vụ & Giống Cây Chất Lượng</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <style>
+        /* Enhanced UI Styles */
+        .header {
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-link {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::before {
+            width: 100%;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+            color: #4f46e5;
+        }
+
+        .nav-link i {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover i {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.6s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:hover::before {
+            width: 300%;
+            height: 300%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1.5" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.08)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateX(0px) translateY(0px); }
+            33% { transform: translateX(10px) translateY(-10px); }
+            66% { transform: translateX(-10px) translateY(10px); }
+        }
+
+        .hero-title {
+            animation: slideInUp 1s ease-out;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            animation: slideInUp 1s ease-out 0.3s both;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .filter-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .filter-input, .filter-select {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: white;
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .filter-input:focus, .filter-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .user-dropdown {
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .dropdown-menu {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border: none;
+            animation: dropdownSlide 0.3s ease-out;
+        }
+
+        @keyframes dropdownSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 4px 8px;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .dropdown-item i {
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-item:hover i {
+            transform: scale(1.2);
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .modal-content {
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            animation: modalSlide 0.4s ease-out;
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-tab {
+            transition: all 0.3s ease;
+            border-radius: 10px 10px 0 0;
+            position: relative;
+        }
+
+        .modal-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .modal-tab:hover:not(.active) {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .password-toggle {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: #667eea;
+            transform: scale(1.1);
+        }
+
+        .back-to-top {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1000;
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+            animation: bounceIn 0.5s ease-out;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .messenger-float {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .messenger-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px rgba(0, 123, 255, 0.4);
+        }
+
+        .messenger-float img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .btn-submit.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-submit.loading span {
+            opacity: 0.7;
+        }
+
+        /* Enhanced Card Types */
+        .card-type {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .card-type:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-type.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        }
+
+        /* Enhanced Form Groups */
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus + label,
+        .form-group input:not(:placeholder-shown) + label {
+            transform: translateY(-25px) scale(0.85);
+            color: #667eea;
+        }
+
+        /* Enhanced Social Buttons */
+        .social-button {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            padding: 12px;
+            cursor: pointer;
+        }
+
+        .social-button.facebook:hover {
+            background: #1877f2;
+            color: white;
+            border-color: #1877f2;
+            transform: translateY(-2px);
+        }
+
+        .social-button.google:hover {
+            background: #db4437;
+            color: white;
+            border-color: #db4437;
+            transform: translateY(-2px);
+        }
+
+        /* Enhanced Products Grid */
+        .products-grid {
+            animation: fadeInUp 1s ease-out 0.5s both;
+        }
+
+        /* Footer Enhancements */
+        .footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="footerPattern" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23footerPattern)"/></svg>');
+        }
+
+        .footer-link a {
+            transition: all 0.3s ease;
+        }
+
+        .footer-link a:hover {
+            color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .footer-link i {
+            transition: transform 0.3s ease;
+        }
+
+        .footer-link a:hover i {
+            transform: scale(1.2);
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
-    <header class="header">
+    <header class="header" id="header">
         <div class="container header-container">
             <a href="index.html">
                 <img src="https://i.ibb.co/q3r1hTft/8574d186247eba75669b7d50d42bd650-png.png" alt="Shop Grow A Garden" class="logo">
@@ -40,7 +505,7 @@
                 <span class="user-name" id="userName">User</span>
                 <div class="dropdown-menu">
                     <a href="account.html" class="dropdown-item">
-                        <i class="fas fa-user"></i>
+                        <i class="fas fa-user-circle"></i>
                         <span>Tài khoản</span>
                     </a>
                     <a href="cart.html" class="dropdown-item">
@@ -90,14 +555,16 @@
                     <i class="fas fa-money-bill-wave"></i>
                     <span>Nạp tiền</span>
                 </div>
-                <a href="cart.html" class="account-action" data-action="cart">
+                <div class="account-action coming-soon-action" data-action="cart">
                     <i class="fas fa-shopping-cart"></i>
                     <span>Giỏ hàng</span>
-                </a>
-                <a href="favorite.html" class="account-action" data-action="favorite">
+                    <small class="coming-soon-badge">Coming Soon</small>
+                </div>
+                <div class="account-action coming-soon-action" data-action="favorite">
                     <i class="fas fa-heart"></i>
                     <span>Yêu thích</span>
-                </a>
+                    <small class="coming-soon-badge">Coming Soon</small>
+                </div>
                 <div class="account-action coming-soon-action" data-action="history">
                     <i class="fas fa-history"></i>
                     <span>Lịch sử</span>
@@ -116,12 +583,24 @@
     <div class="modal" id="depositModal">
         <div class="modal-content deposit-modal">
             <button class="modal-close" id="closeDepositModal" aria-label="Đóng">&times;</button>
-            <h2 class="modal-title">Nạp tiền bằng thẻ cào</h2>
+            <h2 class="modal-title">
+                <i class="fas fa-credit-card"></i>
+                Nạp tiền bằng thẻ cào
+            </h2>
             
             <div class="deposit-steps">
-                <div class="step active" data-step="1">1. Chọn loại thẻ</div>
-                <div class="step" data-step="2">2. Nhập thông tin</div>
-                <div class="step" data-step="3">3. Hoàn thành</div>
+                <div class="step active" data-step="1">
+                    <i class="fas fa-mobile-alt"></i>
+                    1. Chọn loại thẻ
+                </div>
+                <div class="step" data-step="2">
+                    <i class="fas fa-edit"></i>
+                    2. Nhập thông tin
+                </div>
+                <div class="step" data-step="3">
+                    <i class="fas fa-check-circle"></i>
+                    3. Hoàn thành
+                </div>
             </div>
             
             <div class="card-types">
@@ -145,19 +624,28 @@
             
             <form class="deposit-form" id="depositForm">
                 <div class="form-group">
-                    <label for="cardNumber">Mã thẻ <small>(10-15 chữ số)</small></label>
+                    <label for="cardNumber">
+                        <i class="fas fa-hashtag"></i>
+                        Mã thẻ <small>(10-15 chữ số)</small>
+                    </label>
                     <input type="text" id="cardNumber" name="cardNumber" placeholder="Nhập mã thẻ" required maxlength="15">
                     <div class="error-message"></div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="cardSerial">Số serial <small>(5-12 chữ số)</small></label>
+                    <label for="cardSerial">
+                        <i class="fas fa-barcode"></i>
+                        Số serial <small>(5-12 chữ số)</small>
+                    </label>
                     <input type="text" id="cardSerial" name="cardSerial" placeholder="Nhập số serial" required maxlength="12">
                     <div class="error-message"></div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="cardAmount">Mệnh giá</label>
+                    <label for="cardAmount">
+                        <i class="fas fa-money-bill"></i>
+                        Mệnh giá
+                    </label>
                     <select id="cardAmount" name="cardAmount" class="filter-input" required>
                         <option value="">-- Chọn mệnh giá --</option>
                         <option value="10000">10,000đ</option>
@@ -183,7 +671,10 @@
             </form>
             
             <div class="deposit-history" id="depositHistory">
-                <h3>Lịch sử nạp tiền gần đây</h3>
+                <h3>
+                    <i class="fas fa-clock"></i>
+                    Lịch sử nạp tiền gần đây
+                </h3>
                 <div class="history-list">
                     <!-- Nội dung sẽ được thêm bằng JavaScript -->
                 </div>
@@ -196,7 +687,7 @@
         <div class="modal-content">
             <button class="modal-close" id="closeComingSoonModal" aria-label="Đóng">&times;</button>
             <div class="coming-soon">
-                <i class="fas fa-clock"></i>
+                <i class="fas fa-rocket"></i>
                 <h3>Tính năng đang phát triển</h3>
                 <p>Chúng tôi đang nỗ lực để mang đến cho bạn trải nghiệm tốt nhất. Vui lòng quay lại sau!</p>
             </div>
@@ -206,7 +697,10 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="container hero-container">
-            <h1 class="hero-title">Dịch Vụ Grow A Garden</h1>
+            <h1 class="hero-title">
+                <i class="fas fa-store"></i>
+                Dịch Vụ Grow A Garden
+            </h1>
             <p class="hero-subtitle">Khám phá các dịch vụ và sản phẩm chất lượng cao với giá cả hợp lý nhất thị trường</p>
         </div>
     </section>
@@ -215,16 +709,25 @@
     <main class="container">
         <!-- Filter Section -->
         <section class="filter-section">
-            <span class="filter-title">BỘ LỌC TÌM KIẾM</span>
+            <span class="filter-title">
+                <i class="fas fa-filter"></i>
+                BỘ LỌC TÌM KIẾM
+            </span>
             
             <div class="filter-grid">
                 <div class="filter-group">
-                    <label for="id" class="filter-label">Mã Số ID Sản Phẩm</label>
+                    <label for="id" class="filter-label">
+                        <i class="fas fa-hashtag"></i>
+                        Mã Số ID Sản Phẩm
+                    </label>
                     <input type="text" id="id" name="id" class="filter-input" placeholder="Nhập Mã Số ID Sản Phẩm...">
                 </div>
                 
                 <div class="filter-group">
-                    <label for="price" class="filter-label">Giá Tiền</label>
+                    <label for="price" class="filter-label">
+                        <i class="fas fa-money-bill-wave"></i>
+                        Giá Tiền
+                    </label>
                     <select id="price" name="price" class="filter-input filter-select">
                         <option value="">-- Chọn Giá Tiền --</option>
                         <option value="duoi-50k">Dưới 50K</option>
@@ -236,18 +739,21 @@
                 </div>
                 
                 <div class="filter-group">
-                    <label for="ghichu" class="filter-label">Ghi Chú</label>
+                    <label for="ghichu" class="filter-label">
+                        <i class="fas fa-sticky-note"></i>
+                        Ghi Chú
+                    </label>
                     <input type="text" id="ghichu" name="ghichu" class="filter-input" placeholder="Nhập ghi chú...">
                 </div>
             </div>
             
             <div class="filter-actions">
                 <button class="btn btn-primary" type="button" id="filterButton">
-                    <i class="fas fa-filter"></i>
+                    <i class="fas fa-search"></i>
                     <span>Lọc</span>
                 </button>
                 <button class="btn btn-outline" type="button" id="resetButton">
-                    <i class="fas fa-times"></i>
+                    <i class="fas fa-refresh"></i>
                     <span>Xóa Lọc</span>
                 </button>
             </div>
@@ -314,35 +820,51 @@
     <div class="modal" id="authModal">
         <div class="modal-content">
             <button class="modal-close" id="closeModal" aria-label="Đóng">&times;</button>
-            <h2 class="modal-title">Chào mừng bạn</h2>
+            <h2 class="modal-title">
+                <i class="fas fa-user-circle"></i>
+                Chào mừng bạn
+            </h2>
             
             <div class="modal-tabs">
-                <div class="modal-tab active" data-tab="login">Đăng nhập</div>
-                <div class="modal-tab" data-tab="register">Đăng ký</div>
+                <div class="modal-tab active" data-tab="login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Đăng nhập
+                </div>
+                <div class="modal-tab" data-tab="register">
+                    <i class="fas fa-user-plus"></i>
+                    Đăng ký
+                </div>
             </div>
             
             <!-- Login Form -->
             <form class="modal-form active" id="loginForm">
                 <div class="form-group">
-                    <label for="loginEmail">Email</label>
+                    <label for="loginEmail">
+                        <i class="fas fa-envelope"></i>
+                        Email
+                    </label>
                     <input type="email" id="loginEmail" name="email" placeholder="Nhập email của bạn" required>
-                    <div class="error-message" id="loginEmailError"></div>
+                    <div class="error-message"></div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="loginPassword">Mật khẩu</label>
-                    <div class="password-input-wrapper">
-                        <input type="password" id="loginPassword" name="password" placeholder="Nhập mật khẩu" required>
-                        <span class="password-toggle" data-target="loginPassword">
-                            <i class="fas fa-eye"></i>
-                        </span>
-                    </div>
-                    <div class="error-message" id="loginPasswordError"></div>
+                    <label for="loginPassword">
+                        <i class="fas fa-lock"></i>
+                        Mật khẩu
+                    </label>
+                    <input type="password" id="loginPassword" name="password" placeholder="Nhập mật khẩu" required>
+                    <span class="password-toggle">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <div class="error-message"></div>
                 </div>
                 
                 <div class="remember-me">
                     <input type="checkbox" id="rememberMe" name="remember">
-                    <label for="rememberMe">Ghi nhớ đăng nhập</label>
+                    <label for="rememberMe">
+                        <i class="fas fa-check"></i>
+                        Ghi nhớ đăng nhập
+                    </label>
                 </div>
                 
                 <div class="modal-actions">
@@ -352,7 +874,10 @@
                         <div class="spinner"></div>
                     </button>
                     
-                    <button type="button" class="modal-link" id="forgotPassword">Quên mật khẩu?</button>
+                    <button type="button" class="modal-link" id="forgotPassword">
+                        <i class="fas fa-question-circle"></i>
+                        Quên mật khẩu?
+                    </button>
                 </div>
                 
                 <div class="form-footer">
@@ -363,37 +888,45 @@
             <!-- Register Form -->
             <form class="modal-form" id="registerForm">
                 <div class="form-group">
-                    <label for="registerName">Họ và tên</label>
+                    <label for="registerName">
+                        <i class="fas fa-user"></i>
+                        Họ và tên
+                    </label>
                     <input type="text" id="registerName" name="name" placeholder="Nhập họ và tên" required>
-                    <div class="error-message" id="registerNameError"></div>
+                    <div class="error-message"></div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="registerEmail">Email</label>
+                    <label for="registerEmail">
+                        <i class="fas fa-envelope"></i>
+                        Email
+                    </label>
                     <input type="email" id="registerEmail" name="email" placeholder="Nhập email của bạn" required>
-                    <div class="error-message" id="registerEmailError"></div>
+                    <div class="error-message"></div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="registerPassword">Mật khẩu</label>
-                    <div class="password-input-wrapper">
-                        <input type="password" id="registerPassword" name="password" placeholder="Nhập mật khẩu (ít nhất 6 ký tự)" required minlength="6">
-                        <span class="password-toggle" data-target="registerPassword">
-                            <i class="fas fa-eye"></i>
-                        </span>
-                    </div>
-                    <div class="error-message" id="registerPasswordError"></div>
+                    <label for="registerPassword">
+                        <i class="fas fa-lock"></i>
+                        Mật khẩu
+                    </label>
+                    <input type="password" id="registerPassword" name="password" placeholder="Nhập mật khẩu (ít nhất 6 ký tự)" required minlength="6">
+                    <span class="password-toggle">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <div class="error-message"></div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="registerConfirmPassword">Nhập lại mật khẩu</label>
-                    <div class="password-input-wrapper">
-                        <input type="password" id="registerConfirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu" required>
-                        <span class="password-toggle" data-target="registerConfirmPassword">
-                            <i class="fas fa-eye"></i>
-                        </span>
-                    </div>
-                    <div class="error-message" id="registerConfirmPasswordError"></div>
+                    <label for="registerConfirmPassword">
+                        <i class="fas fa-key"></i>
+                        Nhập lại mật khẩu
+                    </label>
+                    <input type="password" id="registerConfirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu" required>
+                    <span class="password-toggle">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <div class="error-message"></div>
                 </div>
                 
                 <button type="submit" class="btn btn-primary btn-submit">
@@ -427,16 +960,23 @@
     <div class="modal" id="forgotPasswordModal">
         <div class="modal-content">
             <button class="modal-close" id="closeForgotModal" aria-label="Đóng">&times;</button>
-            <h2 class="modal-title">Quên mật khẩu</h2>
+            <h2 class="modal-title">
+                <i class="fas fa-key"></i>
+                Quên mật khẩu
+            </h2>
             
             <form class="modal-form" id="forgotPasswordForm">
                 <div class="form-group">
-                    <label for="forgotEmail">Email</label>
+                    <label for="forgotEmail">
+                        <i class="fas fa-envelope"></i>
+                        Email
+                    </label>
                     <input type="email" id="forgotEmail" name="email" placeholder="Nhập email của bạn" required>
-                    <div class="error-message" id="forgotEmailError"></div>
+                    <div class="error-message"></div>
                 </div>
                 
                 <p style="font-size: 0.9rem; color: var(--gray-color); margin-bottom: 15px;">
+                    <i class="fas fa-info-circle"></i>
                     Chúng tôi sẽ gửi link đặt lại mật khẩu đến email của bạn.
                 </p>
                 
@@ -447,7 +987,10 @@
                 </button>
                 
                 <div class="form-footer" style="margin-top: 15px;">
-                    <a href="#" class="switch-to-login">Quay lại đăng nhập</a>
+                    <a href="#" class="switch-to-login">
+                        <i class="fas fa-arrow-left"></i>
+                        Quay lại đăng nhập
+                    </a>
                 </div>
             </form>
         </div>
@@ -455,5 +998,97 @@
 
     <script src="main.js"></script>
     <script src="script.js"></script>
+    <script>
+        // Enhanced JavaScript for better UX
+        document.addEventListener('DOMContentLoaded', function() {
+            // Header scroll effect
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 100) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // Back to top button
+            const backToTop = document.getElementById('backToTop');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTop.classList.add('show');
+                } else {
+                    backToTop.classList.remove('show');
+                }
+            });
+
+            backToTop.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            // Enhanced password toggle
+            document.querySelectorAll('.password-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    const input = this.previousElementSibling;
+                    const icon = this.querySelector('i');
+                    
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
+
+            // Enhanced form submission with loading state
+            document.querySelectorAll('.btn-submit').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    this.classList.add('loading');
+                    
+                    // Remove loading state after 3 seconds (simulate API call)
+                    setTimeout(() => {
+                        this.classList.remove('loading');
+                    }, 3000);
+                });
+            });
+
+            // Enhanced card type selection
+            document.querySelectorAll('.card-type').forEach(card => {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('.card-type').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+
+            // Smooth animations for elements
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe elements for animation
+            document.querySelectorAll('.filter-section, .products-grid').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'all 0.6s ease';
+                observer.observe(el);
+            });
+        });
+    </script>
 </body>
 </html>
