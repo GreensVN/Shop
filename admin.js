@@ -69,9 +69,6 @@ class AdminPanel {
         this.logoutBtn.addEventListener('click', () => window.logout());
     }
 
-    // =======================================================
-    // HÀM ĐĂNG NHẬP ĐƯỢC TỐI ƯU HÓA
-    // =======================================================
     async handleAdminLogin(e) {
         e.preventDefault();
         this.loginError.textContent = '';
@@ -87,8 +84,6 @@ class AdminPanel {
                 window.Utils.showToast(`Chào mừng Admin ${user.name}!`, 'success');
                 this.showDashboard();
             } else {
-                // Đăng xuất "thầm lặng" mà không hỏi người dùng.
-                // Vì họ đăng nhập thành công nhưng không có quyền.
                 localStorage.removeItem('token');
                 localStorage.removeItem('currentUser');
                 window.currentUser = null;
@@ -100,7 +95,6 @@ class AdminPanel {
             this.toggleButtonLoading(this.loginSubmitBtn, false);
         }
     }
-    // =======================================================
 
     async fetchAndRenderProducts() {
         this.productListBody.innerHTML = `<tr><td colspan="5" class="loading-spinner-container"><div class="spinner" style="display:inline-block; border-top-color: var(--primary-color);"></div></td></tr>`;
@@ -212,6 +206,7 @@ class AdminPanel {
     }
 
     getFormData() {
+        const MAX_INT_VALUE = 2147483647; // Giá trị tối đa cho số nguyên 32-bit
         const data = {
             title: this.form.querySelector('#title').value.trim(),
             category: this.form.querySelector('#category').value.trim(),
@@ -229,10 +224,32 @@ class AdminPanel {
         const badge = this.form.querySelector('#badge').value.trim();
         if (badge) data.badge = badge.toUpperCase();
 
+        // === SỬA LỖI & VALIDATION ===
+        // 1. Kiểm tra các trường bắt buộc
         if (!data.title || isNaN(data.price) || isNaN(data.stock)) {
             window.Utils.showToast('Vui lòng điền các trường bắt buộc: Tên, Giá, Tồn kho.', 'error');
             return null;
         }
+        
+        // 2. Kiểm tra giá trị số có quá lớn không để tránh lỗi server 500
+        if (data.price > MAX_INT_VALUE || (data.oldPrice && data.oldPrice > MAX_INT_VALUE)) {
+            window.Utils.showToast(`Giá sản phẩm không được vượt quá ${MAX_INT_VALUE.toLocaleString('vi-VN')}.`, 'error');
+            return null;
+        }
+
+        // 3. Kiểm tra link hình ảnh
+        if(data.images.length === 0) {
+            window.Utils.showToast('Vui lòng cung cấp ít nhất một link hình ảnh.', 'error');
+            return null;
+        }
+        for (const url of data.images) {
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                window.Utils.showToast(`Link hình ảnh "${url.slice(0, 30)}..." không hợp lệ. Phải bắt đầu bằng http:// hoặc https://`, 'error');
+                return null;
+            }
+        }
+        // === KẾT THÚC SỬA LỖI ===
+
         return data;
     }
 
@@ -243,9 +260,23 @@ class AdminPanel {
             const imgWrapper = document.createElement('div');
             imgWrapper.className = 'preview-img-wrapper';
             const img = document.createElement('img');
-            img.src = url;
             img.className = 'preview-img';
-            img.onerror = () => { img.src = 'https://via.placeholder.com/80?text=Lỗi' };
+
+            // === SỬA LỖI ===
+            // Kiểm tra link trước khi gán vào src để tránh lỗi console
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+                img.src = url;
+            } else {
+                // Nếu link không hợp lệ, dùng ảnh thay thế ngay lập tức
+                img.src = 'https://via.placeholder.com/80?text=Link+Sai';
+                img.title = `Link không hợp lệ: ${url}`;
+            }
+            // === KẾT THÚC SỬA LỖI ===
+            
+            img.onerror = () => { 
+                img.src = 'https://via.placeholder.com/80?text=Lỗi+Tải';
+                img.title = `Không thể tải ảnh từ: ${url}`;
+             };
             imgWrapper.appendChild(img);
             this.imagePreview.appendChild(imgWrapper);
         });
