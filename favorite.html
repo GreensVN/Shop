@@ -4,105 +4,171 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sản phẩm yêu thích - Shop Grow A Garden</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header (giống index.html) -->
+    <!-- SỬA LỖI: Đồng bộ cấu trúc header với index.html -->
+    <header class="header" id="header">
+        <div class="container header-container">
+            <a href="index.html">
+                <img src="https://i.ibb.co/q3r1hTft/8574d186247eba75669b7d50d42bd650-png.png" alt="Shop Grow A Garden" class="logo">
+            </a>
+            
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link"><i class="fas fa-home"></i><span>Trang Chủ</span></a>
+                <a href="#" class="nav-link"><i class="fas fa-seedling"></i><span>Giống Cây</span></a>
+                <a href="#" class="nav-link"><i class="fas fa-paw"></i><span>Thú Cưng</span></a>
+                <a href="#" class="nav-link"><i class="fas fa-gamepad"></i><span>Tài Khoản Game</span></a>
+            </nav>
+
+            <!-- Vùng chứa cho trạng thái người dùng, sẽ được JS cập nhật -->
+            <div id="user-section-placeholder">
+                <button class="btn btn-primary" id="loginButton">
+                    <i class="fas fa-user"></i>
+                    <span>Đăng Nhập</span>
+                </button>
+            </div>
+        </div>
+    </header>
 
     <main class="container">
-        <h1 class="page-title">Sản phẩm yêu thích</h1>
-        
+        <h1 class="page-title"><i class="fas fa-heart"></i> Sản Phẩm Yêu Thích</h1>
         <div class="products-grid" id="favoritesGrid">
-            <!-- Sản phẩm yêu thích sẽ được tải bằng JavaScript -->
-            <div class="empty-favorites">
-                <i class="fas fa-heart"></i>
-                <h3>Chưa có sản phẩm yêu thích</h3>
-                <p>Hãy thêm sản phẩm vào danh sách yêu thích!</p>
-                <a href="index.html" class="btn btn-primary">Khám phá sản phẩm</a>
-            </div>
+            <!-- Nâng cấp: Sản phẩm yêu thích sẽ được JS render ở đây, cùng với các trạng thái khác -->
         </div>
     </main>
 
-    <!-- Footer (giống index.html) -->
+    <footer class="footer">
+        <!-- Nội dung footer giữ nguyên như index.html -->
+    </footer>
+    
+    <!-- Modal xác thực được lấy từ index.html để đảm bảo tính nhất quán -->
+    <div class="modal" id="authModal" style="display: none;">
+        <!-- ... Toàn bộ nội dung của #authModal từ index.html nên được đặt ở đây ... -->
+    </div>
 
     <script src="main.js"></script>
     <script>
-    // favorite.js
-    document.addEventListener('DOMContentLoaded', async function() {
-        await loadFavorites();
-    });
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            
+            // Luôn khởi tạo modal để nút "Đăng nhập" từ thông báo có thể hoạt động
+            initAuthModal();
 
-    async function loadFavorites() {
-        const favoritesGrid = document.getElementById('favoritesGrid');
-        
-        try {
-            const favorites = await getFavorites();
-            
-            if (favorites.length === 0) {
-                favoritesGrid.innerHTML = `
-                    <div class="empty-favorites">
-                        <i class="fas fa-heart"></i>
-                        <h3>Chưa có sản phẩm yêu thích</h3>
-                        <p>Hãy thêm sản phẩm vào danh sách yêu thích!</p>
-                        <a href="index.html" class="btn btn-primary">Khám phá sản phẩm</a>
-                    </div>
-                `;
-                return;
+            if (token) {
+                // Nếu đã đăng nhập, cập nhật UI và tải danh sách yêu thích
+                updateUIAfterLogin().then(loadFavorites);
+            } else {
+                // NÂNG CẤP: Xử lý khi chưa đăng nhập
+                displayLoginPrompt();
             }
-            
-            let favoritesHTML = '';
-            
-            for (const product of favorites) {
-                favoritesHTML += `
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="${product.images[0] || 'https://via.placeholder.com/300'}" alt="${product.title}" loading="lazy">
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-title">${product.title}</h3>
-                            <div class="product-price">${window.formatPrice(product.price)}đ</div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn btn-outline add-to-cart" data-id="${product._id}">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span>Thêm vào giỏ</span>
-                            </button>
-                            <button class="btn btn-icon favorite-btn active" data-id="${product._id}">
-                                <i class="fas fa-heart"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            favoritesGrid.innerHTML = favoritesHTML;
-            
-            // Gắn sự kiện
-            document.querySelectorAll('.add-to-cart').forEach(button => {
-                button.addEventListener('click', function() {
-                    const productId = this.getAttribute('data-id');
-                    addToCart(productId);
-                });
-            });
-            
-            document.querySelectorAll('.favorite-btn').forEach(button => {
-                button.addEventListener('click', async function() {
-                    const productId = this.getAttribute('data-id');
-                    await removeFromFavorites(productId);
-                });
-            });
-            
-        } catch (error) {
+        });
+
+        // NÂNG CẤP: Hàm hiển thị thông báo yêu cầu đăng nhập
+        function displayLoginPrompt() {
+            const favoritesGrid = document.getElementById('favoritesGrid');
             favoritesGrid.innerHTML = `
-                <div class="error-favorites">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Đã xảy ra lỗi</h3>
-                    <p>Không thể tải danh sách yêu thích. Vui lòng thử lại sau.</p>
+                <div class="empty-state">
+                    <i class="fas fa-sign-in-alt empty-state-icon"></i>
+                    <h3 class="empty-state-title">Vui lòng đăng nhập</h3>
+                    <p class="empty-state-text">Bạn cần đăng nhập để xem danh sách sản phẩm yêu thích của mình.</p>
+                    <button class="btn btn-primary" id="loginRedirectButton">Đăng nhập ngay</button>
+                </div>
+            `;
+            document.getElementById('loginRedirectButton').addEventListener('click', () => {
+                const authModal = document.getElementById('authModal');
+                authModal.style.display = 'flex';
+                setTimeout(() => authModal.classList.add('show'), 10);
+            });
+        }
+
+        // NÂNG CẤP: Hàm hiển thị thông báo danh sách yêu thích trống
+        function showEmptyFavoritesMessage() {
+            const favoritesGrid = document.getElementById('favoritesGrid');
+            favoritesGrid.innerHTML = `
+                <div class="empty-state">
+                    <i class="far fa-heart empty-state-icon"></i>
+                    <h3 class="empty-state-title">Danh sách yêu thích trống</h3>
+                    <p class="empty-state-text">Hãy khám phá và thêm những sản phẩm bạn yêu thích vào đây nhé!</p>
+                    <a href="index.html" class="btn btn-primary">Khám phá ngay</a>
                 </div>
             `;
         }
-    }
+
+        async function loadFavorites() {
+            const favoritesGrid = document.getElementById('favoritesGrid');
+            favoritesGrid.innerHTML = '<div class="loading-placeholder"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>';
+
+            try {
+                const favorites = await getFavorites();
+                if (!favorites || favorites.length === 0) {
+                    showEmptyFavoritesMessage();
+                    return;
+                }
+
+                favoritesGrid.innerHTML = ''; // Xóa placeholder
+                favorites.forEach(product => {
+                    if (!product || !product._id) return;
+                    const productCard = createFavoriteProductCard(product);
+                    favoritesGrid.appendChild(productCard);
+                });
+                attachFavoritePageEventListeners();
+            } catch (error) {
+                favoritesGrid.innerHTML = `<div class="error-state">Lỗi khi tải danh sách yêu thích.</div>`;
+            }
+        }
+        
+        function createFavoriteProductCard(product) {
+            const card = document.createElement('div');
+            card.className = 'product-card fade-in';
+            card.setAttribute('data-product-id', product._id);
+            card.innerHTML = `
+                <div class="product-image">
+                    <img src="${product.images && product.images.length > 0 ? product.images[0] : 'placeholder.jpg'}" alt="${product.title}" loading="lazy">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">${product.title}</h3>
+                    <div class="product-price">${formatPrice(product.price)}đ</div>
+                </div>
+                <div class="product-actions">
+                    <button class="btn btn-outline add-to-cart" data-id="${product._id}"><i class="fas fa-shopping-cart"></i></button>
+                    <button class="btn-favorite active" data-id="${product._id}"><i class="fas fa-heart"></i></button>
+                </div>
+            `;
+            return card;
+        }
+
+        function attachFavoritePageEventListeners() {
+            const favoritesGrid = document.getElementById('favoritesGrid');
+            favoritesGrid.addEventListener('click', function(e) {
+                const cartButton = e.target.closest('.add-to-cart');
+                const favoriteButton = e.target.closest('.btn-favorite');
+
+                if (cartButton) {
+                    addToCart(cartButton.dataset.id);
+                }
+
+                if (favoriteButton) {
+                    const productId = favoriteButton.dataset.id;
+                    removeFromFavorites(productId).then(success => {
+                        if (success) {
+                            const cardToRemove = document.querySelector(`.product-card[data-product-id="${productId}"]`);
+                            if (cardToRemove) {
+                                cardToRemove.classList.add('fade-out'); // Thêm hiệu ứng
+                                setTimeout(() => {
+                                    cardToRemove.remove();
+                                    // SỬA LỖI: Kiểm tra nếu danh sách rỗng thì hiển thị thông báo
+                                    if (favoritesGrid.children.length === 0) {
+                                        showEmptyFavoritesMessage();
+                                    }
+                                }, 500);
+                            }
+                        }
+                    });
+                }
+            });
+        }
     </script>
 </body>
 </html>
