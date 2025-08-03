@@ -115,7 +115,7 @@ class AdminPanel {
         
         this.productListBody.innerHTML = this.products.map(p => `
             <tr id="product-row-${p._id}">
-                <td><img src="${p.images && p.images.length > 0 ? p.images[0] : 'https://via.placeholder.com/50'}" alt="${p.title}"></td>
+                <td><img src="${p.images && p.images.length > 0 ? p.images[0] : 'https://via.placeholder.com/50?text=No+Img'}" alt="${p.title}"></td>
                 <td>${p.title}</td>
                 <td>${window.Utils.formatPrice(p.price)}</td>
                 <td>${p.stock}</td>
@@ -132,7 +132,7 @@ class AdminPanel {
         this.toggleButtonLoading(this.submitBtn, true);
 
         const productData = this.getFormData();
-        if (!productData) {
+        if (!productData) { // Nếu dữ liệu không hợp lệ, getFormData sẽ trả về null
             this.toggleButtonLoading(this.submitBtn, false);
             return;
         }
@@ -147,7 +147,9 @@ class AdminPanel {
             this.resetForm();
             await this.fetchAndRenderProducts();
         } catch (error) {
-            window.Utils.showToast(error.message || 'Thao tác thất bại.', 'error');
+            // Hiển thị lỗi từ API để người dùng biết vấn đề
+            const errorMessage = error.response?.data?.message || error.message || 'Thao tác thất bại.';
+            window.Utils.showToast(`API Error: ${errorMessage}`, 'error');
         } finally {
             this.toggleButtonLoading(this.submitBtn, false);
         }
@@ -206,7 +208,6 @@ class AdminPanel {
     }
 
     getFormData() {
-        const MAX_INT_VALUE = 2147483647; // Giá trị tối đa cho số nguyên 32-bit
         const data = {
             title: this.form.querySelector('#title').value.trim(),
             category: this.form.querySelector('#category').value.trim(),
@@ -226,27 +227,30 @@ class AdminPanel {
 
         // === SỬA LỖI & VALIDATION ===
         // 1. Kiểm tra các trường bắt buộc
-        if (!data.title || isNaN(data.price) || isNaN(data.stock)) {
-            window.Utils.showToast('Vui lòng điền các trường bắt buộc: Tên, Giá, Tồn kho.', 'error');
+        // Bổ sung kiểm tra cho 'Mô tả ngắn' và 'Link hình ảnh' để tránh lỗi 500 từ server.
+        if (!data.title || isNaN(data.price) || isNaN(data.stock) || !data.description) {
+            window.Utils.showToast('Vui lòng điền đầy đủ các trường bắt buộc: Tên, Giá, Tồn kho, và Mô tả ngắn.', 'error');
             return null;
         }
         
-        // 2. Kiểm tra giá trị số có quá lớn không để tránh lỗi server 500
-        if (data.price > MAX_INT_VALUE || (data.oldPrice && data.oldPrice > MAX_INT_VALUE)) {
-            window.Utils.showToast(`Giá sản phẩm không được vượt quá ${MAX_INT_VALUE.toLocaleString('vi-VN')}.`, 'error');
-            return null;
-        }
-
-        // 3. Kiểm tra link hình ảnh
-        if(data.images.length === 0) {
+        // 2. Kiểm tra link hình ảnh phải được cung cấp và hợp lệ
+        if (data.images.length === 0) {
             window.Utils.showToast('Vui lòng cung cấp ít nhất một link hình ảnh.', 'error');
             return null;
         }
         for (const url of data.images) {
+            // Lỗi ERR_UNKNOWN_URL_SCHEME xảy ra khi link không bắt đầu bằng http:// hoặc https://
             if (!url.startsWith('http://') && !url.startsWith('https://')) {
                 window.Utils.showToast(`Link hình ảnh "${url.slice(0, 30)}..." không hợp lệ. Phải bắt đầu bằng http:// hoặc https://`, 'error');
                 return null;
             }
+        }
+
+        // 3. Kiểm tra giá trị số có quá lớn không để tránh lỗi server 500
+        const MAX_INT_VALUE = 2147483647; // Giới hạn của số nguyên 32-bit
+        if (data.price > MAX_INT_VALUE || (data.oldPrice && data.oldPrice > MAX_INT_VALUE) || data.stock > MAX_INT_VALUE) {
+            window.Utils.showToast(`Giá hoặc số lượng tồn kho không được vượt quá ${MAX_INT_VALUE.toLocaleString('vi-VN')}.`, 'error');
+            return null;
         }
         // === KẾT THÚC SỬA LỖI ===
 
@@ -263,17 +267,18 @@ class AdminPanel {
             img.className = 'preview-img';
 
             // === SỬA LỖI ===
-            // Kiểm tra link trước khi gán vào src để tránh lỗi console
+            // Kiểm tra link trước khi gán vào src để tránh lỗi console `ERR_UNKNOWN_URL_SCHEME`
             if (url.startsWith('http://') || url.startsWith('https://')) {
                 img.src = url;
             } else {
-                // Nếu link không hợp lệ, dùng ảnh thay thế ngay lập tức
+                // Nếu link không hợp lệ, dùng ảnh thay thế để không bị lỗi
                 img.src = 'https://via.placeholder.com/80?text=Link+Sai';
                 img.title = `Link không hợp lệ: ${url}`;
             }
             // === KẾT THÚC SỬA LỖI ===
             
             img.onerror = () => { 
+                // Xử lý trường hợp link đúng định dạng nhưng không tải được (lỗi 404, connection timeout,...)
                 img.src = 'https://via.placeholder.com/80?text=Lỗi+Tải';
                 img.title = `Không thể tải ảnh từ: ${url}`;
              };
