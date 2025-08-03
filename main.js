@@ -304,6 +304,21 @@ async function checkAutoLogin() {
 // CẬP NHẬT GIAO DIỆN NGƯỜI DÙNG - FIXED VERSION
 // =================================================================
 
+function getDisplayName(user) {
+    if (!user) return 'User';
+    
+    // Ưu tiên: name > email username
+    if (user.name && user.name.trim() !== '') {
+        return user.name.trim();
+    }
+    
+    if (user.email) {
+        return user.email.split('@')[0];
+    }
+    
+    return 'User';
+}
+
 async function updateUIAfterLogin() {
     if (!currentUser) return;
 
@@ -313,20 +328,17 @@ async function updateUIAfterLogin() {
     if (loginButton) loginButton.style.display = 'none';
     if (userDropdown) userDropdown.style.display = 'flex';
     
-    // FIX: Ưu tiên hiển thị tên thật trước, sau đó mới dùng email
-    const displayName = currentUser.name && currentUser.name.trim() 
-        ? currentUser.name.trim() 
-        : currentUser.email.split('@')[0];
-    
+    // Lấy tên hiển thị
+    const displayName = getDisplayName(currentUser);
     const firstLetter = displayName.charAt(0).toUpperCase();
     
     // Cập nhật tất cả các element hiển thị tên
     document.querySelectorAll('.user-name, #userName').forEach(el => {
-        el.textContent = displayName;
+        if (el) el.textContent = displayName;
     });
     
     document.querySelectorAll('.user-avatar, #userAvatar').forEach(el => {
-        el.textContent = firstLetter;
+        if (el) el.textContent = firstLetter;
     });
 
     // Cập nhật số lượng giỏ hàng và trạng thái yêu thích
@@ -441,7 +453,8 @@ function handleFormSubmit(form, submitAction, onSuccess) {
 
         try {
             const user = await submitAction();
-            Utils.showToast(`Chào mừng ${user.name || user.email.split('@')[0]}!`, 'success');
+            const displayName = getDisplayName(user);
+            Utils.showToast(`Chào mừng ${displayName}!`, 'success');
             onSuccess();
             form.reset();
         } catch (error) {
@@ -696,12 +709,10 @@ function initAccountPage() {
     if (accountLayout) accountLayout.style.display = 'grid';
     if (loginPrompt) loginPrompt.style.display = 'none';
 
-    // FIX: Ưu tiên hiển thị tên thật
-    const displayName = currentUser.name && currentUser.name.trim() 
-        ? currentUser.name.trim() 
-        : currentUser.email.split('@')[0];
-    
+    // Sử dụng hàm getDisplayName thống nhất
+    const displayName = getDisplayName(currentUser);
     const userId = currentUser._id || 'N/A';
+    const firstLetter = displayName.charAt(0).toUpperCase();
     
     // Cập nhật thông tin tài khoản
     const updateElement = (id, value) => {
@@ -711,12 +722,15 @@ function initAccountPage() {
     
     updateElement('accountName', displayName);
     updateElement('accountId', `ID: ${userId.slice(-6)}`);
-    updateElement('accountAvatar', displayName.charAt(0).toUpperCase());
     updateElement('userFullName', displayName);
-    updateElement('userEmail', currentUser.email);
+    updateElement('userEmail', currentUser.email || 'N/A');
     updateElement('userRegisterDate', Utils.formatDate(currentUser.createdAt));
     updateElement('userAccountId', userId);
     updateElement('balanceAmount', `${Utils.formatPrice(currentUser.balance || 0)}đ`);
+    
+    // Cập nhật avatar
+    const avatarElement = document.getElementById('accountAvatar');
+    if (avatarElement) avatarElement.textContent = firstLetter;
     
     // Menu navigation
     document.querySelectorAll('.menu-item').forEach(item => {
