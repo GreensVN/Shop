@@ -35,7 +35,7 @@
         .login-box { background: white; padding: 2.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-soft); width: 100%; max-width: 400px; text-align: center; }
         .login-box h1 { margin-bottom: 1.5rem; }
         .login-box .form-group { text-align: left; }
-        #loginError { color: var(--danger-color); margin-top: 1rem; min-height: 1.2em; }
+        #loginError { color: #ef4444; margin-top: 1rem; min-height: 1.2em; font-weight: 500;}
 
         /* --- Admin Dashboard --- */
         #adminDashboard { display: none; }
@@ -66,6 +66,7 @@
         .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
         .btn .spinner { display: none; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite; }
         .btn.loading .spinner { display: inline-block; }
+        .btn:disabled { cursor: not-allowed; opacity: 0.7; }
         
         /* --- Product Table --- */
         #productListContainer { margin-top: 3rem; }
@@ -74,7 +75,7 @@
         .product-table th, .product-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e5e7eb; }
         .product-table th { background-color: #f9fafb; font-weight: 600; }
         .product-table img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
-        .product-table .actions { display: flex; gap: 0.5rem; }
+        .product-table .actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
         .product-table tr.editing { background-color: #eef2ff; }
         
         .loading-spinner-container { text-align: center; padding: 2rem; }
@@ -93,17 +94,20 @@
         <!-- Login Screen -->
         <div id="adminLoginScreen">
             <div class="login-box">
-                <h1><i class="fas fa-lock"></i> Admin Panel Login</h1>
+                <h1><i class="fas fa-user-shield"></i> Admin Panel Login</h1>
                 <form id="adminLoginForm">
                     <div class="form-group">
-                        <label for="adminUser">Tên đăng nhập</label>
-                        <input type="text" id="adminUser" required>
+                        <label for="adminEmail">Email</label>
+                        <input type="email" id="adminEmail" required autocomplete="email">
                     </div>
                     <div class="form-group">
                         <label for="adminPass">Mật khẩu</label>
-                        <input type="password" id="adminPass" required>
+                        <input type="password" id="adminPass" required autocomplete="current-password">
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Đăng nhập</button>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;" id="loginSubmitBtn">
+                        <div class="spinner"></div>
+                        <span>Đăng nhập</span>
+                    </button>
                     <p id="loginError"></p>
                 </form>
             </div>
@@ -119,14 +123,14 @@
                         <input type="hidden" id="productId">
                         <div class="form-grid">
                             <div class="form-group"><label for="title">Tên sản phẩm</label><input type="text" id="title" required></div>
-                            <div class="form-group"><label for="category">Danh mục</label><input type="text" id="category" required></div>
+                            <div class="form-group"><label for="category">Danh mục</label><input type="text" id="category" placeholder="VD: Thú cưng"></div>
                             <div class="form-group"><label for="price">Giá bán (VND)</label><input type="number" id="price" required></div>
-                            <div class="form-group"><label for="oldPrice">Giá cũ</label><input type="number" id="oldPrice"></div>
+                            <div class="form-group"><label for="oldPrice">Giá cũ (nếu có)</label><input type="number" id="oldPrice"></div>
                             <div class="form-group"><label for="stock">Tồn kho</label><input type="number" id="stock" required></div>
-                            <div class="form-group"><label for="badge">Nhãn (Badge)</label><input type="text" id="badge"></div>
-                            <div class="form-group full-width"><label for="images">Link hình ảnh (cách nhau bằng dấu phẩy)</label><textarea id="images" required></textarea><div id="imagePreview"></div></div>
+                            <div class="form-group"><label for="badge">Nhãn (Badge)</label><input type="text" id="badge" placeholder="VD: HOT"></div>
+                            <div class="form-group full-width"><label for="images">Link hình ảnh (cách nhau bằng dấu phẩy)</label><textarea id="images" placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg" required></textarea><div id="imagePreview"></div></div>
                             <div class="form-group full-width"><label for="description">Mô tả ngắn</label><textarea id="description" maxlength="200" required></textarea></div>
-                            <div class="form-group full-width"><label for="detailedDescription">Mô tả chi tiết</label><textarea id="detailedDescription" placeholder="Hỗ trợ mã HTML"></textarea></div>
+                            <div class="form-group full-width"><label for="detailedDescription">Mô tả chi tiết</label><textarea id="detailedDescription" placeholder="Hỗ trợ mã HTML cơ bản"></textarea></div>
                             <div class="form-group full-width"><label>Tính năng nổi bật</label><div id="featuresContainer"></div><button type="button" id="addFeatureBtn" class="btn btn-sm btn-secondary" style="margin-top:0.5rem;"><i class="fas fa-plus"></i> Thêm</button></div>
                         </div>
                         <div style="text-align: center; margin-top: 2rem; display:flex; gap:1rem; justify-content:center;">
@@ -151,7 +155,7 @@
                                 </tr>
                             </thead>
                             <tbody id="productList">
-                                <tr><td colspan="5" class="loading-spinner-container"><div class="spinner" style="display:inline-block; border-top-color: var(--primary-color);"></div></td></tr>
+                                <!-- Content injected by JS -->
                             </tbody>
                         </table>
                     </div>
@@ -160,8 +164,10 @@
         </div>
     </main>
     
+    <!-- Toast container should be here or in the body -->
     <div id="toastContainer"></div>
 
+    <!-- Scripts -->
     <script src="main.js"></script>
     <script src="admin.js"></script>
 </body>
