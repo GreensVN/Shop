@@ -1,5 +1,5 @@
-// main.js - Phiên bản được sửa lỗi và tối ưu
-// Tệp "bộ não" trung tâm cho trang web Shop Grow A Garden
+// main.js - Phiên bản kết hợp và nâng cấp toàn diện
+// Tệp "bộ não" trung tâm cho trang web Shop Grow A Garden, sử dụng kiến trúc API-driven.
 
 "use strict";
 
@@ -11,16 +11,19 @@ const API_BASE_URL = 'https://shop-4mlk.onrender.com/api/v1';
 let currentUser = null;
 
 // =================================================================
-// LỚP TIỆN ÍCH (UTILS) - CLEAN VERSION
+// LỚP TIỆN ÍCH (UTILS) - NÂNG CẤP
+// Cung cấp các hàm hỗ trợ chung cho toàn bộ trang web.
 // =================================================================
 
 class Utils {
+    // Định dạng giá tiền sang chuẩn Việt Nam.
     static formatPrice(price) {
         const num = typeof price === 'string' ? parseInt(price, 10) : price;
         if (isNaN(num)) return '0';
         return new Intl.NumberFormat('vi-VN').format(num);
     }
 
+    // Định dạng ngày tháng sang chuẩn Việt Nam.
     static formatDate(date) {
         try {
             return new Date(date).toLocaleDateString('vi-VN');
@@ -29,6 +32,7 @@ class Utils {
         }
     }
 
+    // Hiển thị thông báo nhanh (toast) cho người dùng.
     static showToast(message, type = 'success', duration = 3000) {
         const toastContainer = document.getElementById('toastContainer') || this.createToastContainer();
         
@@ -55,90 +59,81 @@ class Utils {
             error: '#ef4444',
             info: '#3b82f6'
         };
-        
-        Object.assign(toast.style, {
-            background: bgColors[type] || bgColors.info,
-            color: 'white',
-            padding: '12px 20px',
-            borderRadius: '8px',
-            marginBottom: '10px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            transform: 'translateX(100%)',
-            opacity: '0',
-            transition: 'all 0.3s ease',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            minWidth: '300px',
-            zIndex: '9999'
-        });
+        toast.style.cssText = `
+            background: ${bgColors[type] || bgColors.info};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-width: 300px;
+            z-index: 9999;
+        `;
 
         toastContainer.appendChild(toast);
         
-        // Animate in
-        requestAnimationFrame(() => {
+        setTimeout(() => {
             toast.style.transform = 'translateX(0)';
             toast.style.opacity = '1';
-        });
+        }, 100);
 
-        const closeToast = () => {
+        const close = () => {
             toast.style.transform = 'translateX(100%)';
             toast.style.opacity = '0';
             setTimeout(() => toast.remove(), 300);
         };
         
-        const timer = setTimeout(closeToast, duration);
+        const timer = setTimeout(close, duration);
         toast.querySelector('.toast-close').addEventListener('click', () => {
             clearTimeout(timer);
-            closeToast();
+            close();
         });
     }
 
+    // Tạo vùng chứa cho các toast message nếu chưa có.
     static createToastContainer() {
         let container = document.getElementById('toastContainer');
         if (container) return container;
 
         container = document.createElement('div');
         container.id = 'toastContainer';
-        Object.assign(container.style, {
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            zIndex: '10003'
-        });
+        container.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10003;
+        `;
         document.body.appendChild(container);
         return container;
     }
     
+    // Hiển thị trạng thái đang tải bên trong một phần tử.
     static showLoading(element, message = 'Đang tải...') {
         if (!element) return;
-        element.innerHTML = `
-            <div class="loading-placeholder" style="text-align: center; padding: 50px; color: #888; grid-column: 1 / -1;">
-                <i class="fas fa-spinner fa-spin fa-2x"></i>
-                <p style="margin-top: 10px;">${message}</p>
-            </div>
-        `;
+        element.innerHTML = `<div class="loading-placeholder" style="text-align: center; padding: 50px; color: #888; grid-column: 1 / -1;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top: 10px;">${message}</p></div>`;
     }
 
+    // Hiển thị trạng thái lỗi bên trong một phần tử.
     static showError(element, message = 'Có lỗi xảy ra.') {
         if (!element) return;
-        element.innerHTML = `
-            <div class="error-state" style="text-align: center; padding: 50px; color: #ef4444; grid-column: 1 / -1;">
-                <i class="fas fa-exclamation-triangle fa-2x"></i>
-                <p style="margin-top: 10px;">${message}</p>
-            </div>
-        `;
+        element.innerHTML = `<div class="error-state" style="text-align: center; padding: 50px; color: #ef4444; grid-column: 1 / -1;"><i class="fas fa-exclamation-triangle fa-2x"></i><p style="margin-top: 10px;">${message}</p></div>`;
     }
 }
 
 // =================================================================
-// GỌI API - CLEAN VERSION
+// GỌI API - NÂNG CẤP
+// Hàm trung tâm để thực hiện các yêu cầu đến máy chủ.
 // =================================================================
 
 async function callApi(endpoint, method = 'GET', body = null) {
     const headers = { 'Content-Type': 'application/json' };
     const token = localStorage.getItem('token');
-    
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
     }
@@ -150,7 +145,7 @@ async function callApi(endpoint, method = 'GET', body = null) {
             body: body ? JSON.stringify(body) : null
         });
 
-        if (response.status === 204) return true;
+        if (response.status === 204) return true; // Xử lý cho các request không trả về nội dung (vd: DELETE)
 
         const data = await response.json();
         if (!response.ok) {
@@ -164,7 +159,7 @@ async function callApi(endpoint, method = 'GET', body = null) {
 }
 
 // =================================================================
-// QUẢN LÝ GIỎ HÀNG (CART MANAGER)
+// QUẢN LÝ GIỎ HÀNG (CART MANAGER) - API DRIVEN
 // =================================================================
 
 const CartManager = {
@@ -173,41 +168,37 @@ const CartManager = {
             const result = await callApi('/cart');
             return result.data.cart || [];
         } catch (error) {
+            // Nếu người dùng chưa đăng nhập hoặc có lỗi, trả về giỏ hàng rỗng.
             return [];
         }
     },
-
     async add(productId, quantity = 1) {
         await callApi('/cart', 'POST', { productId, quantity });
         await updateCartCount();
     },
-
     async remove(productId) {
         await callApi(`/cart/${productId}`, 'DELETE');
         await updateCartCount();
-        if (window.location.pathname.includes('cart.html')) {
-            await loadCartPage();
-        }
+        // Nếu đang ở trang giỏ hàng, tải lại trang.
+        if (window.location.pathname.includes('cart.html')) await loadCartPage();
     },
-
     async updateQuantity(productId, quantity) {
+        // API này được giả định là có thể cập nhật một phần của giỏ hàng
+        // Gửi một mảng chứa chỉ sản phẩm cần cập nhật.
         await callApi('/cart', 'PATCH', { cart: [{ product: productId, quantity }] });
-        if (window.location.pathname.includes('cart.html')) {
-            await loadCartPage();
-        }
+        // Tải lại toàn bộ trang giỏ hàng để cập nhật tổng tiền và các thông tin khác.
+        if (window.location.pathname.includes('cart.html')) await loadCartPage();
     },
-
     async clear() {
+        // Gửi một mảng rỗng để xóa toàn bộ giỏ hàng
         await callApi('/cart', 'PATCH', { cart: [] });
         await updateCartCount();
-        if (window.location.pathname.includes('cart.html')) {
-            await loadCartPage();
-        }
+        if (window.location.pathname.includes('cart.html')) await loadCartPage();
     }
 };
 
 // =================================================================
-// QUẢN LÝ YÊU THÍCH (FAVORITE MANAGER)
+// QUẢN LÝ YÊU THÍCH (FAVORITE MANAGER) - API DRIVEN
 // =================================================================
 
 const FavoriteManager = {
@@ -219,25 +210,21 @@ const FavoriteManager = {
             return [];
         }
     },
-
     async add(productId) {
         await callApi('/favorites', 'POST', { productId });
         await updateFavoriteStatus(productId, true);
     },
-
     async remove(productId) {
         await callApi(`/favorites/${productId}`, 'DELETE');
         await updateFavoriteStatus(productId, false);
-        if (window.location.pathname.includes('favorite.html')) {
-            await loadFavoritesPage();
-        }
+        // Nếu đang ở trang yêu thích, tải lại danh sách.
+        if (window.location.pathname.includes('favorite.html')) await loadFavoritesPage();
     },
-
     async getStatus() {
         const favorites = await this.get();
         const status = {};
         favorites.forEach(fav => {
-            if (fav && fav._id) {
+            if (fav && fav._id) { // Đảm bảo fav là một object hợp lệ
                 status[fav._id] = true;
             }
         });
@@ -246,7 +233,8 @@ const FavoriteManager = {
 };
 
 // =================================================================
-// XÁC THỰC NGƯỜI DÙNG - FIXED VERSION
+// XÁC THỰC NGƯỜI DÙNG - NÂNG CẤP
+// Xử lý đăng nhập, đăng ký, đăng xuất và tự động đăng nhập.
 // =================================================================
 
 async function authenticate(email, password) {
@@ -276,8 +264,8 @@ function logout() {
     updateUIAfterLogout();
     Utils.showToast('Đăng xuất thành công!', 'success');
 
-    const protectedPages = ['account.html', 'cart.html', 'favorite.html'];
-    if (protectedPages.some(page => window.location.pathname.includes(page))) {
+    // Chuyển về trang chủ nếu đang ở các trang cần đăng nhập
+    if (['account.html', 'cart.html', 'favorite.html'].some(page => window.location.pathname.includes(page))) {
         setTimeout(() => window.location.href = 'index.html', 1000);
     }
 }
@@ -286,12 +274,14 @@ async function checkAutoLogin() {
     const token = localStorage.getItem('token');
     if (token) {
         try {
+            // Xác thực token với server để lấy thông tin người dùng mới nhất
             const data = await callApi('/users/me');
             currentUser = data.data.user;
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             await updateUIAfterLogin();
         } catch (error) {
             console.error('Auto-login failed, token might be expired:', error);
+            // Xóa token và dữ liệu cũ nếu không hợp lệ
             localStorage.removeItem('token');
             localStorage.removeItem('currentUser');
             currentUser = null;
@@ -301,23 +291,8 @@ async function checkAutoLogin() {
 }
 
 // =================================================================
-// CẬP NHẬT GIAO DIỆN NGƯỜI DÙNG - FIXED VERSION
+// CẬP NHẬT GIAO DIỆN NGƯỜI DÙNG (UI) - NÂNG CẤP
 // =================================================================
-
-function getDisplayName(user) {
-    if (!user) return 'User';
-    
-    // Ưu tiên: name > email username
-    if (user.name && user.name.trim() !== '') {
-        return user.name.trim();
-    }
-    
-    if (user.email) {
-        return user.email.split('@')[0];
-    }
-    
-    return 'User';
-}
 
 async function updateUIAfterLogin() {
     if (!currentUser) return;
@@ -328,20 +303,14 @@ async function updateUIAfterLogin() {
     if (loginButton) loginButton.style.display = 'none';
     if (userDropdown) userDropdown.style.display = 'flex';
     
-    // Lấy tên hiển thị
-    const displayName = getDisplayName(currentUser);
-    const firstLetter = displayName.charAt(0).toUpperCase();
+    // FIX: Thêm kiểm tra currentUser.email tồn tại để tránh lỗi runtime
+    const userName = currentUser.name || (currentUser.email ? currentUser.email.split('@')[0] : 'Người dùng');
+    const firstLetter = userName.charAt(0).toUpperCase();
     
-    // Cập nhật tất cả các element hiển thị tên
-    document.querySelectorAll('.user-name, #userName').forEach(el => {
-        if (el) el.textContent = displayName;
-    });
-    
-    document.querySelectorAll('.user-avatar, #userAvatar').forEach(el => {
-        if (el) el.textContent = firstLetter;
-    });
+    document.querySelectorAll('.user-name, #userName').forEach(el => { el.textContent = userName; });
+    document.querySelectorAll('.user-avatar, #userAvatar').forEach(el => { el.textContent = firstLetter; });
 
-    // Cập nhật số lượng giỏ hàng và trạng thái yêu thích
+    // Cập nhật số lượng giỏ hàng và trạng thái các nút yêu thích
     await updateCartCount();
     await updateAllFavoriteButtons();
 }
@@ -353,22 +322,20 @@ function updateUIAfterLogout() {
     if (loginButton) loginButton.style.display = 'flex';
     if (userDropdown) userDropdown.style.display = 'none';
 
-    // Reset các số đếm
+    // Reset số lượng giỏ hàng
     document.querySelectorAll('.cart-count, #cartCount').forEach(el => {
         el.textContent = '0';
         el.style.display = 'none';
     });
-    
+    // Reset các nút yêu thích
     document.querySelectorAll('.favorite-btn').forEach(btn => {
         btn.classList.remove('active');
-        const icon = btn.querySelector('i');
-        if (icon) icon.className = 'far fa-heart';
+        btn.querySelector('i').className = 'far fa-heart';
     });
 }
 
 async function updateCartCount() {
-    if (!currentUser) return;
-    
+    if (!currentUser) return; // Chỉ cập nhật nếu đã đăng nhập
     const cart = await CartManager.get();
     const count = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
     
@@ -379,7 +346,7 @@ async function updateCartCount() {
 }
 
 // =================================================================
-// MODAL XÁC THỰC - CLEAN VERSION
+// LOGIC MODAL XÁC THỰC - TÁI CẤU TRÚC
 // =================================================================
 
 function initAuthModal() {
@@ -403,14 +370,14 @@ function initAuthModal() {
         }, 300);
     };
 
-    // Event listeners
     loginButton.addEventListener('click', showModal);
+    
     closeModalButtons.forEach(btn => btn.addEventListener('click', hideModal));
+
     authModal.addEventListener('click', (e) => {
         if (e.target === authModal) hideModal();
     });
 
-    // Tab switching
     const tabs = authModal.querySelectorAll('.modal-tab');
     const forms = authModal.querySelectorAll('.modal-form');
     
@@ -418,19 +385,15 @@ function initAuthModal() {
         tab.addEventListener('click', () => {
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            forms.forEach(f => {
-                f.classList.toggle('active', f.id === `${tab.dataset.tab}Form`);
-            });
+            forms.forEach(f => f.classList.toggle('active', f.id === `${tab.dataset.tab}Form`));
         });
     });
 
-    // Form switching links
     document.querySelectorAll('.switch-to-register, .switch-to-login').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const targetTab = e.target.classList.contains('switch-to-register') ? 'register' : 'login';
-            const targetTabElement = authModal.querySelector(`.modal-tab[data-tab="${targetTab}"]`);
-            if (targetTabElement) targetTabElement.click();
+            authModal.querySelector(`.modal-tab[data-tab="${targetTab}"]`).click();
         });
     });
     
@@ -438,12 +401,11 @@ function initAuthModal() {
     handleRegisterForm(hideModal);
 }
 
+// Hàm xử lý submit form chung, tránh lặp code
 function handleFormSubmit(form, submitAction, onSuccess) {
     if (!form) return;
-    
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const submitBtn = form.querySelector('.btn-submit');
         const spinner = submitBtn.querySelector('.spinner');
 
@@ -453,8 +415,7 @@ function handleFormSubmit(form, submitAction, onSuccess) {
 
         try {
             const user = await submitAction();
-            const displayName = getDisplayName(user);
-            Utils.showToast(`Chào mừng ${displayName}!`, 'success');
+            Utils.showToast(`Chào mừng ${user.name}!`, 'success');
             onSuccess();
             form.reset();
         } catch (error) {
@@ -470,15 +431,10 @@ function handleFormSubmit(form, submitAction, onSuccess) {
 function handleLoginForm(onSuccess) {
     const form = document.getElementById('loginForm');
     if (!form) return;
-    
     handleFormSubmit(form, () => {
         const email = form.email.value.trim();
         const password = form.password.value;
-        
-        if (!email || !password) {
-            throw new Error('Vui lòng nhập đầy đủ thông tin!');
-        }
-        
+        if (!email || !password) throw new Error('Vui lòng nhập đầy đủ thông tin!');
         return authenticate(email, password);
     }, onSuccess);
 }
@@ -486,51 +442,39 @@ function handleLoginForm(onSuccess) {
 function handleRegisterForm(onSuccess) {
     const form = document.getElementById('registerForm');
     if (!form) return;
-    
     handleFormSubmit(form, () => {
         const name = form.name.value.trim();
         const email = form.email.value.trim();
         const password = form.password.value;
         const confirmPassword = form.confirmPassword.value;
 
-        if (!name || !email || !password || !confirmPassword) {
-            throw new Error('Vui lòng nhập đầy đủ thông tin!');
-        }
-        
-        if (password.length < 6) {
-            throw new Error('Mật khẩu phải có ít nhất 6 ký tự!');
-        }
-        
-        if (password !== confirmPassword) {
-            throw new Error('Mật khẩu xác nhận không khớp!');
-        }
+        if (!name || !email || !password || !confirmPassword) throw new Error('Vui lòng nhập đầy đủ thông tin!');
+        if (password.length < 6) throw new Error('Mật khẩu phải có ít nhất 6 ký tự!');
+        if (password !== confirmPassword) throw new Error('Mật khẩu xác nhận không khớp!');
         
         return register(name, email, password, confirmPassword);
     }, onSuccess);
 }
 
+
 // =================================================================
-// LOGIC RIÊNG CHO CÁC TRANG
+// LOGIC RIÊNG CHO CÁC TRANG - API-DRIVEN
 // =================================================================
 
+// --- Tải sản phẩm và gắn các event listeners ---
 async function loadProducts() {
     const productsGrid = document.getElementById('productsGrid');
     if (!productsGrid) return;
-    
     Utils.showLoading(productsGrid, 'Đang tải sản phẩm...');
-    
     try {
         const data = await callApi('/products');
         const products = data.data.products;
-        
         if (!products || products.length === 0) {
             productsGrid.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">Không có sản phẩm nào để hiển thị.</p>';
             return;
         }
-        
         productsGrid.innerHTML = products.map(createProductCardHTML).join('');
         attachProductEventListeners();
-        
         if (currentUser) {
             await updateAllFavoriteButtons();
         }
@@ -544,7 +488,7 @@ function createProductCardHTML(product) {
         <div class="product-card" data-id="${product._id}" data-price="${product.price}" data-note="${product.description || ''}">
             <div class="product-image">
                 <img src="${product.images[0] || 'https://via.placeholder.com/300'}" alt="${product.title}" loading="lazy">
-                ${product.badge ? `<span class="product-badge ${product.badge.toLowerCase()}">${product.badge}</span>` : ''}
+                ${product.badge ? `<span class="product-badge ${String(product.badge).toLowerCase()}">${product.badge}</span>` : ''}
                 <div class="product-overlay">
                     <button class="btn-icon favorite-btn" data-id="${product._id}" title="Thêm vào yêu thích">
                         <i class="far fa-heart"></i>
@@ -554,7 +498,7 @@ function createProductCardHTML(product) {
             <div class="product-info">
                 <h3 class="product-title">${product.title}</h3>
                 <p class="product-description">${product.description || ''}</p>
-                <div class="product-price">${Utils.formatPrice(product.price)}đ</div>
+                 <div class="product-price">${Utils.formatPrice(product.price)}đ</div>
             </div>
             <div class="product-actions">
                 <button class="btn btn-primary add-to-cart" data-id="${product._id}">
@@ -567,15 +511,13 @@ function createProductCardHTML(product) {
 }
 
 function attachProductEventListeners() {
-    // Add to cart buttons
     document.querySelectorAll('.add-to-cart').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             if (!currentUser) {
                 Utils.showToast('Vui lòng đăng nhập để mua hàng!', 'info');
-                document.getElementById('loginButton').click();
+                document.getElementById('loginButton').click(); // Mở modal đăng nhập
                 return;
             }
-            
             const productId = e.currentTarget.dataset.id;
             try {
                 await CartManager.add(productId);
@@ -586,10 +528,10 @@ function attachProductEventListeners() {
         });
     });
 
-    // Favorite buttons
     document.querySelectorAll('.favorite-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
-            e.stopPropagation();
+            // Ngăn sự kiện click lan ra các phần tử cha
+            e.stopPropagation(); 
             e.preventDefault();
 
             if (!currentUser) {
@@ -597,10 +539,8 @@ function attachProductEventListeners() {
                 document.getElementById('loginButton').click();
                 return;
             }
-            
             const productId = e.currentTarget.dataset.id;
             const isFavorite = e.currentTarget.classList.contains('active');
-            
             try {
                 if (isFavorite) {
                     await FavoriteManager.remove(productId);
@@ -616,32 +556,29 @@ function attachProductEventListeners() {
     });
 }
 
+// --- Cập nhật trạng thái nút yêu thích ---
 async function updateFavoriteStatus(productId, isFavorite) {
     document.querySelectorAll(`.favorite-btn[data-id="${productId}"]`).forEach(btn => {
         btn.classList.toggle('active', isFavorite);
         const icon = btn.querySelector('i');
-        if (icon) {
-            icon.className = isFavorite ? 'fas fa-heart' : 'far fa-heart';
-        }
+        icon.className = isFavorite ? 'fas fa-heart' : 'far fa-heart';
     });
 }
 
 async function updateAllFavoriteButtons() {
-    if (!currentUser) return;
-    
+    if(!currentUser) return;
     const favoriteStatus = await FavoriteManager.getStatus();
     Object.keys(favoriteStatus).forEach(productId => {
         updateFavoriteStatus(productId, true);
     });
 }
 
-// =================================================================
-// TRANG CHỦ (INDEX.HTML)
-// =================================================================
 
+// --- Trang chủ (index.html) ---
 function initIndexPage() {
-    loadProducts();
+    loadProducts(); // Tải sản phẩm từ API
     
+    // Logic bộ lọc giữ nguyên vì nó hoạt động trên các sản phẩm đã được tải ra
     const filterButton = document.getElementById('filterButton');
     const resetButton = document.getElementById('resetButton');
     
@@ -655,22 +592,14 @@ function initIndexPage() {
                 const cardId = (card.dataset.id || '').toLowerCase();
                 const cardPrice = parseInt(card.dataset.price || '0');
                 const cardNote = (card.dataset.note || '').toLowerCase();
-                
                 let isVisible = true;
-                
                 if (id && !cardId.includes(id)) isVisible = false;
                 if (note && !cardNote.includes(note)) isVisible = false;
-                
                 if (priceRange) {
-                    const ranges = {
-                        'duoi-50k': [0, 49999],
-                        'tu-50k-200k': [50000, 200000],
-                        'tren-200k': [200001, Infinity]
-                    };
+                    const ranges = { 'duoi-50k': [0, 49999], 'tu-50k-200k': [50000, 200000], 'tren-200k': [200001, Infinity] };
                     const [min, max] = ranges[priceRange] || [0, Infinity];
                     if (cardPrice < min || cardPrice > max) isVisible = false;
                 }
-                
                 card.style.display = isVisible ? 'block' : 'none';
             });
         });
@@ -678,11 +607,9 @@ function initIndexPage() {
 
     if (resetButton) {
         resetButton.addEventListener('click', () => {
-            ['searchId', 'searchPrice', 'searchNote'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) element.value = '';
-            });
-            
+            document.getElementById('searchId').value = '';
+            document.getElementById('searchPrice').value = '';
+            document.getElementById('searchNote').value = '';
             document.querySelectorAll('.product-card').forEach(card => {
                 card.style.display = 'block';
             });
@@ -690,14 +617,10 @@ function initIndexPage() {
     }
 }
 
-// =================================================================
-// TRANG TÀI KHOẢN (ACCOUNT.HTML)
-// =================================================================
-
+// --- Trang tài khoản (account.html) ---
 function initAccountPage() {
     const accountLayout = document.getElementById('accountLayout');
     const loginPrompt = document.getElementById('loginPrompt');
-    
     if (!accountLayout) return;
 
     if (!currentUser) {
@@ -709,35 +632,24 @@ function initAccountPage() {
     if (accountLayout) accountLayout.style.display = 'grid';
     if (loginPrompt) loginPrompt.style.display = 'none';
 
-    // Sử dụng hàm getDisplayName thống nhất
-    const displayName = getDisplayName(currentUser);
+    const userName = currentUser.name || (currentUser.email ? currentUser.email.split('@')[0] : 'Người dùng');
     const userId = currentUser._id || 'N/A';
-    const firstLetter = displayName.charAt(0).toUpperCase();
     
-    // Cập nhật thông tin tài khoản
-    const updateElement = (id, value) => {
-        const element = document.getElementById(id);
-        if (element) element.textContent = value;
-    };
+    document.getElementById('accountName').textContent = userName;
+    // FIX: Cải thiện logic hiển thị ID để tránh lỗi runtime với .slice()
+    document.getElementById('accountId').textContent = userId !== 'N/A' ? `ID: ${userId.slice(-6)}` : 'ID: Không xác định';
+    document.getElementById('accountAvatar').textContent = userName.charAt(0).toUpperCase();
+    document.getElementById('userFullName').textContent = userName;
+    document.getElementById('userEmail').textContent = currentUser.email;
+    document.getElementById('userRegisterDate').textContent = Utils.formatDate(currentUser.createdAt);
+    document.getElementById('userAccountId').textContent = userId;
+    // Lấy số dư từ đối tượng currentUser, an toàn hơn
+    document.getElementById('balanceAmount').textContent = `${Utils.formatPrice(currentUser.balance || 0)}đ`;
     
-    updateElement('accountName', displayName);
-    updateElement('accountId', `ID: ${userId.slice(-6)}`);
-    updateElement('userFullName', displayName);
-    updateElement('userEmail', currentUser.email || 'N/A');
-    updateElement('userRegisterDate', Utils.formatDate(currentUser.createdAt));
-    updateElement('userAccountId', userId);
-    updateElement('balanceAmount', `${Utils.formatPrice(currentUser.balance || 0)}đ`);
-    
-    // Cập nhật avatar
-    const avatarElement = document.getElementById('accountAvatar');
-    if (avatarElement) avatarElement.textContent = firstLetter;
-    
-    // Menu navigation
     document.querySelectorAll('.menu-item').forEach(item => {
         item.addEventListener('click', () => {
             document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
-            
             document.querySelectorAll('.tab-content').forEach(t => {
                 t.classList.toggle('active', t.id === `${item.dataset.tab}Tab`);
             });
@@ -745,10 +657,7 @@ function initAccountPage() {
     });
 }
 
-// =================================================================
-// HIỂN THỊ THÔNG BÁO ĐĂNG NHẬP
-// =================================================================
-
+// --- Hàm hiển thị thông báo yêu cầu đăng nhập chung ---
 function displayLoginPrompt(container, message, title) {
     container.innerHTML = `
         <div class="empty-state" style="text-align: center; padding: 40px; grid-column: 1 / -1;">
@@ -758,34 +667,22 @@ function displayLoginPrompt(container, message, title) {
             <button class="btn btn-primary" id="promptLoginButton">Đăng nhập ngay</button>
         </div>
     `;
-    
-    const promptLoginButton = document.getElementById('promptLoginButton');
-    if (promptLoginButton) {
-        promptLoginButton.addEventListener('click', () => {
-            const loginButton = document.getElementById('loginButton');
-            if (loginButton) loginButton.click();
-        });
-    }
+    document.getElementById('promptLoginButton').addEventListener('click', () => {
+        document.getElementById('loginButton').click();
+    });
 }
 
-// =================================================================
-// TRANG YÊU THÍCH (FAVORITE.HTML)
-// =================================================================
-
+// --- Trang yêu thích (favorite.html) ---
 async function loadFavoritesPage() {
     const favoritesGrid = document.getElementById('favoritesGrid');
     if (!favoritesGrid) return;
-    
     if (!currentUser) {
         displayLoginPrompt(favoritesGrid, 'Bạn cần đăng nhập để xem danh sách sản phẩm yêu thích của mình.', 'Vui lòng đăng nhập');
         return;
     }
-    
     Utils.showLoading(favoritesGrid, 'Đang tải danh sách yêu thích...');
-    
     try {
         const favorites = await FavoriteManager.get();
-        
         if (favorites.length === 0) {
             favoritesGrid.innerHTML = `
                 <div class="empty-state" style="text-align: center; padding: 40px; grid-column: 1 / -1;">
@@ -797,7 +694,6 @@ async function loadFavoritesPage() {
             `;
             return;
         }
-        
         favoritesGrid.innerHTML = favorites.map(createProductCardHTML).join('');
         attachProductEventListeners();
         await updateAllFavoriteButtons();
@@ -806,24 +702,17 @@ async function loadFavoritesPage() {
     }
 }
 
-// =================================================================
-// TRANG GIỎ HÀNG (CART.HTML)
-// =================================================================
-
+// --- Trang giỏ hàng (cart.html) ---
 async function loadCartPage() {
     const cartContainer = document.getElementById('cartContainer');
     if (!cartContainer) return;
-    
     if (!currentUser) {
         displayLoginPrompt(cartContainer, 'Bạn cần đăng nhập để xem giỏ hàng và tiến hành thanh toán.', 'Giỏ hàng của bạn');
         return;
     }
-    
     Utils.showLoading(cartContainer, 'Đang tải giỏ hàng...');
-    
     try {
         const cart = await CartManager.get();
-        
         if (cart.length === 0) {
             cartContainer.innerHTML = `
                 <div class="empty-state" style="text-align: center; padding: 40px;">
@@ -831,22 +720,20 @@ async function loadCartPage() {
                     <h3>Giỏ hàng của bạn đang trống</h3>
                     <p style="margin-bottom: 20px;">Hãy lựa chọn những sản phẩm tuyệt vời và thêm vào giỏ hàng nhé.</p>
                     <a href="index.html" class="btn btn-primary">Tiếp tục mua sắm</a>
-                </div>
-            `;
+                </div>`;
             return;
         }
 
         let subtotal = 0;
         const itemsHTML = cart.map(item => {
             const product = item.product;
-            if (!product) return '';
-            
+            if (!product) return ''; // Bỏ qua nếu sản phẩm không có dữ liệu
             const itemTotal = product.price * item.quantity;
             subtotal += itemTotal;
-            
             return `
                 <div class="cart-item" data-id="${product._id}">
-                    <img src="${product.images[0]}" alt="${product.title}" class="cart-item-image">
+                    // FIX: Thêm ảnh placeholder để tránh lỗi ảnh hỏng nếu product.images[0] không tồn tại
+                    <img src="${product.images[0] || 'https://via.placeholder.com/150'}" alt="${product.title}" class="cart-item-image">
                     <div class="cart-item-details">
                         <h3 class="cart-item-title">${product.title}</h3>
                         <div class="cart-item-price">${Utils.formatPrice(product.price)}đ</div>
@@ -873,8 +760,7 @@ async function loadCartPage() {
                     <div class="summary-row total"><span>Thành tiền</span><span id="total">${Utils.formatPrice(subtotal)}đ</span></div>
                     <button class="btn btn-primary btn-block" id="checkoutButton">Tiến Hành Thanh Toán</button>
                 </div>
-            </div>
-        `;
+            </div>`;
         
         attachCartPageEventListeners();
 
@@ -884,7 +770,6 @@ async function loadCartPage() {
 }
 
 function attachCartPageEventListeners() {
-    // Remove buttons
     document.querySelectorAll('.btn-remove').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const productId = e.currentTarget.dataset.id;
@@ -893,13 +778,13 @@ function attachCartPageEventListeners() {
         });
     });
 
-    // Quantity controls with debounce
+    // Tạo một hàm debounce để tránh gọi API liên tục khi người dùng thay đổi số lượng
     let debounceTimer;
     const debouncedUpdateQuantity = (productId, newQuantity) => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
-            CartManager.updateQuantity(productId, newQuantity);
-        }, 500);
+             CartManager.updateQuantity(productId, newQuantity);
+        }, 500); // Chờ 500ms sau lần thay đổi cuối cùng mới gọi API
     };
 
     document.querySelectorAll('.plus, .minus').forEach(btn => {
@@ -907,7 +792,6 @@ function attachCartPageEventListeners() {
             const input = e.currentTarget.parentElement.querySelector('input');
             let quantity = parseInt(input.value);
             quantity += e.currentTarget.classList.contains('plus') ? 1 : -1;
-            
             if (quantity > 0) {
                 input.value = quantity;
                 debouncedUpdateQuantity(input.dataset.productId, quantity);
@@ -923,9 +807,8 @@ function attachCartPageEventListeners() {
         });
     });
     
-    // Checkout button
     const checkoutButton = document.getElementById('checkoutButton');
-    if (checkoutButton) {
+    if(checkoutButton) {
         checkoutButton.addEventListener('click', () => {
             Utils.showToast('Tính năng thanh toán đang được phát triển.', 'info');
         });
@@ -938,7 +821,7 @@ function attachCartPageEventListeners() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // 1. Khởi tạo các thành phần chung
+        // 1. Khởi tạo các thành phần chung (luôn chạy)
         Utils.createToastContainer();
         initAuthModal();
         
@@ -968,9 +851,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await loadFavoritesPage();
                 break;
         }
-        
-        console.log('Shop Grow A Garden initialized successfully');
-        
     } catch (error) {
         console.error('Lỗi nghiêm trọng khi khởi tạo trang:', error);
         Utils.showToast('Có lỗi xảy ra khi khởi tạo trang web', 'error');
