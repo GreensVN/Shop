@@ -7,6 +7,10 @@
     <title>Shop Grow A Garden - Dịch Vụ & Giống Cây Chất Lượng</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        /* =================================================================
+           ENHANCED PROFESSIONAL CSS - OPTIMIZED & CLEAN
+           ================================================================= */
+
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -55,6 +59,10 @@
             margin: 0 auto;
             padding: 0 20px;
         }
+
+        /* =================================================================
+           HEADER & NAVIGATION
+           ================================================================= */
 
         .header {
             background: var(--glass-bg);
@@ -133,6 +141,10 @@
             box-shadow: var(--shadow-soft);
         }
 
+        /* =================================================================
+           BUTTONS & INTERACTIVE ELEMENTS
+           ================================================================= */
+
         .btn {
             display: inline-flex;
             align-items: center;
@@ -203,6 +215,10 @@
             color: white;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
         }
+
+        /* =================================================================
+           USER INTERFACE & MODALS
+           ================================================================= */
 
         .user-dropdown {
             display: flex;
@@ -297,8 +313,6 @@
             border-radius: 10px;
             font-weight: 600;
             margin-left: auto;
-            min-width: 16px;
-            text-align: center;
         }
 
         .logout-btn {
@@ -309,6 +323,10 @@
             font-family: inherit;
             cursor: pointer;
         }
+
+        /* =================================================================
+           MODAL SYSTEM
+           ================================================================= */
 
         .modal {
             display: none;
@@ -512,6 +530,10 @@
             text-decoration: underline;
         }
 
+        /* =================================================================
+           HERO SECTION
+           ================================================================= */
+
         .hero {
             background: var(--primary-gradient);
             color: white;
@@ -547,6 +569,10 @@
             margin: 0 auto;
             animation: slideInUp 1s ease-out 0.2s both;
         }
+
+        /* =================================================================
+           FILTER SECTION
+           ================================================================= */
 
         .filter-section {
             background: white;
@@ -611,6 +637,10 @@
             gap: 1rem;
             flex-wrap: wrap;
         }
+
+        /* =================================================================
+           PRODUCT GRID & CARDS
+           ================================================================= */
 
         .products-grid {
             display: grid;
@@ -876,6 +906,10 @@
             gap: 0.5rem;
         }
 
+        /* =================================================================
+           TOAST NOTIFICATIONS
+           ================================================================= */
+
         .toast-container {
             position: fixed;
             top: 20px;
@@ -950,6 +984,10 @@
             color: var(--dark-color);
         }
 
+        /* =================================================================
+           LOADING & ANIMATIONS
+           ================================================================= */
+
         .loading-container {
             grid-column: 1/-1;
             text-align: center;
@@ -1005,20 +1043,13 @@
             50% { transform: scale(1.1); }
         }
 
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .fade-in {
             animation: fadeInUp 0.8s ease-out forwards;
         }
+
+        /* =================================================================
+           FOOTER
+           ================================================================= */
 
         .footer {
             background: var(--dark-gradient);
@@ -1091,6 +1122,10 @@
             color: #9ca3af;
         }
 
+        /* =================================================================
+           RESPONSIVE DESIGN
+           ================================================================= */
+
         @media (max-width: 768px) {
             .hero-title {
                 font-size: 2.5rem;
@@ -1140,6 +1175,7 @@
     </style>
 </head>
 <body>
+    <!-- Header -->
     <header class="header" id="header">
         <div class="container header-container">
             <a href="index.html">
@@ -1153,6 +1189,7 @@
                 <a href="#" class="nav-link"><i class="fas fa-gamepad"></i><span>Tài Khoản Game</span></a>
             </nav>
 
+            <!-- User Dropdown (Hidden by default) -->
             <div class="user-dropdown" id="userDropdown" style="display: none;">
                 <div class="user-avatar" id="userAvatar">U</div>
                 <span class="user-name" id="userName">User</span>
@@ -1162,11 +1199,11 @@
                     </a>
                     <a href="cart.html" class="dropdown-item">
                         <i class="fas fa-shopping-cart"></i><span>Giỏ hàng</span>
-                        <span class="badge cart-count" id="cartCount" style="display: none;">0</span>
+                        <span class="badge cart-count" style="display: none;">0</span>
                     </a>
                     <a href="favorite.html" class="dropdown-item">
                         <i class="fas fa-heart"></i><span>Yêu thích</span>
-                        <span class="badge favorite-count" id="favoriteCount" style="display: none;">0</span>
+                        <span class="badge favorite-count" style="display: none;">0</span>
                     </a>
                     <div class="dropdown-divider"></div>
                     <button class="logout-btn dropdown-item" id="logoutButton">
@@ -1175,6 +1212,7 @@
                 </div>
             </div>
 
+            <!-- Login Button (Shown by default) -->
             <button class="btn btn-primary" id="loginButton">
                 <i class="fas fa-user"></i>
                 <span>Đăng Nhập</span>
@@ -1182,6 +1220,7 @@
         </div>
     </header>
 
+    <!-- Hero Section -->
     <section class="hero">
         <div class="container">
             <h1 class="hero-title"><i class="fas fa-store"></i> Shop Grow A Garden</h1>
@@ -1189,7 +1228,9 @@
         </div>
     </section>
     
+    <!-- Main Content -->
     <main class="container">
+        <!-- Filter Section -->
         <section class="filter-section">
             <div class="filter-title"><i class="fas fa-filter"></i> BỘ LỌC TÌM KIẾM</div>
             <div class="filter-grid">
@@ -1221,12 +1262,15 @@
             </div>
         </section>
         
+        <!-- Products Grid -->
         <section id="productsSection">
             <div class="products-grid" id="productsGrid">
+                <!-- Products will be rendered here -->
             </div>
         </section>
     </main>
     
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-grid">
@@ -1254,6 +1298,7 @@
         </div>
     </footer>
 
+    <!-- Auth Modal -->
     <div class="modal" id="authModal">
         <div class="modal-content">
             <button class="modal-close" aria-label="Đóng">×</button>
@@ -1323,23 +1368,29 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
         "use strict";
 
-        const STORAGE_KEYS = {
-            cart: 'shop_cart',
-            favorites: 'shop_favorites',
-            user: 'shop_user',
-            token: 'shop_token'
-        };
+        // =================================================================
+        // ENHANCED UTILITIES & CORE FUNCTIONS
+        // =================================================================
 
-        class Utils {
+        class ShopUtils {
             static formatPrice(price) {
                 const num = typeof price === 'string' ? parseInt(price, 10) : price;
                 if (isNaN(num)) return '0';
                 return new Intl.NumberFormat('vi-VN').format(num);
+            }
+
+            static formatDate(date) {
+                try {
+                    return new Date(date).toLocaleDateString('vi-VN');
+                } catch (error) {
+                    return 'N/A';
+                }
             }
 
             static showToast(message, type = 'success', duration = 4000) {
@@ -1362,10 +1413,14 @@
                 `;
 
                 container.appendChild(toast);
+
+                // Animate in
                 setTimeout(() => toast.classList.add('show'), 100);
 
+                // Auto remove
                 const timer = setTimeout(() => this.removeToast(toast), duration);
 
+                // Manual close
                 toast.querySelector('.toast-close').addEventListener('click', () => {
                     clearTimeout(timer);
                     this.removeToast(toast);
@@ -1374,22 +1429,55 @@
 
             static removeToast(toast) {
                 toast.classList.remove('show');
-                setTimeout(() => toast?.remove(), 300);
+                setTimeout(() => toast.remove(), 300);
+            }
+
+            static createRippleEffect(element, event) {
+                const rect = element.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = event.clientX - rect.left - size / 2;
+                const y = event.clientY - rect.top - size / 2;
+
+                const ripple = document.createElement('div');
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${x}px;
+                    top: ${y}px;
+                    background: rgba(255, 255, 255, 0.6);
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    pointer-events: none;
+                `;
+
+                element.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
             }
 
             static validateEmail(email) {
-                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
             }
 
             static validateInput(input, message, validator) {
                 const formGroup = input.closest('.form-group');
-                const errorElement = formGroup?.querySelector('.error-message');
+                let errorElement = formGroup?.querySelector('.error-message');
+
+                if (!errorElement && formGroup) {
+                    errorElement = document.createElement('div');
+                    errorElement.className = 'error-message';
+                    formGroup.appendChild(errorElement);
+                }
 
                 const isValid = validator ? validator(input.value.trim()) : input.value.trim().length > 0;
 
-                if (!isValid && formGroup && errorElement) {
-                    errorElement.textContent = message;
-                    formGroup.classList.add('has-error');
+                if (!isValid) {
+                    if (formGroup && errorElement) {
+                        errorElement.textContent = message;
+                        formGroup.classList.add('has-error');
+                    }
                     return false;
                 }
 
@@ -1401,53 +1489,45 @@
             }
         }
 
-        class Storage {
-            static get(key) {
-                try {
-                    const data = localStorage.getItem(key);
-                    return data ? JSON.parse(data) : null;
-                } catch {
-                    return null;
+        // Add ripple animation CSS
+        const rippleStyle = document.createElement('style');
+        rippleStyle.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
                 }
             }
+        `;
+        document.head.appendChild(rippleStyle);
 
-            static set(key, value) {
-                try {
-                    localStorage.setItem(key, JSON.stringify(value));
-                    return true;
-                } catch {
-                    return false;
-                }
-            }
-
-            static remove(key) {
-                try {
-                    localStorage.removeItem(key);
-                    return true;
-                } catch {
-                    return false;
-                }
-            }
-        }
+        // =================================================================
+        // USER AUTHENTICATION & MANAGEMENT
+        // =================================================================
 
         class UserManager {
             constructor() {
                 this.currentUser = null;
-                this.init();
+                this.initializeAuth();
             }
 
-            init() {
-                const user = Storage.get(STORAGE_KEYS.user);
-                const token = Storage.get(STORAGE_KEYS.token);
+            async initializeAuth() {
+                const storedUser = localStorage.getItem('currentUser');
+                const token = localStorage.getItem('token');
                 
-                if (user && token) {
-                    this.currentUser = user;
-                    this.updateUI();
+                if (storedUser && token) {
+                    try {
+                        this.currentUser = JSON.parse(storedUser);
+                        this.updateUIAfterLogin();
+                    } catch (error) {
+                        console.error('Error loading stored user:', error);
+                        this.logout();
+                    }
                 }
             }
 
             async login(email, password) {
-                if (!Utils.validateEmail(email)) {
+                if (!ShopUtils.validateEmail(email)) {
                     throw new Error('Email không hợp lệ');
                 }
 
@@ -1455,109 +1535,154 @@
                     throw new Error('Mật khẩu phải có ít nhất 6 ký tự');
                 }
 
+                // Simulate API call
                 await new Promise(resolve => setTimeout(resolve, 1500));
 
+                // Create user from email (fallback simulation)
                 const user = {
-                    id: 'user_' + Date.now(),
+                    _id: 'user_' + Date.now(),
                     name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
                     email: email,
-                    createdAt: new Date().toISOString()
+                    createdAt: new Date().toISOString(),
+                    balance: Math.floor(Math.random() * 1000000)
                 };
 
+                // Store user data
                 this.currentUser = user;
-                Storage.set(STORAGE_KEYS.user, user);
-                Storage.set(STORAGE_KEYS.token, 'token_' + Date.now());
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.setItem('token', 'demo_token_' + Date.now());
 
-                this.updateUI();
+                this.updateUIAfterLogin();
                 return user;
             }
 
             async register(name, email, password, confirmPassword) {
-                if (!name.trim()) throw new Error('Vui lòng nhập họ tên');
-                if (!Utils.validateEmail(email)) throw new Error('Email không hợp lệ');
-                if (password.length < 6) throw new Error('Mật khẩu phải có ít nhất 6 ký tự');
-                if (password !== confirmPassword) throw new Error('Mật khẩu xác nhận không khớp');
+                if (!name.trim()) {
+                    throw new Error('Vui lòng nhập họ tên');
+                }
 
+                if (!ShopUtils.validateEmail(email)) {
+                    throw new Error('Email không hợp lệ');
+                }
+
+                if (password.length < 6) {
+                    throw new Error('Mật khẩu phải có ít nhất 6 ký tự');
+                }
+
+                if (password !== confirmPassword) {
+                    throw new Error('Mật khẩu xác nhận không khớp');
+                }
+
+                // Simulate API call
                 await new Promise(resolve => setTimeout(resolve, 2000));
 
                 const user = {
-                    id: 'user_' + Date.now(),
+                    _id: 'user_' + Date.now(),
                     name: name.trim(),
                     email: email,
-                    createdAt: new Date().toISOString()
+                    createdAt: new Date().toISOString(),
+                    balance: 0
                 };
 
+                // Store user data
                 this.currentUser = user;
-                Storage.set(STORAGE_KEYS.user, user);
-                Storage.set(STORAGE_KEYS.token, 'token_' + Date.now());
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.setItem('token', 'demo_token_' + Date.now());
 
-                this.updateUI();
+                this.updateUIAfterLogin();
                 return user;
             }
 
             logout() {
-                Storage.remove(STORAGE_KEYS.user);
-                Storage.remove(STORAGE_KEYS.token);
+                // Clear storage
+                localStorage.removeItem('token');
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('userBalance');
+                
                 this.currentUser = null;
-                this.updateUI();
-                Utils.showToast('Đăng xuất thành công!', 'success');
-            }
+                this.updateUIAfterLogout();
+                
+                ShopUtils.showToast('Đăng xuất thành công!', 'success');
 
-            updateUI() {
-                const loginButton = document.getElementById('loginButton');
-                const userDropdown = document.getElementById('userDropdown');
-                const userName = document.getElementById('userName');
-                const userAvatar = document.getElementById('userAvatar');
-
-                if (this.currentUser) {
-                    if (loginButton) loginButton.style.display = 'none';
-                    if (userDropdown) userDropdown.style.display = 'flex';
-
-                    const name = this.currentUser.name || this.currentUser.email.split('@')[0];
-                    const avatar = name.charAt(0).toUpperCase();
-
-                    if (userName) userName.textContent = name;
-                    if (userAvatar) userAvatar.textContent = avatar;
-
-                    this.updateCounts();
-                } else {
-                    if (loginButton) loginButton.style.display = 'flex';
-                    if (userDropdown) userDropdown.style.display = 'none';
-                    
-                    document.querySelectorAll('.cart-count, .favorite-count').forEach(el => {
-                        el.textContent = '0';
-                        el.style.display = 'none';
-                    });
+                // Redirect if on protected page
+                if (window.location.pathname.includes('account.html')) {
+                    setTimeout(() => window.location.href = 'index.html', 1000);
                 }
             }
 
-            updateCounts() {
-                const cart = Storage.get(STORAGE_KEYS.cart) || [];
-                const favorites = Storage.get(STORAGE_KEYS.favorites) || [];
+            updateUIAfterLogin() {
+                if (!this.currentUser) return;
 
-                const cartCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-                const favoriteCount = favorites.length;
+                const loginButton = document.getElementById('loginButton');
+                const userDropdown = document.getElementById('userDropdown');
 
-                document.querySelectorAll('#cartCount, .cart-count').forEach(el => {
-                    el.textContent = cartCount;
-                    el.style.display = cartCount > 0 ? 'inline-flex' : 'none';
+                if (loginButton) loginButton.style.display = 'none';
+                if (userDropdown) userDropdown.style.display = 'flex';
+
+                // Update user display
+                const userName = this.currentUser.name || this.currentUser.email.split('@')[0];
+                const firstLetter = userName.charAt(0).toUpperCase();
+
+                document.querySelectorAll('.user-name, #userName').forEach(el => {
+                    el.textContent = userName;
                 });
 
-                document.querySelectorAll('#favoriteCount, .favorite-count').forEach(el => {
-                    el.textContent = favoriteCount;
-                    el.style.display = favoriteCount > 0 ? 'inline-flex' : 'none';
+                document.querySelectorAll('.user-avatar, #userAvatar').forEach(el => {
+                    el.textContent = firstLetter;
+                });
+
+                // Update cart count
+                this.updateCartCount();
+            }
+
+            updateUIAfterLogout() {
+                const loginButton = document.getElementById('loginButton');
+                const userDropdown = document.getElementById('userDropdown');
+
+                if (loginButton) loginButton.style.display = 'flex';
+                if (userDropdown) userDropdown.style.display = 'none';
+
+                // Reset counts
+                document.querySelectorAll('.cart-count, #cartCount').forEach(el => {
+                    el.textContent = '0';
+                    el.style.display = 'none';
+                });
+
+                document.querySelectorAll('.favorite-count').forEach(el => {
+                    el.textContent = '0';
+                    el.style.display = 'none';
+                });
+            }
+
+            async updateCartCount() {
+                const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+                document.querySelectorAll('.cart-count, #cartCount').forEach(el => {
+                    el.textContent = count;
+                    el.style.display = count > 0 ? 'inline-flex' : 'none';
                 });
             }
         }
 
+        // =================================================================
+        // CART & FAVORITES MANAGEMENT
+        // =================================================================
+
         class CartManager {
-            static get() {
-                return Storage.get(STORAGE_KEYS.cart) || [];
+            static async get() {
+                return JSON.parse(localStorage.getItem('cart') || '[]');
             }
 
-            static add(product, quantity = 1) {
-                const cart = this.get();
-                const existingItem = cart.find(item => item.product.id === product.id);
+            static async add(productId, quantity = 1) {
+                let cart = await this.get();
+                const product = sampleProducts.find(p => p.id === productId);
+                
+                if (!product) {
+                    throw new Error('Sản phẩm không tồn tại');
+                }
+
+                const existingItem = cart.find(item => item.product.id === productId);
 
                 if (existingItem) {
                     existingItem.quantity += quantity;
@@ -1565,60 +1690,57 @@
                     cart.push({ product, quantity });
                 }
 
-                Storage.set(STORAGE_KEYS.cart, cart);
-                window.userManager?.updateCounts();
+                localStorage.setItem('cart', JSON.stringify(cart));
+                userManager.updateCartCount();
                 return cart;
             }
 
-            static remove(productId) {
-                const cart = this.get().filter(item => item.product.id !== productId);
-                Storage.set(STORAGE_KEYS.cart, cart);
-                window.userManager?.updateCounts();
+            static async remove(productId) {
+                let cart = await this.get();
+                cart = cart.filter(item => item.product.id !== productId);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                userManager.updateCartCount();
                 return cart;
             }
 
-            static clear() {
-                Storage.remove(STORAGE_KEYS.cart);
-                window.userManager?.updateCounts();
+            static async clear() {
+                localStorage.removeItem('cart');
+                userManager.updateCartCount();
             }
         }
 
         class FavoriteManager {
-            static get() {
-                return Storage.get(STORAGE_KEYS.favorites) || [];
+            static async get() {
+                return JSON.parse(localStorage.getItem('favorites') || '[]');
             }
 
-            static add(product) {
-                const favorites = this.get();
-                if (!favorites.find(p => p.id === product.id)) {
+            static async add(product) {
+                let favorites = await this.get();
+                const exists = favorites.find(p => p.id === product.id);
+
+                if (!exists) {
                     favorites.push(product);
-                    Storage.set(STORAGE_KEYS.favorites, favorites);
-                    window.userManager?.updateCounts();
+                    localStorage.setItem('favorites', JSON.stringify(favorites));
                 }
                 return favorites;
             }
 
-            static remove(productId) {
-                const favorites = this.get().filter(p => p.id !== productId);
-                Storage.set(STORAGE_KEYS.favorites, favorites);
-                window.userManager?.updateCounts();
+            static async remove(productId) {
+                let favorites = await this.get();
+                favorites = favorites.filter(p => p.id !== productId);
+                localStorage.setItem('favorites', JSON.stringify(favorites));
                 return favorites;
             }
 
-            static isFavorite(productId) {
-                return this.get().some(p => p.id === productId);
-            }
-
-            static toggle(product) {
-                if (this.isFavorite(product.id)) {
-                    this.remove(product.id);
-                    return false;
-                } else {
-                    this.add(product);
-                    return true;
-                }
+            static async isFavorite(productId) {
+                const favorites = await this.get();
+                return favorites.some(p => p.id === productId);
             }
         }
+
+        // =================================================================
+        // SAMPLE PRODUCTS DATA
+        // =================================================================
 
         const sampleProducts = [
             {
@@ -1649,11 +1771,16 @@
             }
         ];
 
-        function renderProducts() {
-            const grid = document.getElementById('productsGrid');
-            if (!grid) return;
+        // =================================================================
+        // PRODUCT RENDERING & INTERACTIONS
+        // =================================================================
 
-            grid.innerHTML = `
+        function renderProducts() {
+            const productsGrid = document.getElementById('productsGrid');
+            if (!productsGrid) return;
+
+            // Show loading
+            productsGrid.innerHTML = `
                 <div class="loading-container">
                     <div class="loading-spinner"></div>
                     <h3>Đang tải sản phẩm...</h3>
@@ -1662,12 +1789,14 @@
             `;
 
             setTimeout(() => {
-                grid.innerHTML = '';
+                productsGrid.innerHTML = '';
+
                 sampleProducts.forEach((product, index) => {
                     const card = createProductCard(product, index);
-                    grid.appendChild(card);
+                    productsGrid.appendChild(card);
                 });
-                initProductInteractions();
+
+                initializeProductInteractions();
             }, 1200);
         }
 
@@ -1703,8 +1832,8 @@
                     <p class="product-description">${product.description}</p>
                     <div class="product-price">
                         <div class="price-container">
-                            <span class="product-current-price">${Utils.formatPrice(product.price)}đ</span>
-                            ${product.oldPrice ? `<span class="product-old-price">${Utils.formatPrice(product.oldPrice)}đ</span>` : ''}
+                            <span class="product-current-price">${ShopUtils.formatPrice(product.price)}đ</span>
+                            ${product.oldPrice ? `<span class="product-old-price">${ShopUtils.formatPrice(product.oldPrice)}đ</span>` : ''}
                         </div>
                         <div class="product-meta">
                             <span class="product-sales"><i class="fas fa-user"></i> ${product.sales}</span>
@@ -1730,35 +1859,77 @@
             return card;
         }
 
-        function initProductInteractions() {
+        async function initializeProductInteractions() {
+            // Add to cart buttons with enhanced purchase flow
             document.querySelectorAll('.add-to-cart').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     e.preventDefault();
-                    const productId = btn.dataset.id;
+                    const productId = e.currentTarget.dataset.id;
                     const product = sampleProducts.find(p => p.id === productId);
 
                     if (!product) return;
 
+                    // Add ripple effect
+                    ShopUtils.createRippleEffect(btn, e);
+
+                    // Show loading state
                     btn.classList.add('loading');
 
                     try {
-                        CartManager.add(product);
-                        Utils.showToast(`Đã thêm ${product.title} vào yêu thích!`, 'success');
-                    } else {
-                        btn.classList.remove('active');
-                        icon.className = 'far fa-heart';
-                        Utils.showToast('Đã xóa khỏi yêu thích', 'info');
+                        // Add to cart
+                        await CartManager.add(productId);
+
+                        // Success feedback
+                        ShopUtils.showToast(`Đã thêm ${product.title} vào giỏ hàng!`, 'success');
+
+                        // Redirect to product page after short delay
+                        setTimeout(() => {
+                            window.location.href = `product.html?id=${encodeURIComponent(productId)}`;
+                        }, 1000);
+
+                    } catch (error) {
+                        ShopUtils.showToast('Có lỗi xảy ra, vui lòng thử lại!', 'error');
+                        btn.classList.remove('loading');
                     }
                 });
             });
 
-            updateFavoriteStates();
+            // Favorite buttons
+            document.querySelectorAll('.btn-favorite').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const productId = e.currentTarget.dataset.id;
+                    const product = sampleProducts.find(p => p.id === productId);
+
+                    if (!product) return;
+
+                    const icon = btn.querySelector('i');
+                    const isFavorite = await FavoriteManager.isFavorite(productId);
+
+                    if (isFavorite) {
+                        await FavoriteManager.remove(productId);
+                        btn.classList.remove('active');
+                        icon.className = 'far fa-heart';
+                        ShopUtils.showToast('Đã xóa khỏi yêu thích', 'info');
+                    } else {
+                        await FavoriteManager.add(product);
+                        btn.classList.add('active');
+                        icon.className = 'fas fa-heart';
+                        ShopUtils.showToast(`Đã thêm ${product.title} vào yêu thích!`, 'success');
+                    }
+                });
+            });
+
+            // Update favorite button states
+            await updateFavoriteButtonStates();
         }
 
-        function updateFavoriteStates() {
-            document.querySelectorAll('.btn-favorite').forEach(btn => {
+        async function updateFavoriteButtonStates() {
+            const favoriteButtons = document.querySelectorAll('.btn-favorite');
+
+            for (const btn of favoriteButtons) {
                 const productId = btn.dataset.id;
-                const isFavorite = FavoriteManager.isFavorite(productId);
+                const isFavorite = await FavoriteManager.isFavorite(productId);
                 const icon = btn.querySelector('i');
 
                 if (isFavorite) {
@@ -1768,26 +1939,52 @@
                     btn.classList.remove('active');
                     icon.className = 'far fa-heart';
                 }
-            });
+            }
         }
 
-        function initFiltering() {
+        // =================================================================
+        // FILTERING SYSTEM
+        // =================================================================
+
+        function initializeFiltering() {
             const filterButton = document.getElementById('filterButton');
             const resetButton = document.getElementById('resetButton');
+            const searchInputs = ['searchId', 'searchNote'];
 
-            filterButton?.addEventListener('click', filterProducts);
-            resetButton?.addEventListener('click', resetFilters);
-
-            ['searchId', 'searchNote'].forEach(id => {
-                document.getElementById(id)?.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        filterProducts();
-                    }
+            if (filterButton) {
+                filterButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    ShopUtils.createRippleEffect(filterButton, e);
+                    filterProducts();
                 });
+            }
+
+            if (resetButton) {
+                resetButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    ShopUtils.createRippleEffect(resetButton, e);
+                    resetFilters();
+                });
+            }
+
+            // Enter key support
+            searchInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            filterProducts();
+                        }
+                    });
+                }
             });
 
-            document.getElementById('searchPrice')?.addEventListener('change', filterProducts);
+            // Auto filter on price change
+            const priceSelect = document.getElementById('searchPrice');
+            if (priceSelect) {
+                priceSelect.addEventListener('change', filterProducts);
+            }
         }
 
         function filterProducts() {
@@ -1818,10 +2015,12 @@
                     if (cardPrice < min || cardPrice > max) isVisible = false;
                 }
 
-                card.style.display = isVisible ? 'block' : 'none';
                 if (isVisible) {
+                    card.style.display = 'block';
                     card.style.animation = `fadeInUp 0.6s ease-out ${index * 0.1}s both`;
                     visibleCount++;
+                } else {
+                    card.style.display = 'none';
                 }
             });
 
@@ -1858,8 +2057,7 @@
                     box-shadow: var(--shadow-soft);
                     animation: slideInDown 0.5s ease-out;
                 `;
-                const grid = document.getElementById('productsGrid');
-                grid.insertBefore(result, grid.firstChild);
+                document.getElementById('productsGrid').insertBefore(result, document.getElementById('productsGrid').firstChild);
             }
 
             result.innerHTML = `
@@ -1867,6 +2065,7 @@
                 <h3 style="margin: 0.5rem 0; color: var(--dark-color);">Kết quả lọc</h3>
                 <p style="margin: 0; color: var(--gray-color);">Tìm thấy ${count} sản phẩm phù hợp với tiêu chí</p>
             `;
+
             result.style.display = 'block';
         }
 
@@ -1875,10 +2074,18 @@
             if (result) result.style.display = 'none';
         }
 
-        function initModals() {
+        // =================================================================
+        // MODAL SYSTEM
+        // =================================================================
+
+        function initializeModals() {
             const authModal = document.getElementById('authModal');
             const loginButton = document.getElementById('loginButton');
+            const closeButtons = document.querySelectorAll('.modal-close');
 
+            if (!authModal || !loginButton) return;
+
+            // Show modal
             const showModal = (modal) => {
                 if (modal) {
                     modal.classList.add('show');
@@ -1886,6 +2093,7 @@
                 }
             };
 
+            // Hide modal
             const hideModal = (modal) => {
                 if (modal) {
                     modal.classList.remove('show');
@@ -1893,197 +2101,269 @@
                 }
             };
 
-            loginButton?.addEventListener('click', () => showModal(authModal));
+            // Event listeners
+            loginButton.addEventListener('click', () => showModal(authModal));
 
-            document.querySelectorAll('.modal-close').forEach(btn => {
+            closeButtons.forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const modal = e.target.closest('.modal');
                     hideModal(modal);
                 });
             });
 
-            authModal?.addEventListener('click', (e) => {
-                if (e.target === authModal) hideModal(authModal);
+            // Click outside to close
+            authModal.addEventListener('click', (e) => {
+                if (e.target === authModal) {
+                    hideModal(authModal);
+                }
             });
 
-            const tabs = authModal?.querySelectorAll('.modal-tab');
-            const forms = authModal?.querySelectorAll('.modal-form');
+            // Tab switching
+            const tabs = authModal.querySelectorAll('.modal-tab');
+            const forms = authModal.querySelectorAll('.modal-form');
 
-            tabs?.forEach(tab => {
+            tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     const tabName = tab.dataset.tab;
+
                     tabs.forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
+
                     forms.forEach(f => {
                         f.classList.toggle('active', f.id === `${tabName}Form`);
                     });
                 });
             });
 
-            document.querySelector('.switch-to-register')?.addEventListener('click', (e) => {
-                e.preventDefault();
-                document.querySelector('.modal-tab[data-tab="register"]')?.click();
-            });
+            // Form switching links
+            const switchToRegister = document.querySelector('.switch-to-register');
+            const switchToLogin = document.querySelectorAll('.switch-to-login');
 
-            document.querySelectorAll('.switch-to-login').forEach(el => {
+            if (switchToRegister) {
+                switchToRegister.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const registerTab = document.querySelector('.modal-tab[data-tab="register"]');
+                    if (registerTab) registerTab.click();
+                });
+            }
+
+            switchToLogin.forEach(el => {
                 el.addEventListener('click', (e) => {
                     e.preventDefault();
-                    document.querySelector('.modal-tab[data-tab="login"]')?.click();
+                    const loginTab = document.querySelector('.modal-tab[data-tab="login"]');
+                    if (loginTab) loginTab.click();
                 });
             });
 
-            initAuthForms();
+            // Form handlers
+            initializeLoginForm();
+            initializeRegisterForm();
         }
 
-        function initAuthForms() {
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
+        function initializeLoginForm() {
+            const form = document.getElementById('loginForm');
+            if (!form) return;
 
-            loginForm?.addEventListener('submit', async (e) => {
+            form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const email = loginForm.email.value.trim();
-                const password = loginForm.password.value;
-                const submitBtn = loginForm.querySelector('.btn-submit');
 
-                loginForm.querySelectorAll('.form-group').forEach(group => {
+                const email = form.email.value.trim();
+                const password = form.password.value;
+                const submitBtn = form.querySelector('.btn-submit');
+
+                // Clear previous errors
+                form.querySelectorAll('.form-group').forEach(group => {
                     group.classList.remove('has-error');
                 });
 
+                // Validation
                 let isValid = true;
-                if (!Utils.validateInput(loginForm.email, 'Vui lòng nhập email hợp lệ', Utils.validateEmail)) {
+
+                if (!ShopUtils.validateInput(form.email, 'Vui lòng nhập email hợp lệ', ShopUtils.validateEmail)) {
                     isValid = false;
                 }
-                if (!Utils.validateInput(loginForm.password, 'Vui lòng nhập mật khẩu', (val) => val.length >= 6)) {
+
+                if (!ShopUtils.validateInput(form.password, 'Vui lòng nhập mật khẩu', (val) => val.length >= 6)) {
                     isValid = false;
                 }
 
                 if (!isValid) return;
 
+                // Show loading
                 submitBtn.classList.add('loading');
 
                 try {
-                    const user = await window.userManager.login(email, password);
-                    Utils.showToast(`Chào mừng ${user.name} trở lại!`, 'success');
+                    const user = await userManager.login(email, password);
+                    ShopUtils.showToast(`Chào mừng ${user.name} trở lại!`, 'success');
 
-                    const modal = loginForm.closest('.modal');
-                    modal?.classList.remove('show');
-                    document.body.style.overflow = '';
+                    // Close modal
+                    const modal = form.closest('.modal');
+                    if (modal) {
+                        modal.classList.remove('show');
+                        document.body.style.overflow = '';
+                    }
 
-                    loginForm.reset();
-                    loginForm.querySelectorAll('.form-group').forEach(group => {
+                    // Reset form
+                    form.reset();
+                    form.querySelectorAll('.form-group').forEach(group => {
                         group.classList.remove('has-error');
                     });
 
                 } catch (error) {
-                    Utils.showToast(error.message || 'Đăng nhập thất bại', 'error');
-                } finally {
-                    submitBtn.classList.remove('loading');
-                }
-            });
-
-            registerForm?.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const name = registerForm.name.value.trim();
-                const email = registerForm.email.value.trim();
-                const password = registerForm.password.value;
-                const confirmPassword = registerForm.confirmPassword.value;
-                const submitBtn = registerForm.querySelector('.btn-submit');
-
-                registerForm.querySelectorAll('.form-group').forEach(group => {
-                    group.classList.remove('has-error');
-                });
-
-                let isValid = true;
-                if (!Utils.validateInput(registerForm.name, 'Vui lòng nhập họ tên', (val) => val.length >= 2)) {
-                    isValid = false;
-                }
-                if (!Utils.validateInput(registerForm.email, 'Vui lòng nhập email hợp lệ', Utils.validateEmail)) {
-                    isValid = false;
-                }
-                if (!Utils.validateInput(registerForm.password, 'Mật khẩu phải có ít nhất 6 ký tự', (val) => val.length >= 6)) {
-                    isValid = false;
-                }
-                if (!Utils.validateInput(registerForm.confirmPassword, 'Mật khẩu xác nhận không khớp', (val) => val === password)) {
-                    isValid = false;
-                }
-
-                if (!isValid) return;
-
-                submitBtn.classList.add('loading');
-
-                try {
-                    const user = await window.userManager.register(name, email, password, confirmPassword);
-                    Utils.showToast(`Đăng ký thành công! Chào mừng ${user.name}!`, 'success');
-
-                    const modal = registerForm.closest('.modal');
-                    modal?.classList.remove('show');
-                    document.body.style.overflow = '';
-
-                    registerForm.reset();
-                    registerForm.querySelectorAll('.form-group').forEach(group => {
-                        group.classList.remove('has-error');
-                    });
-
-                } catch (error) {
-                    Utils.showToast(error.message || 'Đăng ký thất bại', 'error');
+                    ShopUtils.showToast(error.message || 'Đăng nhập thất bại', 'error');
                 } finally {
                     submitBtn.classList.remove('loading');
                 }
             });
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            window.userManager = new UserManager();
-            
-            initModals();
-            initFiltering();
-            renderProducts();
+        function initializeRegisterForm() {
+            const form = document.getElementById('registerForm');
+            if (!form) return;
 
-            document.getElementById('logoutButton')?.addEventListener('click', () => {
-                if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-                    window.userManager.logout();
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const name = form.name.value.trim();
+                const email = form.email.value.trim();
+                const password = form.password.value;
+                const confirmPassword = form.confirmPassword.value;
+                const submitBtn = form.querySelector('.btn-submit');
+
+                // Clear previous errors
+                form.querySelectorAll('.form-group').forEach(group => {
+                    group.classList.remove('has-error');
+                });
+
+                // Validation
+                let isValid = true;
+
+                if (!ShopUtils.validateInput(form.name, 'Vui lòng nhập họ tên', (val) => val.length >= 2)) {
+                    isValid = false;
+                }
+
+                if (!ShopUtils.validateInput(form.email, 'Vui lòng nhập email hợp lệ', ShopUtils.validateEmail)) {
+                    isValid = false;
+                }
+
+                if (!ShopUtils.validateInput(form.password, 'Mật khẩu phải có ít nhất 6 ký tự', (val) => val.length >= 6)) {
+                    isValid = false;
+                }
+
+                if (!ShopUtils.validateInput(form.confirmPassword, 'Mật khẩu xác nhận không khớp', (val) => val === password)) {
+                    isValid = false;
+                }
+
+                if (!isValid) return;
+
+                // Show loading
+                submitBtn.classList.add('loading');
+
+                try {
+                    const user = await userManager.register(name, email, password, confirmPassword);
+                    ShopUtils.showToast(`Đăng ký thành công! Chào mừng ${user.name}!`, 'success');
+
+                    // Close modal
+                    const modal = form.closest('.modal');
+                    if (modal) {
+                        modal.classList.remove('show');
+                        document.body.style.overflow = '';
+                    }
+
+                    // Reset form
+                    form.reset();
+                    form.querySelectorAll('.form-group').forEach(group => {
+                        group.classList.remove('has-error');
+                    });
+
+                } catch (error) {
+                    ShopUtils.showToast(error.message || 'Đăng ký thất bại', 'error');
+                } finally {
+                    submitBtn.classList.remove('loading');
                 }
             });
+        }
 
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-            });
-        });
+        // =================================================================
+        // INITIALIZATION
+        // =================================================================
 
-        window.Utils = Utils;
-        window.CartManager = CartManager;
-        window.FavoriteManager = FavoriteManager;
-    </script>
-</body>
-</html>Đã thêm ${product.title} vào giỏ hàng!`, 'success');
-                        
-                        setTimeout(() => {
-                            window.location.href = `product.html?id=${encodeURIComponent(productId)}`;
-                        }, 1000);
+        // Global instances
+        let userManager;
 
-                    } catch (error) {
-                        Utils.showToast('Có lỗi xảy ra, vui lòng thử lại!', 'error');
-                        btn.classList.remove('loading');
+        // Add slideInDown animation
+        const slideStyle = document.createElement('style');
+        slideStyle.textContent = `
+            @keyframes slideInDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(slideStyle);
+
+        // Main initialization
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Enhanced Shop Grow A Garden initialized');
+
+            try {
+                // Initialize core systems
+                userManager = new UserManager();
+                
+                // Initialize components
+                initializeModals();
+                initializeFiltering();
+                
+                // Load products
+                renderProducts();
+
+                // Logout button event
+                document.getElementById('logoutButton')?.addEventListener('click', () => {
+                    if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                        userManager.logout();
                     }
                 });
-            });
 
-            document.querySelectorAll('.btn-favorite').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const productId = btn.dataset.id;
-                    const product = sampleProducts.find(p => p.id === productId);
+                // Add ripple effects to all buttons
+                document.addEventListener('click', function(e) {
+                    if (e.target.matches('.btn:not(.add-to-cart)')) {
+                        ShopUtils.createRippleEffect(e.target, e);
+                    }
+                });
 
-                    if (!product) return;
+                // Smooth scrolling
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('href'));
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    });
+                });
 
-                    const icon = btn.querySelector('i');
-                    const isFavorite = FavoriteManager.toggle(product);
+                console.log('All systems initialized successfully');
 
-                    if (isFavorite) {
-                        btn.classList.add('active');
-                        icon.className = 'fas fa-heart';
-                        Utils.showToast(`
+            } catch (error) {
+                console.error('Initialization error:', error);
+                ShopUtils.showToast('Có lỗi xảy ra khi khởi tạo trang web', 'error');
+            }
+        });
+
+        // Export for global access
+        window.ShopUtils = ShopUtils;
+        window.UserManager = UserManager;
+        window.CartManager = CartManager;
+        window.FavoriteManager = FavoriteManager;
+
+    </script>
+</body>
+</html>
