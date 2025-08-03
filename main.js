@@ -132,14 +132,14 @@ class Utils {
 }
 
 // =================================================================
-// GỌI API - CLEAN VERSION
+// GỌI API - ENHANCED VERSION
 // =================================================================
 
-async function callApi(endpoint, method = 'GET', body = null) {
+async function callApi(endpoint, method = 'GET', body = null, requireAuth = true) {
     const headers = { 'Content-Type': 'application/json' };
     const token = localStorage.getItem('token');
     
-    if (token) {
+    if (token && requireAuth) {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
@@ -153,9 +153,17 @@ async function callApi(endpoint, method = 'GET', body = null) {
         if (response.status === 204) return true;
 
         const data = await response.json();
+        
+        // Handle 401 Unauthorized for optional auth endpoints
+        if (response.status === 401 && !requireAuth) {
+            console.log('401 on optional auth endpoint, returning empty data');
+            return { data: { products: [], favorites: [], cart: [] } };
+        }
+
         if (!response.ok) {
             throw new Error(data.message || 'Có lỗi xảy ra từ máy chủ.');
         }
+        
         return data;
     } catch (error) {
         console.error(`API Error on ${endpoint}:`, error);
@@ -169,20 +177,29 @@ async function callApi(endpoint, method = 'GET', body = null) {
 
 const CartManager = {
     async get() {
+        if (!currentUser) return [];
+        
         try {
             const result = await callApi('/cart');
             return result.data.cart || [];
         } catch (error) {
+            console.log('Cart access requires login:', error.message);
             return [];
         }
     },
 
     async add(productId, quantity = 1) {
+        if (!currentUser) {
+            throw new Error('Vui lòng đăng nhập để thêm vào giỏ hàng!');
+        }
+        
         await callApi('/cart', 'POST', { productId, quantity });
         await updateCartCount();
     },
 
     async remove(productId) {
+        if (!currentUser) return;
+        
         await callApi(`/cart/${productId}`, 'DELETE');
         await updateCartCount();
         if (window.location.pathname.includes('cart.html')) {
@@ -191,6 +208,8 @@ const CartManager = {
     },
 
     async updateQuantity(productId, quantity) {
+        if (!currentUser) return;
+        
         await callApi('/cart', 'PATCH', { cart: [{ product: productId, quantity }] });
         if (window.location.pathname.includes('cart.html')) {
             await loadCartPage();
@@ -198,6 +217,8 @@ const CartManager = {
     },
 
     async clear() {
+        if (!currentUser) return;
+        
         await callApi('/cart', 'PATCH', { cart: [] });
         await updateCartCount();
         if (window.location.pathname.includes('cart.html')) {
@@ -212,20 +233,29 @@ const CartManager = {
 
 const FavoriteManager = {
     async get() {
+        if (!currentUser) return [];
+        
         try {
             const result = await callApi('/favorites');
             return result.data.favorites || [];
         } catch (error) {
+            console.log('Favorites access requires login:', error.message);
             return [];
         }
     },
 
     async add(productId) {
+        if (!currentUser) {
+            throw new Error('Vui lòng đăng nhập để thêm vào yêu thích!');
+        }
+        
         await callApi('/favorites', 'POST', { productId });
         await updateFavoriteStatus(productId, true);
     },
 
     async remove(productId) {
+        if (!currentUser) return;
+        
         await callApi(`/favorites/${productId}`, 'DELETE');
         await updateFavoriteStatus(productId, false);
         if (window.location.pathname.includes('favorite.html')) {
@@ -234,6 +264,8 @@ const FavoriteManager = {
     },
 
     async getStatus() {
+        if (!currentUser) return {};
+        
         const favorites = await this.get();
         const status = {};
         favorites.forEach(fav => {
@@ -253,10 +285,9 @@ async function authenticate(email, password) {
     const data = await callApi('/users/login', 'POST', { email, password });
     localStorage.setItem('token', data.token);
     
-    // Đảm bảo user object có email (vì đây là field bắt buộc)
     currentUser = {
         ...data.data.user,
-        email: data.data.user.email || email // Fallback về email đăng nhập
+        email: data.data.user.email || email
     };
     
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -268,11 +299,10 @@ async function register(name, email, password, passwordConfirm) {
     const data = await callApi('/users/signup', 'POST', { name, email, password, passwordConfirm });
     localStorage.setItem('token', data.token);
     
-    // Đảm bảo user object có đầy đủ thông tin
     currentUser = {
         ...data.data.user,
-        name: data.data.user.name || name, // Fallback về name đăng ký
-        email: data.data.user.email || email // Fallback về email đăng ký
+        name: data.data.user.name || name,
+        email: data.data.user.email || email
     };
     
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -302,7 +332,6 @@ async function checkAutoLogin() {
             const data = await callApi('/users/me');
             currentUser = data.data.user;
             
-            // Validate user data trước khi lưu
             if (!currentUser.email) {
                 throw new Error('Invalid user data: missing email');
             }
@@ -310,25 +339,21 @@ async function checkAutoLogin() {
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             await updateUIAfterLogin();
         } catch (error) {
-            console.error('Auto-login failed, token might be expired:', error);
-            // Xóa dữ liệu không hợp lệ
+            console.error('Auto-login failed:', error);
             localStorage.removeItem('token');
             localStorage.removeItem('currentUser');
             currentUser = null;
             updateUIAfterLogout();
         }
     } else {
-        // Kiểm tra currentUser từ localStorage nếu không có token
         const storedUser = localStorage.getItem('currentUser');
         if (storedUser) {
             try {
                 const userData = JSON.parse(storedUser);
-                // Validate dữ liệu từ localStorage
                 if (userData && userData.email) {
                     currentUser = userData;
                     await updateUIAfterLogin();
                 } else {
-                    // Xóa dữ liệu không hợp lệ
                     localStorage.removeItem('currentUser');
                 }
             } catch (error) {
@@ -346,17 +371,14 @@ async function checkAutoLogin() {
 function getDisplayName(user) {
     if (!user) return 'User';
     
-    // Ưu tiên: name > email username > fallback
     if (user.name && user.name.trim() !== '') {
         return user.name.trim();
     }
     
-    // Kiểm tra email tồn tại và hợp lệ trước khi split
     if (user.email && typeof user.email === 'string' && user.email.includes('@')) {
         return user.email.split('@')[0];
     }
     
-    // Fallback cuối cùng
     return 'User';
 }
 
@@ -369,11 +391,9 @@ async function updateUIAfterLogin() {
     if (loginButton) loginButton.style.display = 'none';
     if (userDropdown) userDropdown.style.display = 'flex';
     
-    // Lấy tên hiển thị
     const displayName = getDisplayName(currentUser);
     const firstLetter = displayName.charAt(0).toUpperCase();
     
-    // Cập nhật tất cả các element hiển thị tên
     document.querySelectorAll('.user-name, #userName').forEach(el => {
         if (el) el.textContent = displayName;
     });
@@ -382,7 +402,6 @@ async function updateUIAfterLogin() {
         if (el) el.textContent = firstLetter;
     });
 
-    // Cập nhật số lượng giỏ hàng và trạng thái yêu thích
     await updateCartCount();
     await updateAllFavoriteButtons();
 }
@@ -394,7 +413,6 @@ function updateUIAfterLogout() {
     if (loginButton) loginButton.style.display = 'flex';
     if (userDropdown) userDropdown.style.display = 'none';
 
-    // Reset các số đếm
     document.querySelectorAll('.cart-count, #cartCount').forEach(el => {
         el.textContent = '0';
         el.style.display = 'none';
@@ -444,14 +462,12 @@ function initAuthModal() {
         }, 300);
     };
 
-    // Event listeners
     loginButton.addEventListener('click', showModal);
     closeModalButtons.forEach(btn => btn.addEventListener('click', hideModal));
     authModal.addEventListener('click', (e) => {
         if (e.target === authModal) hideModal();
     });
 
-    // Tab switching
     const tabs = authModal.querySelectorAll('.modal-tab');
     const forms = authModal.querySelectorAll('.modal-form');
     
@@ -465,7 +481,6 @@ function initAuthModal() {
         });
     });
 
-    // Form switching links
     document.querySelectorAll('.switch-to-register, .switch-to-login').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
@@ -498,6 +513,13 @@ function handleFormSubmit(form, submitAction, onSuccess) {
             Utils.showToast(`Chào mừng ${displayName}!`, 'success');
             onSuccess();
             form.reset();
+            
+            // Reload products after login if on index page
+            if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+                setTimeout(() => {
+                    if (window.loadProducts) window.loadProducts();
+                }, 500);
+            }
         } catch (error) {
             Utils.showToast(error.message || 'Thao tác thất bại, vui lòng thử lại.', 'error');
         } finally {
@@ -551,13 +573,54 @@ function handleRegisterForm(onSuccess) {
 }
 
 // =================================================================
-// LOGIC RIÊNG CHO CÁC TRANG
+// LOGIC RIÊNG CHO CÁC TRANG - UPDATED
 // =================================================================
 
 async function loadProducts() {
     const productsGrid = document.getElementById('productsGrid');
     if (!productsGrid) return;
     
+    // Check if we have renderApiProducts from script.js (for index page)
+    if (window.renderApiProducts) {
+        console.log('Using renderApiProducts from script.js for index page');
+        
+        Utils.showLoading(productsGrid, 'Đang tải sản phẩm...');
+        
+        try {
+            // Try to load from API without requiring auth first
+            const data = await callApi('/products', 'GET', null, false);
+            const products = data.data.products || [];
+            
+            // Store products globally for script.js
+            window.allProducts = products;
+            
+            // Use renderApiProducts from script.js
+            window.renderApiProducts(products);
+            
+            if (currentUser) {
+                await updateAllFavoriteButtons();
+            }
+            
+        } catch (error) {
+            console.error('API requires authentication for products:', error);
+            
+            // Show login required message
+            productsGrid.innerHTML = `
+                <div class="auth-required-message" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-lock" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #1f2937; margin-bottom: 1rem;">Cần đăng nhập để xem sản phẩm</h3>
+                    <p style="color: #64748b; margin-bottom: 2rem;">API yêu cầu xác thực để truy cập danh sách sản phẩm</p>
+                    <button class="btn btn-primary" onclick="document.getElementById('loginButton').click()">
+                        <i class="fas fa-user"></i>
+                        <span>Đăng nhập ngay</span>
+                    </button>
+                </div>
+            `;
+        }
+        return;
+    }
+    
+    // Fallback for other pages (product.html, etc.)
     Utils.showLoading(productsGrid, 'Đang tải sản phẩm...');
     
     try {
@@ -576,7 +639,7 @@ async function loadProducts() {
             await updateAllFavoriteButtons();
         }
     } catch (error) {
-        Utils.showError(productsGrid, 'Không thể tải sản phẩm. Vui lòng thử lại sau.');
+        Utils.showError(productsGrid, 'Không thể tải sản phẩm. Vui lòng đăng nhập và thử lại.');
     }
 }
 
@@ -608,7 +671,6 @@ function createProductCardHTML(product) {
 }
 
 function attachProductEventListeners() {
-    // Add to cart buttons
     document.querySelectorAll('.add-to-cart').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             if (!currentUser) {
@@ -627,7 +689,6 @@ function attachProductEventListeners() {
         });
     });
 
-    // Favorite buttons
     document.querySelectorAll('.favorite-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             e.stopPropagation();
@@ -677,56 +738,30 @@ async function updateAllFavoriteButtons() {
 }
 
 // =================================================================
-// TRANG CHỦ (INDEX.HTML)
+// TRANG CHỦ (INDEX.HTML) - UPDATED
 // =================================================================
 
 function initIndexPage() {
+    // Load products (will use script.js renderApiProducts if available)
     loadProducts();
     
+    // Filter functionality (only if elements exist - for index page)
     const filterButton = document.getElementById('filterButton');
     const resetButton = document.getElementById('resetButton');
     
     if (filterButton) {
         filterButton.addEventListener('click', () => {
-            const id = (document.getElementById('searchId')?.value || '').toLowerCase();
-            const priceRange = document.getElementById('searchPrice')?.value || '';
-            const note = (document.getElementById('searchNote')?.value || '').toLowerCase();
-            
-            document.querySelectorAll('.product-card').forEach(card => {
-                const cardId = (card.dataset.id || '').toLowerCase();
-                const cardPrice = parseInt(card.dataset.price || '0');
-                const cardNote = (card.dataset.note || '').toLowerCase();
-                
-                let isVisible = true;
-                
-                if (id && !cardId.includes(id)) isVisible = false;
-                if (note && !cardNote.includes(note)) isVisible = false;
-                
-                if (priceRange) {
-                    const ranges = {
-                        'duoi-50k': [0, 49999],
-                        'tu-50k-200k': [50000, 200000],
-                        'tren-200k': [200001, Infinity]
-                    };
-                    const [min, max] = ranges[priceRange] || [0, Infinity];
-                    if (cardPrice < min || cardPrice > max) isVisible = false;
-                }
-                
-                card.style.display = isVisible ? 'block' : 'none';
-            });
+            if (window.filterProducts) {
+                window.filterProducts();
+            }
         });
     }
 
     if (resetButton) {
         resetButton.addEventListener('click', () => {
-            ['searchId', 'searchPrice', 'searchNote'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) element.value = '';
-            });
-            
-            document.querySelectorAll('.product-card').forEach(card => {
-                card.style.display = 'block';
-            });
+            if (window.resetFilters) {
+                window.resetFilters();
+            }
         });
     }
 }
@@ -750,12 +785,10 @@ function initAccountPage() {
     if (accountLayout) accountLayout.style.display = 'grid';
     if (loginPrompt) loginPrompt.style.display = 'none';
 
-    // Sử dụng hàm getDisplayName thống nhất
     const displayName = getDisplayName(currentUser);
     const userId = currentUser._id || 'N/A';
     const firstLetter = displayName.charAt(0).toUpperCase();
     
-    // Cập nhật thông tin tài khoản
     const updateElement = (id, value) => {
         const element = document.getElementById(id);
         if (element) element.textContent = value;
@@ -769,11 +802,9 @@ function initAccountPage() {
     updateElement('userAccountId', userId);
     updateElement('balanceAmount', `${Utils.formatPrice(currentUser.balance || 0)}đ`);
     
-    // Cập nhật avatar
     const avatarElement = document.getElementById('accountAvatar');
     if (avatarElement) avatarElement.textContent = firstLetter;
     
-    // Menu navigation
     document.querySelectorAll('.menu-item').forEach(item => {
         item.addEventListener('click', () => {
             document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
@@ -925,7 +956,6 @@ async function loadCartPage() {
 }
 
 function attachCartPageEventListeners() {
-    // Remove buttons
     document.querySelectorAll('.btn-remove').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const productId = e.currentTarget.dataset.id;
@@ -934,7 +964,6 @@ function attachCartPageEventListeners() {
         });
     });
 
-    // Quantity controls with debounce
     let debounceTimer;
     const debouncedUpdateQuantity = (productId, newQuantity) => {
         clearTimeout(debounceTimer);
@@ -964,7 +993,6 @@ function attachCartPageEventListeners() {
         });
     });
     
-    // Checkout button
     const checkoutButton = document.getElementById('checkoutButton');
     if (checkoutButton) {
         checkoutButton.addEventListener('click', () => {
@@ -976,6 +1004,16 @@ function attachCartPageEventListeners() {
 // =================================================================
 // KHỞI CHẠY CHÍNH
 // =================================================================
+
+// Export các hàm quan trọng để các file khác có thể sử dụng
+window.Utils = Utils;
+window.CartManager = CartManager;
+window.FavoriteManager = FavoriteManager;
+window.callApi = callApi;
+window.currentUser = currentUser;
+window.updateAllFavoriteButtons = updateAllFavoriteButtons;
+window.updateFavoriteStatus = updateFavoriteStatus;
+window.loadProducts = loadProducts;
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
