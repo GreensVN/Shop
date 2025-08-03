@@ -73,6 +73,7 @@ class Utils {
             align-items: center;
             justify-content: space-between;
             min-width: 300px;
+            z-index: 9999;
         `;
 
         toastContainer.appendChild(toast);
@@ -97,7 +98,10 @@ class Utils {
 
     // Tạo vùng chứa cho các toast message nếu chưa có.
     static createToastContainer() {
-        const container = document.createElement('div');
+        let container = document.getElementById('toastContainer');
+        if (container) return container;
+
+        container = document.createElement('div');
         container.id = 'toastContainer';
         container.style.cssText = `
             position: fixed;
@@ -111,12 +115,14 @@ class Utils {
     
     // Hiển thị trạng thái đang tải bên trong một phần tử.
     static showLoading(element, message = 'Đang tải...') {
-        element.innerHTML = `<div class="loading-placeholder" style="text-align: center; padding: 50px; color: #888;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top: 10px;">${message}</p></div>`;
+        if (!element) return;
+        element.innerHTML = `<div class="loading-placeholder" style="text-align: center; padding: 50px; color: #888; grid-column: 1 / -1;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top: 10px;">${message}</p></div>`;
     }
 
     // Hiển thị trạng thái lỗi bên trong một phần tử.
     static showError(element, message = 'Có lỗi xảy ra.') {
-        element.innerHTML = `<div class="error-state" style="text-align: center; padding: 50px; color: #ef4444;"><i class="fas fa-exclamation-triangle fa-2x"></i><p style="margin-top: 10px;">${message}</p></div>`;
+        if (!element) return;
+        element.innerHTML = `<div class="error-state" style="text-align: center; padding: 50px; color: #ef4444; grid-column: 1 / -1;"><i class="fas fa-exclamation-triangle fa-2x"></i><p style="margin-top: 10px;">${message}</p></div>`;
     }
 }
 
@@ -153,8 +159,7 @@ async function callApi(endpoint, method = 'GET', body = null) {
 }
 
 // =================================================================
-// QUẢN LÝ GIỎ HÀNG (CART MANAGER) - THAY THẾ HOÀN TOÀN
-// Tương tác với API của máy chủ để quản lý giỏ hàng.
+// QUẢN LÝ GIỎ HÀNG (CART MANAGER) - API DRIVEN
 // =================================================================
 
 const CartManager = {
@@ -178,19 +183,22 @@ const CartManager = {
         if (window.location.pathname.includes('cart.html')) await loadCartPage();
     },
     async updateQuantity(productId, quantity) {
+        // API này được giả định là có thể cập nhật một phần của giỏ hàng
+        // Gửi một mảng chứa chỉ sản phẩm cần cập nhật.
         await callApi('/cart', 'PATCH', { cart: [{ product: productId, quantity }] });
-        // Tải lại toàn bộ trang giỏ hàng để cập nhật tổng tiền.
+        // Tải lại toàn bộ trang giỏ hàng để cập nhật tổng tiền và các thông tin khác.
         if (window.location.pathname.includes('cart.html')) await loadCartPage();
     },
     async clear() {
+        // Gửi một mảng rỗng để xóa toàn bộ giỏ hàng
         await callApi('/cart', 'PATCH', { cart: [] });
         await updateCartCount();
+        if (window.location.pathname.includes('cart.html')) await loadCartPage();
     }
 };
 
 // =================================================================
-// QUẢN LÝ YÊU THÍCH (FAVORITE MANAGER) - THAY THẾ HOÀN TOÀN
-// Tương tác với API của máy chủ để quản lý sản phẩm yêu thích.
+// QUẢN LÝ YÊU THÍCH (FAVORITE MANAGER) - API DRIVEN
 // =================================================================
 
 const FavoriteManager = {
@@ -394,6 +402,7 @@ function initAuthModal() {
 
 // Hàm xử lý submit form chung, tránh lặp code
 function handleFormSubmit(form, submitAction, onSuccess) {
+    if (!form) return;
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const submitBtn = form.querySelector('.btn-submit');
@@ -810,6 +819,7 @@ function attachCartPageEventListeners() {
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         // 1. Khởi tạo các thành phần chung (luôn chạy)
+        Utils.createToastContainer();
         initAuthModal();
         
         // 2. Gắn sự kiện đăng xuất
