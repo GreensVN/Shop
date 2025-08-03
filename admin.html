@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Quản Lý Sản Phẩm</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --primary-color: #667eea;
+            --dark-color: #1f2937;
+            --gray-color: #6b7280;
+            --light-gray: #f3f4f6;
+            --warning-color: #f59e0b;
+            --success-color: #10b981;
+            --shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --border-radius: 12px;
+            --font-main: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--font-main); color: var(--dark-color); background: var(--light-gray); }
+        
+        /* --- Layout & Header --- */
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 20px; }
+        .header { background: white; padding: 1rem 0; box-shadow: var(--shadow-soft); margin-bottom: 2rem; }
+        .header-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { height: 50px; }
+        
+        /* --- Login Screen --- */
+        #adminLoginScreen { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
+        .login-box { background: white; padding: 2.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-soft); width: 100%; max-width: 400px; text-align: center; }
+        .login-box h1 { margin-bottom: 1.5rem; }
+        .login-box .form-group { text-align: left; }
+        #loginError { color: var(--danger-color); margin-top: 1rem; min-height: 1.2em; }
+
+        /* --- Admin Dashboard --- */
+        #adminDashboard { display: none; }
+        .admin-panel { background: white; border-radius: var(--border-radius); padding: 2.5rem; box-shadow: var(--shadow-soft); }
+        .section-title { font-weight: 600; font-size: 1.5rem; margin-bottom: 1.5rem; border-bottom: 3px solid var(--primary-color); padding-bottom: 0.75rem; }
+        
+        /* --- Form & Inputs --- */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        .full-width { grid-column: 1 / -1; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-color); }
+        input, textarea, select { width: 100%; padding: 0.8rem 1rem; border: 2px solid #e5e7eb; border-radius: var(--border-radius); font-size: 1rem; transition: var(--transition-smooth); }
+        textarea { min-height: 100px; resize: vertical; }
+        input:focus, textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        
+        /* --- Dynamic Fields & Previews --- */
+        #imagePreview { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+        .preview-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #e5e7eb; }
+        .feature-item { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+        
+        /* --- Buttons --- */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.8rem 1.8rem; border: none; border-radius: 50px; font-weight: 600; text-decoration: none; cursor: pointer; transition: var(--transition-smooth); font-size: 1rem; }
+        .btn-primary { background: var(--primary-gradient); color: white; }
+        .btn-secondary { background: var(--gray-color); color: white; }
+        .btn-danger { background: var(--danger-gradient); color: white; }
+        .btn-warning { background-color: var(--warning-color); color: white; }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+        .btn .spinner { display: none; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite; }
+        .btn.loading .spinner { display: inline-block; }
+        
+        /* --- Product Table --- */
+        #productListContainer { margin-top: 3rem; }
+        .product-table-wrapper { overflow-x: auto; }
+        .product-table { width: 100%; border-collapse: collapse; }
+        .product-table th, .product-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        .product-table th { background-color: #f9fafb; font-weight: 600; }
+        .product-table img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
+        .product-table .actions { display: flex; gap: 0.5rem; }
+        .product-table tr.editing { background-color: #eef2ff; }
+        
+        .loading-spinner-container { text-align: center; padding: 2rem; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <a href="index.html"><img src="https://i.ibb.co/q3r1hTft/8574d186247eba75669b7d50d42bd650-png.png" alt="Shop Logo" class="logo"></a>
+            <button id="adminLogoutBtn" class="btn btn-danger" style="display: none;"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất Admin</span></button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Login Screen -->
+        <div id="adminLoginScreen">
+            <div class="login-box">
+                <h1><i class="fas fa-lock"></i> Admin Panel Login</h1>
+                <form id="adminLoginForm">
+                    <div class="form-group">
+                        <label for="adminUser">Tên đăng nhập</label>
+                        <input type="text" id="adminUser" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPass">Mật khẩu</label>
+                        <input type="password" id="adminPass" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Đăng nhập</button>
+                    <p id="loginError"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Dashboard (hidden by default) -->
+        <div id="adminDashboard">
+            <div class="admin-panel">
+                <!-- Form Section -->
+                <section id="formSection">
+                    <h2 class="section-title" id="formTitle"><i class="fas fa-plus-circle"></i> Đăng sản phẩm mới</h2>
+                    <form id="productForm">
+                        <input type="hidden" id="productId">
+                        <div class="form-grid">
+                            <div class="form-group"><label for="title">Tên sản phẩm</label><input type="text" id="title" required></div>
+                            <div class="form-group"><label for="category">Danh mục</label><input type="text" id="category" required></div>
+                            <div class="form-group"><label for="price">Giá bán (VND)</label><input type="number" id="price" required></div>
+                            <div class="form-group"><label for="oldPrice">Giá cũ</label><input type="number" id="oldPrice"></div>
+                            <div class="form-group"><label for="stock">Tồn kho</label><input type="number" id="stock" required></div>
+                            <div class="form-group"><label for="badge">Nhãn (Badge)</label><input type="text" id="badge"></div>
+                            <div class="form-group full-width"><label for="images">Link hình ảnh (cách nhau bằng dấu phẩy)</label><textarea id="images" required></textarea><div id="imagePreview"></div></div>
+                            <div class="form-group full-width"><label for="description">Mô tả ngắn</label><textarea id="description" maxlength="200" required></textarea></div>
+                            <div class="form-group full-width"><label for="detailedDescription">Mô tả chi tiết</label><textarea id="detailedDescription" placeholder="Hỗ trợ mã HTML"></textarea></div>
+                            <div class="form-group full-width"><label>Tính năng nổi bật</label><div id="featuresContainer"></div><button type="button" id="addFeatureBtn" class="btn btn-sm btn-secondary" style="margin-top:0.5rem;"><i class="fas fa-plus"></i> Thêm</button></div>
+                        </div>
+                        <div style="text-align: center; margin-top: 2rem; display:flex; gap:1rem; justify-content:center;">
+                            <button type="submit" class="btn btn-primary" id="submitBtn"><div class="spinner"></div><span id="submitBtnText">Đăng sản phẩm</span></button>
+                            <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display: none;">Hủy sửa</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Product List Section -->
+                <section id="productListContainer">
+                    <h2 class="section-title"><i class="fas fa-list-ul"></i> Danh sách sản phẩm</h2>
+                    <div class="product-table-wrapper">
+                        <table class="product-table">
+                            <thead>
+                                <tr>
+                                    <th>Ảnh</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Giá</th>
+                                    <th>Tồn kho</th>
+                                    <th style="text-align: right;">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productList">
+                                <tr><td colspan="5" class="loading-spinner-container"><div class="spinner" style="display:inline-block; border-top-color: var(--primary-color);"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    
+    <div id="toastContainer"></div>
+
+    <script src="main.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
