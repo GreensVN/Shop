@@ -1,17 +1,32 @@
-document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const submitBtn = this.querySelector('.btn-submit');
-                const email = document.getElementById('forgotEmail').value;
-                
-                if (!email<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Shop Grow A Garden - Chuyên cung cấp giống cây trồng, thú cưng và tài khoản game chất lượng">
-    <title>Shop Grow A Garden - Dịch Vụ & Giống Cây Chất Lượng</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Tài khoản - Shop Grow A Garden</title>
+    <link rel="icon" type="image/x-icon" href="https://i.ibb.co/q3r1hTft/8574d186247eba75669b7d50d42bd650.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* CSS Variables */
+        :root {
+            --primary-color: #e63946;
+            --secondary-color: #1d3557;
+            --accent-color: #a8dadc;
+            --light-color: #f1faee;
+            --dark-color: #1b1a1a;
+            --gray-color: #6c757d;
+            --success-color: #2a9d8f;
+            --warning-color: #f4a261;
+            --danger-color: #dc3545;
+            --border-color: #dee2e6;
+            --transition: all 0.3s ease;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+        }
+
+        /* Base Styles */
         * {
             margin: 0;
             padding: 0;
@@ -19,202 +34,212 @@ document.getElementById('forgotPasswordForm').addEventListener('submit', functio
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--dark-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             line-height: 1.6;
-            color: #333;
-            background: #f8fafc;
+            min-height: 100vh;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 15px;
         }
 
-        /* Header Styles */
+        /* Header */
         .header {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            position: fixed;
+            box-shadow: var(--shadow-lg);
+            padding: 15px 0;
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .header.scrolled {
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            border-bottom: 2px solid rgba(230, 57, 70, 0.1);
         }
 
         .header-container {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding: 15px 20px;
+            align-items: center;
         }
 
         .logo {
             height: 50px;
-            transition: transform 0.3s ease;
+            transition: var(--transition);
+            border-radius: 8px;
         }
 
         .logo:hover {
-            transform: scale(1.05);
+            transform: scale(1.05) rotate(2deg);
+            box-shadow: var(--shadow-md);
         }
 
         .nav-menu {
             display: flex;
-            gap: 30px;
+            gap: 20px;
         }
 
         .nav-link {
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #64748b;
+            padding: 12px 20px;
+            color: var(--dark-color);
             text-decoration: none;
+            border-radius: 50px;
+            transition: var(--transition);
             font-weight: 500;
-            transition: all 0.3s ease;
             position: relative;
-            padding: 8px 12px;
-            border-radius: 8px;
+            overflow: hidden;
         }
 
-        .nav-link:hover,
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            color: white;
+            background: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
         .nav-link.active {
-            color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
+            color: white;
+            background: var(--primary-color);
         }
 
-        .nav-link i {
-            font-size: 16px;
+        /* User Actions */
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-
-        /* User Dropdown */
+        
+        #loginButton {
+            display: flex; /* Initially shown */
+        }
+        
         .user-dropdown {
             position: relative;
-            display: none;
-        }
-
-        .user-dropdown.show {
-            display: flex;
+            display: none; /* Initially hidden */
             align-items: center;
             gap: 10px;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 50px;
+            transition: var(--transition);
+            background: rgba(230, 57, 70, 0.1);
         }
 
-        .user-avatar:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        .user-dropdown:hover {
+            background: rgba(230, 57, 70, 0.2);
+            transform: translateY(-2px);
         }
 
-        .user-name {
-            font-weight: 500;
-            color: #2d3748;
-        }
-
-        .dropdown-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            min-width: 200px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            border: 1px solid #e2e8f0;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            z-index: 1000;
-            margin-top: 10px;
-        }
-
-        .user-dropdown:hover .dropdown-menu {
+        .user-dropdown.active .dropdown-menu {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
 
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color), #ff6b6b);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .user-name {
+            font-weight: 500;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 15px);
+            right: 0;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            min-width: 250px;
+            padding: 15px 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 1000;
+            border: 1px solid var(--border-color);
+        }
+
         .dropdown-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            color: #4a5568;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--dark-color);
             text-decoration: none;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-            margin: 4px 8px;
+            transition: var(--transition);
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
         }
 
         .dropdown-item:hover {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            transform: translateX(2px);
+            background: linear-gradient(90deg, rgba(230, 57, 70, 0.1), rgba(230, 57, 70, 0.05));
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .dropdown-item i {
+            width: 18px;
+            text-align: center;
         }
 
         .dropdown-divider {
             height: 1px;
-            background: #e2e8f0;
-            margin: 8px 0;
+            background: var(--border-color);
+            margin: 10px 0;
         }
 
-        .logout-btn {
-            background: none !important;
-            border: none !important;
-            width: 100%;
-            text-align: left;
-            padding: 12px 16px;
-            color: #dc2626 !important;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-            margin: 4px 8px;
-        }
-
-        .logout-btn:hover {
-            background: #fee2e2 !important;
-            color: #dc2626 !important;
-        }
-
-        .badge {
-            background: #ef4444;
-            color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 0.7rem;
-            margin-left: auto;
-        }
-
-        /* Button Styles */
         .btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            padding: 12px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
+            border-radius: 50px;
+            font-weight: 500;
             cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
             font-size: 14px;
             position: relative;
             overflow: hidden;
@@ -227,101 +252,230 @@ document.getElementById('forgotPasswordForm').addEventListener('submit', functio
             left: 50%;
             width: 0;
             height: 0;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.3);
             border-radius: 50%;
-            transition: all 0.6s ease;
             transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
 
         .btn:hover::before {
-            width: 300%;
-            height: 300%;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            width: 300px;
+            height: 300px;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color), #ff6b6b);
             color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(230, 57, 70, 0.3);
         }
 
         .btn-outline {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--dark-color);
         }
 
         .btn-outline:hover {
-            background: #667eea;
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 30px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            font-size: 14px;
             color: white;
         }
 
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .breadcrumb a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb a:hover {
             color: white;
+        }
+
+        /* Account Layout */
+        .account-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+        }
+
+        /* Sidebar */
+        .account-sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--border-radius);
+            padding: 30px 25px;
+            box-shadow: var(--shadow-lg);
+            height: fit-content;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-header {
             text-align: center;
-            padding: 120px 0 80px;
-            margin-top: 80px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(230, 57, 70, 0.1);
+        }
+
+        .account-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), #ff6b6b);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 600;
+            margin: 0 auto 15px;
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
+
+        .account-avatar::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            background: linear-gradient(45deg, var(--primary-color), #ff6b6b, var(--accent-color), var(--primary-color));
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .account-name {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+
+        .account-id {
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+
+        .sidebar-menu {
+            margin-bottom: 30px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            color: var(--dark-color);
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            margin-bottom: 8px;
+            transition: var(--transition);
+            font-weight: 500;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 100%;
+            font-size: 14px;
             position: relative;
             overflow: hidden;
         }
 
-        .hero::before {
+        .menu-item::before {
             content: '';
             position: absolute;
-            top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1.5" fill="rgba(255,255,255,0.05)"/></svg>');
-            animation: float 20s ease-in-out infinite;
+            top: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), rgba(230, 57, 70, 0.8));
+            transition: width 0.3s ease;
+            z-index: -1;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateX(0px) translateY(0px); }
-            33% { transform: translateX(10px) translateY(-10px); }
-            66% { transform: translateX(-10px) translateY(10px); }
+        .menu-item:hover::before,
+        .menu-item.active::before {
+            width: 100%;
         }
 
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            animation: slideInUp 1s ease-out;
+        .menu-item:hover,
+        .menu-item.active {
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Content Area */
+        .account-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .content-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid rgba(230, 57, 70, 0.1);
+        }
+
+        .content-title {
+            font-size: 28px;
+            color: var(--secondary-color);
+            margin: 0;
             position: relative;
         }
 
-        .hero-subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            animation: slideInUp 1s ease-out 0.3s both;
-            max-width: 600px;
-            margin: 0 auto;
+        .content-title::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), #ff6b6b);
+            border-radius: 2px;
         }
 
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .tab-content {
+            display: none;
         }
 
-        /* Filter Section */
-        .filter-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            margin: 30px 0;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            animation: fadeInUp 0.8s ease-out;
+        .tab-content.active {
+            display: block;
+            animation: fadeInUp 0.5s ease;
         }
 
         @keyframes fadeInUp {
@@ -335,2018 +489,1054 @@ document.getElementById('forgotPasswordForm').addEventListener('submit', functio
             }
         }
 
-        .filter-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 25px;
-        }
-
-        .filter-grid {
+        /* Account Info */
+        .info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
             margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(230, 57, 70, 0.02);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary-color);
+            transition: var(--transition);
         }
 
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+        .info-item:hover {
+            background: rgba(230, 57, 70, 0.05);
+            transform: translateY(-2px);
         }
 
-        .filter-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            color: #4a5568;
-        }
-
-        .filter-input,
-        .filter-select {
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
+        .info-label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-color);
+            margin-bottom: 8px;
             font-size: 14px;
-            transition: all 0.3s ease;
-            background: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .filter-input:focus,
-        .filter-select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            outline: none;
+        .info-value {
+            font-size: 18px;
+            color: var(--dark-color);
+            word-break: break-word;
+            font-weight: 500;
         }
 
-        .filter-actions {
+        /* Balance Card */
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #ff6b6b 50%, #ff8e8e 100%);
+            color: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(30deg); }
+        }
+
+        .balance-amount {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .balance-actions {
             display: flex;
             gap: 15px;
-        }
-
-        /* Products Grid */
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 30px;
-            padding: 20px 0;
-        }
-
-        .product-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-        }
-
-        .product-image {
-            position: relative;
-            height: 250px;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            display: flex;
-            align-items: center;
             justify-content: center;
-            overflow: hidden;
+            flex-wrap: wrap;
         }
 
-        .product-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .product-card:hover .product-image img {
-            transform: scale(1.05);
-        }
-
-        .product-overlay {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        .product-card:hover .product-overlay {
-            opacity: 1;
-        }
-
-        .btn-favorite,
-        .btn-view {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            background: rgba(255, 255, 255, 0.9);
-            color: #667eea;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .balance-actions .btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
             backdrop-filter: blur(10px);
         }
 
-        .btn-favorite:hover,
-        .btn-view:hover {
-            background: #667eea;
-            color: white;
-            transform: scale(1.1);
+        .balance-actions .btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
-        .btn-favorite.active {
-            background: #ef4444;
-            color: white;
-        }
-
-        .product-info {
-            padding: 25px;
-        }
-
-        .product-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #2d3748;
+        /* History */
+        .history-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            background: rgba(248, 249, 250, 0.5);
         }
 
-        .product-description {
-            color: #64748b;
-            margin-bottom: 15px;
-            line-height: 1.5;
+        .history-item:hover {
+            background: rgba(230, 57, 70, 0.05);
+            transform: translateX(5px);
         }
 
-        .product-price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 8px;
+        .history-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 18px;
         }
 
-        .product-original-price {
-            font-size: 1rem;
-            color: #94a3b8;
-            text-decoration: line-through;
-            margin-left: 10px;
+        .history-icon.success {
+            background: linear-gradient(135deg, rgba(42, 157, 143, 0.2), rgba(42, 157, 143, 0.1));
+            color: var(--success-color);
         }
 
-        .product-id {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            margin-bottom: 20px;
-            font-family: 'Courier New', monospace;
-            background: #f1f5f9;
-            padding: 4px 8px;
-            border-radius: 4px;
-            display: inline-block;
+        .history-icon.purchase {
+            background: linear-gradient(135deg, rgba(230, 57, 70, 0.2), rgba(230, 57, 70, 0.1));
+            color: var(--primary-color);
         }
 
-        .add-to-cart {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
+        .history-details {
+            flex: 1;
+        }
+
+        .history-title {
             font-weight: 600;
-            transition: all 0.3s ease;
+            margin-bottom: 5px;
+            font-size: 16px;
         }
 
+        .history-date, .history-info {
+            font-size: 14px;
+            color: var(--gray-color);
+            margin-bottom: 2px;
+        }
+
+        .history-amount {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .history-amount.success {
+            color: var(--success-color);
+        }
+
+        .history-amount.purchase {
+            color: var(--primary-color);
+        }
+
+        /* Security Settings */
+        .security-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            transition: var(--transition);
+            background: rgba(248, 249, 250, 0.5);
+        }
+
+        .security-item:hover {
+            background: rgba(230, 57, 70, 0.02);
+            border-color: rgba(230, 57, 70, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .security-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .security-info i {
+            font-size: 24px;
+            color: var(--primary-color);
+            width: 40px;
+            text-align: center;
+        }
+
+        .security-info h4 {
+            margin-bottom: 5px;
+            font-size: 18px;
+            color: var(--secondary-color);
+        }
+
+        .security-info p {
+            font-size: 14px;
+            color: var(--gray-color);
+            margin: 0;
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--gray-color);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+            background: linear-gradient(135deg, var(--primary-color), #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+            font-size: 24px;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+        }
+
+        /* Login Prompt */
+        .login-prompt {
+            text-align: center;
+            padding: 80px 30px;
+            background: white;
+            border-radius: var(--border-radius);
+            margin: 50px auto;
+            max-width: 800px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-prompt i {
+            font-size: 80px;
+            background: linear-gradient(135deg, var(--primary-color), #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .login-prompt h2 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+
+        .login-prompt p {
+            color: var(--gray-color);
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+
+        .login-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, var(--dark-color) 0%, #2c2c2c 100%);
+            color: white;
+            padding: 50px 0 20px;
+            margin-top: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+        }
+        
+        /* Messenger Chat Button */
+        .messenger-chat {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #0084ff, #006ce7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(0, 132, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            text-decoration: none;
+            color: white;
+        }
+
+        .messenger-chat:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 12px 35px rgba(0, 132, 255, 0.4);
+            color: white;
+        }
+
+        .messenger-chat i {
+            font-size: 24px;
+        }
+        
+        #toastContainer {
+             position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10003;
+        }
+        
         /* Modal Styles */
         .modal {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
             backdrop-filter: blur(5px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            padding: 20px;
         }
 
         .modal.show {
             display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
         }
 
         .modal-content {
             background: white;
-            border-radius: 15px;
+            border-radius: var(--border-radius);
+            padding: 40px;
             max-width: 500px;
-            width: 100%;
+            width: 90%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: modalSlideIn 0.3s ease-out;
             position: relative;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            box-shadow: var(--shadow-lg);
         }
 
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9) translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
+        .modal.show .modal-content {
+            transform: scale(1);
         }
 
         .modal-close {
             position: absolute;
             top: 15px;
             right: 15px;
-            width: 35px;
-            height: 35px;
+            background: none;
             border: none;
-            background: #f1f5f9;
-            color: #64748b;
-            border-radius: 50%;
+            font-size: 28px;
+            color: var(--gray-color);
             cursor: pointer;
-            font-size: 18px;
-            transition: all 0.3s ease;
-            z-index: 1;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .modal-close:hover {
-            background: #e2e8f0;
-            color: #2d3748;
+            color: var(--primary-color);
+            background: rgba(230, 57, 70, 0.1);
+            transform: rotate(90deg);
         }
 
         .modal-title {
+            font-size: 28px;
+            margin-bottom: 25px;
+            color: var(--secondary-color);
             text-align: center;
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 30px;
-            padding: 30px 30px 0;
         }
 
-        .modal-tabs {
-            display: flex;
-            margin: 0 30px 25px;
-            background: #f8fafc;
-            border-radius: 10px;
-            padding: 4px;
-        }
-
-        .modal-tab {
-            flex: 1;
-            padding: 12px 20px;
-            text-align: center;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            color: #64748b;
-        }
-
-        .modal-tab.active {
-            background: white;
-            color: #667eea;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-form {
-            padding: 0 30px 30px;
-            display: none;
-        }
-
-        .modal-form.active {
-            display: block;
-        }
-
+        /* Form Styles */
         .form-group {
-            margin-bottom: 20px;
-            position: relative;
+            margin-bottom: 25px;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 500;
-            color: #374151;
+            font-weight: 600;
+            color: var(--secondary-color);
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group select {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
+            padding: 15px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.9);
         }
 
-        .form-group input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+            background: white;
+        }
+
+        .password-group {
+            position: relative;
         }
 
         .password-toggle {
             position: absolute;
-            right: 12px;
-            top: 38px;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
             cursor: pointer;
-            color: #9ca3af;
-            transition: color 0.3s ease;
-        }
-
-        .password-toggle:hover {
-            color: #667eea;
-        }
-
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .remember-me input[type="checkbox"] {
-            width: auto;
-        }
-
-        .modal-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .modal-link {
-            background: none;
-            border: none;
-            color: #667eea;
-            cursor: pointer;
-            text-decoration: underline;
+            color: var(--gray-color);
+            transition: var(--transition);
             padding: 5px;
         }
 
-        .form-footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #6b7280;
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            font-size: 16px;
+            font-weight: 600;
+            position: relative;
         }
 
-        .form-footer a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .form-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .error-message {
-            color: #ef4444;
-            font-size: 0.85rem;
-            margin-top: 5px;
-            display: none;
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid transparent;
-            border-top: 2px solid currentColor;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
             display: none;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .btn-submit.loading .spinner {
-            display: inline-block;
-        }
-
-        /* Fixed Buttons */
-        .back-to-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.3s ease;
-            opacity: 0;
-            visibility: hidden;
-            z-index: 1000;
-        }
-
-        .back-to-top.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .back-to-top:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        .messenger-float {
-            position: fixed;
-            bottom: 100px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            z-index: 999;
-            transition: transform 0.2s ease;
-        }
-
-        .messenger-float:hover {
-            transform: scale(1.05);
-        }
-
-        .messenger-float img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-        }
-
-        /* Footer */
-        .footer {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 50px 0 30px;
-            margin-top: 60px;
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin-bottom: 30px;
-        }
-
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .footer-logo img {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-        }
-
-        .footer-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #f8fafc;
-        }
-
-        .footer-text {
-            color: #cbd5e0;
-            line-height: 1.6;
-        }
-
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-link {
-            margin-bottom: 10px;
-        }
-
-        .footer-link a {
-            color: #cbd5e0;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .footer-link a:hover {
-            color: #667eea;
-            transform: translateX(5px);
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid #4a5568;
-            color: #a0aec0;
-        }
-
-        /* Enhanced Animations */
-        .success-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
-            backdrop-filter: blur(15px);
-            z-index: 10002;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .error-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
-            backdrop-filter: blur(15px);
-            z-index: 10002;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .logout-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(79, 70, 229, 0.95));
-            backdrop-filter: blur(15px);
-            z-index: 10002;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .success-overlay.show,
-        .error-overlay.show,
-        .logout-overlay.show {
-            display: flex;
-            opacity: 1;
-        }
-
-        .animation-content {
-            text-align: center;
-            color: white;
-            animation: bounceIn 0.8s ease-out;
-        }
-
-        .animation-icon {
-            font-size: 5rem;
-            margin-bottom: 25px;
-            animation: pulseIcon 1.5s ease-out;
-        }
-
-        .animation-title {
-            font-size: 2.8rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            animation: slideInFromTop 0.8s ease-out 0.3s both;
-        }
-
-        .animation-subtitle {
-            font-size: 1.3rem;
-            opacity: 0.9;
-            animation: slideInFromBottom 0.8s ease-out 0.6s both;
-        }
-
-        @keyframes bounceIn {
-            0% {
-                transform: scale(0.3) rotate(-10deg);
-                opacity: 0;
-            }
-            30% {
-                transform: scale(1.15) rotate(5deg);
-            }
-            60% {
-                transform: scale(0.9) rotate(-2deg);
-            }
-            100% {
-                transform: scale(1) rotate(0deg);
-                opacity: 1;
-            }
-        }
-
-        @keyframes pulseIcon {
-            0%, 100% {
-                transform: scale(1);
-            }
-            25% {
-                transform: scale(1.2) rotate(5deg);
-            }
-            50% {
-                transform: scale(1.1) rotate(-5deg);
-            }
-            75% {
-                transform: scale(1.15) rotate(3deg);
-            }
-        }
-
-        @keyframes slideInFromTop {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideInFromBottom {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .sparkle-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            pointer-events: none;
-        }
-
-        .sparkle {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: white;
-            border-radius: 50%;
-            animation: sparkleFloat 4s linear infinite;
-        }
-
-        @keyframes sparkleFloat {
-            0% {
-                transform: translateY(100vh) rotate(0deg) scale(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-                transform: translateY(90vh) rotate(45deg) scale(1);
-            }
-            90% {
-                opacity: 1;
-                transform: translateY(-10vh) rotate(315deg) scale(1);
-            }
-            100% {
-                transform: translateY(-20vh) rotate(360deg) scale(0);
-                opacity: 0;
-            }
-        }
-
-        /* Enhanced Favorite Button */
-        .btn-favorite {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            border: none;
-            background: rgba(255, 255, 255, 0.95);
-            color: #64748b;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-favorite::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: radial-gradient(circle, rgba(239, 68, 68, 0.3), transparent);
-            border-radius: 50%;
-            transition: all 0.4s ease;
-            transform: translate(-50%, -50%);
-        }
-
-        .btn-favorite:hover {
-            background: rgba(255, 255, 255, 1);
-            color: #ef4444;
-            transform: scale(1.1);
-            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
-        }
-
-        .btn-favorite:hover::before {
-            width: 100%;
-            height: 100%;
-        }
-
-        .btn-favorite.active {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
-        }
-
-        .btn-favorite.active::before {
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent);
-            width: 100%;
-            height: 100%;
-        }
-
-        .btn-favorite i {
-            font-size: 18px;
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 1;
-        }
-
-        .btn-favorite.active i {
-            animation: heartBeat 0.6s ease;
-        }
-
-        @keyframes heartBeat {
-            0%, 100% { 
-                transform: scale(1); 
-            }
-            25% { 
-                transform: scale(1.3) rotate(-5deg); 
-            }
-            50% { 
-                transform: scale(1.1) rotate(5deg); 
-            }
-            75% { 
-                transform: scale(1.2) rotate(-3deg); 
-            }
-        }
-
-        /* Enhanced Product Card Hover */
-        .product-card:hover .btn-favorite {
-            transform: scale(1.05);
-        }
-
-        .product-card:hover .btn-view {
-            transform: scale(1.05);
-        }
-
-        /* Form Loading States */
-        .btn-submit.loading {
-            pointer-events: none;
-            opacity: 0.8;
-            position: relative;
-        }
-
-        .btn-submit.loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
             width: 20px;
             height: 20px;
-            border: 2px solid transparent;
-            border-top: 2px solid currentColor;
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            animation: buttonSpin 1s linear infinite;
-            transform: translate(-50%, -50%);
-        }
-
-        .btn-submit.loading .spinner {
-            display: inline-block;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
         }
 
         .btn-submit.loading span {
-            opacity: 0.5;
+            margin-right: 10px;
+        }
+        
+        .btn-submit.loading .spinner {
+            display: inline-block;
         }
 
-        @keyframes buttonSpin {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        .welcome-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
-            backdrop-filter: blur(10px);
-            z-index: 10001;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .welcome-overlay.show {
-            display: flex;
-            opacity: 1;
-        }
-
-        .welcome-content {
-            text-align: center;
-            color: white;
-            animation: welcomeSlideIn 1s ease-out;
-        }
-
-        .welcome-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            animation: welcomeBounce 1s ease-out 0.3s;
-        }
-
-        .welcome-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-            animation: welcomeFadeIn 1s ease-out 0.6s both;
-        }
-
-        .welcome-subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            animation: welcomeFadeIn 1s ease-out 0.9s both;
-        }
-
-        @keyframes welcomeSlideIn {
-            0% {
-                transform: scale(0.3) rotate(-10deg);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1.1) rotate(5deg);
-            }
-            100% {
-                transform: scale(1) rotate(0deg);
-                opacity: 1;
-            }
-        }
-
-        @keyframes welcomeBounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-20px);
-            }
-            60% {
-                transform: translateY(-10px);
-            }
-        }
-
-        @keyframes welcomeFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Responsive Design */
-        @media (max-width: 768px) {
-            .header-container {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .nav-menu {
-                order: 2;
-                width: 100%;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-
-            .hero-title {
-                font-size: 2.5rem;
-            }
-
-            .filter-grid {
+        @media (max-width: 992px) {
+            .account-layout {
                 grid-template-columns: 1fr;
-            }
-
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
                 gap: 20px;
-            }
-
-            .modal-content {
-                margin: 20px;
-                max-width: none;
-            }
-
-            .filter-actions {
-                flex-direction: column;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .hero-title {
-                font-size: 2rem;
-            }
-
-            .products-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .back-to-top,
-            .messenger-float {
-                right: 20px;
-            }
-
-            .messenger-float {
-                bottom: 90px;
-                width: 50px;
-                height: 50px;
             }
         }
     </style>
 </head>
 <body>
     <!-- Header -->
-    <header class="header" id="header">
+    <header class="header">
         <div class="container header-container">
             <a href="index.html">
-                <img src="https://i.ibb.co/q3r1hTft/8574d186247eba75669b7d50d42bd650-png.png" alt="Shop Grow A Garden" class="logo">
+                <img src="https://i.ibb.co/q3r1hTft/8574d186247eba75669b7d50d42bd650.png" alt="Shop Grow A Garden" class="logo">
             </a>
             
-            <nav class="nav-menu">
-                <a href="index.html" class="nav-link active">
+             <nav class="nav-menu">
+                <a href="index.html" class="nav-link">
                     <i class="fas fa-home"></i>
                     <span>Trang Chủ</span>
                 </a>
-                <a href="#" class="nav-link">
+                <a href="index.html" class="nav-link">
                     <i class="fas fa-seedling"></i>
-                    <span>Giống Cây</span>
-                </a>
-                <a href="#" class="nav-link">
-                    <i class="fas fa-paw"></i>
-                    <span>Thú Cưng</span>
-                </a>
-                <a href="#" class="nav-link">
-                    <i class="fas fa-gamepad"></i>
-                    <span>Tài Khoản Game</span>
+                    <span>Sản phẩm</span>
                 </a>
             </nav>
 
-            <!-- User Dropdown (Hidden by default) -->
-            <div class="user-dropdown" id="userDropdown">
-                <div class="user-avatar" id="userAvatar">U</div>
-                <span class="user-name" id="userName">User</span>
-                <div class="dropdown-menu">
-                    <a href="account.html" class="dropdown-item">
-                        <i class="fas fa-user-circle"></i>
-                        <span>Tài khoản</span>
-                    </a>
-                    <a href="cart.html" class="dropdown-item">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span>Giỏ hàng</span>
-                        <span class="badge">0</span>
-                    </a>
-                    <a href="favorite.html" class="dropdown-item">
-                        <i class="fas fa-heart"></i>
-                        <span>Yêu thích</span>
-                        <span class="badge">0</span>
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <button class="logout-btn" id="logoutButton">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Đăng xuất</span>
-                    </button>
+            <div class="user-actions">
+                <button class="btn btn-primary" id="loginButton">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Đăng Nhập / Đăng Ký</span>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-avatar" id="headerAvatar">U</div>
+                    <span class="user-name" id="headerName">User</span>
+                    <i class="fas fa-chevron-down" style="margin-left: 8px; font-size: 12px; transition: transform 0.3s ease;"></i>
+                    <div class="dropdown-menu">
+                        <a href="account.html" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Tài khoản</span>
+                        </a>
+                        <a href="favorite.html" class="dropdown-item">
+                            <i class="fas fa-heart"></i>
+                            <span>Yêu thích</span>
+                        </a>
+                        <a href="cart.html" class="dropdown-item">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Giỏ hàng</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" id="headerLogoutBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Đăng xuất</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            <!-- Login Button (Shown by default) -->
-            <button class="btn btn-primary" id="loginButton">
-                <i class="fas fa-user"></i>
-                <span>Đăng Nhập</span>
-            </button>
         </div>
     </header>
-
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <h1 class="hero-title">
-                <i class="fas fa-store"></i>
-                Shop Grow A Garden
-            </h1>
-            <p class="hero-subtitle">Khám phá các dịch vụ và sản phẩm chất lượng cao với giá cả hợp lý nhất thị trường</p>
-        </div>
-    </section>
     
     <!-- Main Content -->
-    <main class="container">
-        <!-- Filter Section -->
-        <section class="filter-section">
-            <div class="filter-title">
-                <i class="fas fa-filter"></i>
-                BỘ LỌC TÌM KIẾM
-            </div>
-            
-            <div class="filter-grid">
-                <div class="filter-group">
-                    <label for="searchId" class="filter-label">
-                        <i class="fas fa-hashtag"></i>
-                        Mã Số ID Sản Phẩm
-                    </label>
-                    <input type="text" id="searchId" class="filter-input" placeholder="Nhập Mã Số ID Sản Phẩm...">
-                </div>
-                
-                <div class="filter-group">
-                    <label for="searchPrice" class="filter-label">
-                        <i class="fas fa-money-bill-wave"></i>
-                        Giá Tiền
-                    </label>
-                    <select id="searchPrice" class="filter-select">
-                        <option value="">-- Chọn Giá Tiền --</option>
-                        <option value="duoi-50k">Dưới 50K</option>
-                        <option value="tu-50k-200k">Từ 50K - 200K</option>
-                        <option value="tu-200k-500k">Từ 200K - 500K</option>
-                        <option value="tu-500k-1-trieu">Từ 500K - 1 Triệu</option>
-                        <option value="tren-1-trieu">Trên 1 Triệu</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label for="searchNote" class="filter-label">
-                        <i class="fas fa-sticky-note"></i>
-                        Ghi Chú
-                    </label>
-                    <input type="text" id="searchNote" class="filter-input" placeholder="Nhập ghi chú...">
-                </div>
-            </div>
-            
-            <div class="filter-actions">
-                <button class="btn btn-primary" type="button" id="filterButton">
-                    <i class="fas fa-search"></i>
-                    <span>Lọc</span>
-                </button>
-                <button class="btn btn-outline" type="button" id="resetButton">
-                    <i class="fas fa-refresh"></i>
-                    <span>Xóa Lọc</span>
-                </button>
-            </div>
-        </section>
+    <main class="container main-content">
+        <div class="breadcrumb">
+            <a href="index.html">Trang chủ</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Tài khoản</span>
+        </div>
         
-        <!-- Products Grid -->
-        <section id="productsSection">
-            <div class="products-grid" id="productsGrid">
-                <!-- Sản phẩm Raccoon -->
-                <div class="product-card" data-id="001" data-price="250000" data-note="thú cưng dễ thương">
-                    <div class="product-image">
-                        <img src="https://i.imgur.com/ZoX9VKo.png" alt="Raccoon Pet" loading="lazy">
-                        <div class="product-overlay">
-                            <button class="btn-favorite" title="Thêm vào yêu thích">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            <button class="btn-view" title="Xem chi tiết">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">🦝 Raccoon</h3>
-                        <p class="product-description">Thú cưng gấu mèo dễ thương, thông minh và năng động. Phù hợp nuôi trong gia đình.</p>
-                        <div class="product-price">
-                            250,000đ
-                            <span class="product-original-price">300,000đ</span>
-                        </div>
-                        <div class="product-id">ID: #001</div>
-                        <button class="btn btn-primary add-to-cart">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span>Mua Ngay</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Sản phẩm Mimic Octopus -->
-                <div class="product-card" data-id="002" data-price="70000" data-note="thú cưng biển độc đáo">
-                    <div class="product-image">
-                        <img src="https://i.imgur.com/8pYhB3m.png" alt="Mimic Octopus" loading="lazy">
-                        <div class="product-overlay">
-                            <button class="btn-favorite" title="Thêm vào yêu thích">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            <button class="btn-view" title="Xem chi tiết">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title">🐙 Mimic Octopus</h3>
-                        <p class="product-description">Bạch tuộc mimic có khả năng bắt chước nhiều loài sinh vật khác. Rất thú vị và độc đáo.</p>
-                        <div class="product-price">
-                            70,000đ
-                            <span class="product-original-price">100,000đ</span>
-                        </div>
-                        <div class="product-id">ID: #002</div>
-                        <button class="btn btn-primary add-to-cart">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span>Mua Ngay</span>
-                        </button>
-                    </div>
-                </div>
+        <!-- Login Required Message -->
+        <div class="login-prompt" id="loginPrompt" style="display: none;">
+            <i class="fas fa-user-lock"></i>
+            <h2>Vui lòng đăng nhập</h2>
+            <p>Bạn cần đăng nhập để xem thông tin tài khoản của mình.</p>
+            <div class="login-actions">
+                <button class="btn btn-primary" id="promptLoginButton">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Đăng nhập ngay
+                </button>
             </div>
-        </section>
+        </div>
+        
+        <!-- Account Content -->
+        <div class="account-layout" id="accountLayout" style="display: none;">
+            <!-- Sidebar -->
+            <aside class="account-sidebar">
+                <div class="sidebar-header">
+                    <div class="account-avatar" id="accountAvatar">U</div>
+                    <div>
+                        <h2 class="account-name" id="accountName">Loading...</h2>
+                        <div class="account-id" id="accountId">ID: ------</div>
+                    </div>
+                </div>
+                
+                <nav class="sidebar-menu">
+                    <button class="menu-item active" data-tab="info"><i class="fas fa-user"></i>Thông tin tài khoản</button>
+                    <button class="menu-item" data-tab="balance"><i class="fas fa-wallet"></i>Số dư & Nạp tiền</button>
+                    <button class="menu-item" data-tab="history"><i class="fas fa-history"></i>Lịch sử giao dịch</button>
+                    <button class="menu-item" data-tab="security"><i class="fas fa-shield-alt"></i>Bảo mật</button>
+                </nav>
+                
+                <button class="btn btn-outline" id="sidebarLogoutBtn" style="width: 100%;"><i class="fas fa-sign-out-alt"></i>Đăng xuất</button>
+            </aside>
+            
+            <!-- Content -->
+            <section class="account-content">
+                <!-- Account Info Tab -->
+                <div class="tab-content active" id="infoTab">
+                    <div class="content-header"><h2 class="content-title">Thông tin tài khoản</h2></div>
+                    <div class="info-grid">
+                        <div class="info-item"><label class="info-label">Họ và tên</label><div class="info-value" id="userFullName">Loading...</div></div>
+                        <div class="info-item"><label class="info-label">Email</label><div class="info-value" id="userEmail">Loading...</div></div>
+                        <div class="info-item"><label class="info-label">Ngày đăng ký</label><div class="info-value" id="userRegisterDate">Loading...</div></div>
+                        <div class="info-item"><label class="info-label">ID tài khoản</label><div class="info-value" id="userAccountId">------</div></div>
+                    </div>
+                </div>
+                
+                <!-- Balance Tab -->
+                <div class="tab-content" id="balanceTab">
+                    <div class="content-header"><h2 class="content-title">Số dư tài khoản</h2></div>
+                    <div class="balance-card">
+                        <div class="balance-amount" id="balanceAmount">0đ</div>
+                        <div class="balance-actions">
+                            <button class="btn" id="depositBtn"><i class="fas fa-money-bill-wave"></i>Nạp tiền</button>
+                            <button class="btn" id="withdrawBtn"><i class="fas fa-hand-holding-usd"></i>Rút tiền</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- History Tab -->
+                <div class="tab-content" id="historyTab">
+                    <div class="content-header"><h2 class="content-title">Lịch sử giao dịch</h2></div>
+                    <div class="history-list" id="historyList">
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <h3>Chưa có giao dịch nào</h3>
+                            <p>Lịch sử nạp và rút tiền sẽ hiển thị tại đây.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Tab -->
+                <div class="tab-content" id="securityTab">
+                    <div class="content-header"><h2 class="content-title">Bảo mật tài khoản</h2></div>
+                    <div class="security-settings">
+                        <div class="security-item">
+                            <div class="security-info"><i class="fas fa-lock"></i><div><h4>Mật khẩu</h4><p>Đã thiết lập - Thay đổi mật khẩu của bạn.</p></div></div>
+                            <button class="btn btn-outline" id="changePasswordBtn"><i class="fas fa-edit"></i>Đổi mật khẩu</button>
+                        </div>
+                         <div class="security-item">
+                            <div class="security-info"><i class="fas fa-shield-alt"></i><div><h4>Xác thực 2 bước (2FA)</h4><p>Tính năng sắp ra mắt.</p></div></div>
+                            <button class="btn btn-outline" disabled><i class="fas fa-toggle-off"></i>Bật</button>
+                        </div>
+                         <div class="security-item">
+                            <div class="security-info"><i class="fas fa-laptop-house"></i><div><h4>Thiết bị đã đăng nhập</h4><p>Tính năng sắp ra mắt.</p></div></div>
+                            <button class="btn btn-outline" disabled><i class="fas fa-cog"></i>Quản lý</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
     </main>
     
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div>
-                    <div class="footer-logo">
-                        <img src="https://i.ibb.co/k6BvctRR/t-i-xu-ng.jpg" alt="Shop Grow A Garden" loading="lazy">
-                        <span>Shop Grow A Garden</span>
-                    </div>
-                    <p class="footer-text">Chuyên cung cấp dịch vụ, giống cây và thú cưng chất lượng. Giao dịch nhanh chóng, uy tín.</p>
-                </div>
-                
-                <div>
-                    <h3 class="footer-title">Về Chúng Tôi</h3>
-                    <p class="footer-text">Với nhiều năm kinh nghiệm trong lĩnh vực cung cấp thú cưng và giống cây, chúng tôi cam kết mang đến những sản phẩm chất lượng cao nhất.</p>
-                </div>
-                
-                <div>
-                    <h3 class="footer-title">Liên Hệ</h3>
-                    <ul class="footer-links">
-                        <li class="footer-link">
-                            <a href="mailto:support@shopgrowgarden.com">
-                                <i class="fas fa-envelope"></i>
-                                <span>support@shopgrowgarden.com</span>
-                            </a>
-                        </li>
-                        <li class="footer-link">
-                            <a href="tel:0123456789">
-                                <i class="fas fa-phone"></i>
-                                <span>0123 456 789</span>
-                            </a>
-                        </li>
-                        <li class="footer-link">
-                            <a href="#">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>Hồ Chí Minh, Việt Nam</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>© 2025 Shop Grow A Garden. All Rights Reserved.</p>
-            </div>
-        </div>
-    </footer>
+    <!-- Messenger Chat Button -->
+    <a href="https://www.messenger.com/t/8645401405544278" target="_blank" class="messenger-chat"><i class="fab fa-facebook-messenger"></i></a>
     
-    <!-- Auth Modal -->
+    <!-- Modals -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content">
+            <button class="modal-close">×</button>
+            <h2 class="modal-title">Nạp tiền (Demo)</h2>
+            <p style="text-align:center; color: var(--gray-color); margin-bottom: 20px;">Đây là chức năng demo. Nhấn "Nạp" để mô phỏng.</p>
+            <form id="depositForm" novalidate>
+                 <div class="form-group">
+                    <label for="depositAmount">Số tiền muốn nạp</label>
+                    <input type="number" id="depositAmount" placeholder="VD: 50000" required min="10000">
+                </div>
+                <button type="submit" class="btn btn-primary btn-submit"><i class="fas fa-check-circle"></i><span>Nạp tiền</span><div class="spinner"></div></button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <button class="modal-close">×</button>
+            <h2 class="modal-title">Rút tiền (Demo)</h2>
+            <p style="text-align:center; color: var(--gray-color); margin-bottom: 20px;">Chức năng này đang được phát triển.</p>
+        </div>
+    </div>
+
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <button class="modal-close">×</button>
+            <h2 class="modal-title">Đổi mật khẩu</h2>
+            <form id="passwordChangeForm" novalidate>
+                <div class="form-group password-group">
+                    <label for="currentPassword">Mật khẩu hiện tại</label>
+                    <input type="password" id="currentPassword" required><span class="password-toggle"><i class="fas fa-eye"></i></span>
+                </div>
+                <div class="form-group password-group">
+                    <label for="newPassword">Mật khẩu mới</label>
+                    <input type="password" id="newPassword" minlength="6" required><span class="password-toggle"><i class="fas fa-eye"></i></span>
+                </div>
+                <div class="form-group password-group">
+                    <label for="newPasswordConfirm">Xác nhận mật khẩu mới</label>
+                    <input type="password" id="newPasswordConfirm" required><span class="password-toggle"><i class="fas fa-eye"></i></span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-submit"><span>Lưu thay đổi</span><div class="spinner"></div></button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+    
+    <!-- AUTH MODAL (for login prompt) -->
     <div class="modal" id="authModal">
         <div class="modal-content">
-            <button class="modal-close" id="closeModal">&times;</button>
-            <h2 class="modal-title">
-                <i class="fas fa-user-circle"></i>
-                Chào mừng bạn
-            </h2>
-            
-            <div class="modal-tabs">
-                <div class="modal-tab active" data-tab="login">
-                    <i class="fas fa-sign-in-alt"></i>
-                    Đăng nhập
-                </div>
-                <div class="modal-tab" data-tab="register">
-                    <i class="fas fa-user-plus"></i>
-                    Đăng ký
-                </div>
-            </div>
-            
-            <!-- Login Form -->
-            <form class="modal-form active" id="loginForm">
-                <div class="form-group">
-                    <label for="loginEmail">
-                        <i class="fas fa-envelope"></i>
-                        Email
-                    </label>
-                    <input type="email" id="loginEmail" name="email" placeholder="Nhập email của bạn" required>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="loginPassword">
-                        <i class="fas fa-lock"></i>
-                        Mật khẩu
-                    </label>
-                    <input type="password" id="loginPassword" name="password" placeholder="Nhập mật khẩu" required>
-                    <span class="password-toggle">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="remember-me">
-                    <input type="checkbox" id="rememberMe" name="remember">
-                    <label for="rememberMe">Ghi nhớ đăng nhập</label>
-                </div>
-                
-                <div class="modal-actions">
-                    <button type="submit" class="btn btn-primary btn-submit">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span>Đăng nhập</span>
-                        <div class="spinner"></div>
-                    </button>
-                    
-                    <button type="button" class="modal-link" id="forgotPassword">
-                        <i class="fas fa-question-circle"></i>
-                        Quên mật khẩu?
-                    </button>
-                </div>
-                
-                <div class="form-footer">
-                    Chưa có tài khoản? <a href="#" class="switch-to-register">Đăng ký ngay</a>
-                </div>
-            </form>
-            
-            <!-- Register Form -->
-            <form class="modal-form" id="registerForm">
-                <div class="form-group">
-                    <label for="registerName">
-                        <i class="fas fa-user"></i>
-                        Họ và tên
-                    </label>
-                    <input type="text" id="registerName" name="name" placeholder="Nhập họ và tên" required>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="registerEmail">
-                        <i class="fas fa-envelope"></i>
-                        Email
-                    </label>
-                    <input type="email" id="registerEmail" name="email" placeholder="Nhập email của bạn" required>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="registerPassword">
-                        <i class="fas fa-lock"></i>
-                        Mật khẩu
-                    </label>
-                    <input type="password" id="registerPassword" name="password" placeholder="Nhập mật khẩu (ít nhất 6 ký tự)" required minlength="6">
-                    <span class="password-toggle">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                    <div class="error-message"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="registerConfirmPassword">
-                        <i class="fas fa-key"></i>
-                        Xác nhận mật khẩu
-                    </label>
-                    <input type="password" id="registerConfirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu" required>
-                    <span class="password-toggle">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                    <div class="error-message"></div>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-submit">
-                    <i class="fas fa-user-plus"></i>
-                    <span>Đăng ký</span>
-                    <div class="spinner"></div>
-                </button>
-                
-                <div class="form-footer">
-                    Đã có tài khoản? <a href="#" class="switch-to-login">Đăng nhập ngay</a>
-                </div>
-            </form>
+             <!-- Content will be injected by JS if needed -->
         </div>
     </div>
 
-    <!-- Forgot Password Modal -->
-    <div class="modal" id="forgotPasswordModal">
-        <div class="modal-content">
-            <button class="modal-close" id="closeForgotModal">&times;</button>
-            <h2 class="modal-title">
-                <i class="fas fa-key"></i>
-                Quên mật khẩu
-            </h2>
-            
-            <form class="modal-form active" id="forgotPasswordForm">
-                <div class="form-group">
-                    <label for="forgotEmail">
-                        <i class="fas fa-envelope"></i>
-                        Email
-                    </label>
-                    <input type="email" id="forgotEmail" name="email" placeholder="Nhập email của bạn" required>
-                    <div class="error-message"></div>
-                </div>
-                
-                <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px; text-align: center;">
-                    <i class="fas fa-info-circle"></i>
-                    Chúng tôi sẽ gửi link đặt lại mật khẩu đến email của bạn.
-                </p>
-                
-                <button type="submit" class="btn btn-primary btn-submit">
-                    <i class="fas fa-paper-plane"></i>
-                    <span>Gửi yêu cầu</span>
-                    <div class="spinner"></div>
-                </button>
-                
-                <div class="form-footer">
-                    <a href="#" class="switch-to-login">
-                        <i class="fas fa-arrow-left"></i>
-                        Quay lại đăng nhập
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <!-- Fixed Buttons -->
-    <button class="back-to-top" id="backToTop">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-    
-    <a href="https://www.messenger.com/t/8645401405544278" target="_blank" class="messenger-float" rel="noopener noreferrer">
-        <img src="https://i.imgur.com/G7i5D02.png" alt="Nhắn tin với chúng tôi qua Messenger" loading="lazy">
-    </a>
-
-    <!-- Enhanced Animation Overlays -->
-    <div class="welcome-overlay" id="welcomeOverlay">
-        <div class="welcome-particles" id="welcomeParticles"></div>
-        <div class="welcome-content">
-            <div class="welcome-icon">🎉</div>
-            <h2 class="welcome-title" id="welcomeTitle">Chào mừng!</h2>
-            <p class="welcome-subtitle" id="welcomeSubtitle">Đăng nhập thành công</p>
-        </div>
-    </div>
-
-    <div class="success-overlay" id="successOverlay">
-        <div class="sparkle-container" id="successSparkles"></div>
-        <div class="animation-content">
-            <div class="animation-icon" id="successIcon">✅</div>
-            <h2 class="animation-title" id="successTitle">Thành công!</h2>
-            <p class="animation-subtitle" id="successSubtitle">Hành động đã được thực hiện</p>
-        </div>
-    </div>
-
-    <div class="error-overlay" id="errorOverlay">
-        <div class="sparkle-container" id="errorSparkles"></div>
-        <div class="animation-content">
-            <div class="animation-icon" id="errorIcon">❌</div>
-            <h2 class="animation-title" id="errorTitle">Có lỗi xảy ra!</h2>
-            <p class="animation-subtitle" id="errorSubtitle">Vui lòng thử lại</p>
-        </div>
-    </div>
-
-    <div class="logout-overlay" id="logoutOverlay">
-        <div class="sparkle-container" id="logoutSparkles"></div>
-        <div class="animation-content">
-            <div class="animation-icon" id="logoutIcon">👋</div>
-            <h2 class="animation-title" id="logoutTitle">Tạm biệt!</h2>
-            <p class="animation-subtitle" id="logoutSubtitle">Đăng xuất thành công</p>
-        </div>
-    </div>
 
     <script>
-        // Main JavaScript functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Elements
-            const authModal = document.getElementById('authModal');
-            const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+    // =================================================================
+    // UNIFIED SCRIPT FOR SHOP GROW A GARDEN - FULLY FUNCTIONAL
+    // =================================================================
+    "use strict";
+
+    // =================================================================
+    // GLOBAL CONFIG & STATE
+    // =================================================================
+    const API_BASE_URL = 'https://shop-4mlk.onrender.com/api/v1';
+    let currentUser = null;
+
+    // =================================================================
+    // UTILITY CLASS
+    // =================================================================
+    class Utils {
+        static formatPrice(price) {
+            const num = typeof price === 'string' ? parseInt(price, 10) : price;
+            if (isNaN(num)) return '0';
+            return new Intl.NumberFormat('vi-VN').format(num);
+        }
+
+        /**
+         * FIX: Handles invalid date strings gracefully.
+         * @param {string} dateString The date string to format.
+         * @returns {string} Formatted date or 'N/A'.
+         */
+        static formatDate(dateString) {
+            try {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return 'N/A';
+                return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            } catch (error) {
+                console.error("Error formatting date:", dateString, error);
+                return 'N/A';
+            }
+        }
+        
+        static showToast(message, type = 'success', duration = 3000) {
+            const toastContainer = document.getElementById('toastContainer') || (() => {
+                const container = document.createElement('div');
+                container.id = 'toastContainer';
+                document.body.appendChild(container);
+                return container;
+            })();
+            
+            const toast = document.createElement('div');
+            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+            const bgColors = { success: 'var(--success-color)', error: 'var(--danger-color)', info: 'var(--secondary-color)' };
+            
+            toast.style.cssText = `background: ${bgColors[type] || bgColors.info}; color: white; padding: 15px 20px; border-radius: var(--border-radius); margin-bottom: 10px; box-shadow: var(--shadow-lg); transform: translateX(120%); opacity: 0; transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); display: flex; align-items: center; justify-content: space-between; min-width: 300px;`;
+            toast.innerHTML = `<i class="fas ${icons[type] || icons.info}" style="margin-right: 10px;"></i><span>${message}</span>`;
+            
+            toastContainer.prepend(toast);
+            setTimeout(() => {
+                toast.style.transform = 'translateX(0)';
+                toast.style.opacity = '1';
+            }, 100);
+
+            setTimeout(() => {
+                toast.style.transform = 'translateX(120%)';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }, duration);
+        }
+    }
+
+    // =================================================================
+    // API CALLER
+    // =================================================================
+    async function callApi(endpoint, method = 'GET', body = null) {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = localStorage.getItem('token');
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, { method, headers, body: body ? JSON.stringify(body) : null });
+            if (response.status === 204) return true;
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Có lỗi xảy ra từ máy chủ.');
+            return data;
+        } catch (error) {
+            console.error(`API Error on ${endpoint}:`, error);
+            throw error;
+        }
+    }
+
+    // =================================================================
+    // AUTHENTICATION MANAGER
+    // =================================================================
+    const AuthManager = {
+        async login(email, password) {
+            const data = await callApi('/users/login', 'POST', { email, password });
+            localStorage.setItem('token', data.token);
+            currentUser = data.data.user;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        },
+        async signup(name, email, password, passwordConfirm) {
+            const data = await callApi('/users/signup', 'POST', { name, email, password, passwordConfirm });
+            localStorage.setItem('token', data.token);
+            currentUser = data.data.user;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        },
+        logout() {
+            if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) return;
+            localStorage.removeItem('token');
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            Utils.showToast('Đăng xuất thành công!', 'success');
+            setTimeout(() => window.location.reload(), 1500);
+        },
+        async checkAutoLogin() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const data = await callApi('/users/me');
+                    currentUser = data.data.user;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    return true;
+                } catch (error) {
+                    this.clearLocalData();
+                    return false;
+                }
+            }
+            return false;
+        },
+        clearLocalData() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+        },
+        updateUI() {
             const loginButton = document.getElementById('loginButton');
             const userDropdown = document.getElementById('userDropdown');
-            const closeModal = document.getElementById('closeModal');
-            const closeForgotModal = document.getElementById('closeForgotModal');
-            const modalTabs = document.querySelectorAll('.modal-tab');
-            const modalForms = document.querySelectorAll('.modal-form');
-            const switchToRegister = document.querySelector('.switch-to-register');
-            const switchToLogin = document.querySelectorAll('.switch-to-login');
-            const forgotPassword = document.getElementById('forgotPassword');
-            const logoutButton = document.getElementById('logoutButton');
-            const backToTop = document.getElementById('backToTop');
-            const header = document.getElementById('header');
-
-            // Check if user is logged in
-            let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-            let userData = JSON.parse(localStorage.getItem('userData') || '{}');
-
-            // Update UI based on login status
-            function updateUIForLoginStatus() {
-                if (isLoggedIn && userData.name) {
-                    loginButton.style.display = 'none';
-                    userDropdown.classList.add('show');
-                    document.getElementById('userName').textContent = userData.name;
-                    document.getElementById('userAvatar').textContent = userData.name.charAt(0).toUpperCase();
-                } else {
-                    loginButton.style.display = 'flex';
-                    userDropdown.classList.remove('show');
-                }
+            if (currentUser) {
+                loginButton.style.display = 'none';
+                userDropdown.style.display = 'flex';
+                const userName = currentUser.name || 'User';
+                document.getElementById('headerName').textContent = userName;
+                document.getElementById('headerAvatar').textContent = userName.charAt(0).toUpperCase();
+            } else {
+                loginButton.style.display = 'flex';
+                userDropdown.style.display = 'none';
             }
+        }
+    };
 
-            // Initialize UI
-            updateUIForLoginStatus();
-
-            // Header scroll effect
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 100) {
-                    header.classList.add('scrolled');
-                } else {
-                    header.classList.remove('scrolled');
-                }
-
-                // Back to top button
-                if (window.scrollY > 300) {
-                    backToTop.classList.add('show');
-                } else {
-                    backToTop.classList.remove('show');
-                }
+    // =================================================================
+    // MODAL MANAGER
+    // =================================================================
+    const ModalManager = {
+        open(modalId) {
+            const modal = document.getElementById(modalId);
+            if(modal) modal.classList.add('show');
+        },
+        close(modalId) {
+            const modal = document.getElementById(modalId);
+            if(modal) modal.classList.remove('show');
+        },
+        init() {
+            document.querySelectorAll('.modal .modal-close').forEach(btn => {
+                btn.addEventListener('click', e => this.close(e.target.closest('.modal').id));
             });
-
-            // Back to top functionality
-            backToTop.addEventListener('click', () => {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', e => { if (e.target === modal) this.close(modal.id); });
             });
+        }
+    };
 
-            // Modal functionality
-            function showModal(modal) {
-                modal.classList.add('show');
-                document.body.style.overflow = 'hidden';
+    // =================================================================
+    // MAIN PAGE LOGIC: ACCOUNT PAGE MANAGER
+    // =================================================================
+    class AccountPageManager {
+        constructor() {
+            this.init();
+        }
+
+        async init() {
+            const isLoggedIn = await AuthManager.checkAutoLogin();
+            AuthManager.updateUI(); // Update header regardless of page
+            
+            if (isLoggedIn) {
+                this.displayAccountLayout();
+                this.populateUserInfo();
+                this.setupEventListeners();
+            } else {
+                this.displayLoginPrompt();
             }
-
-            function hideModal(modal) {
-                modal.classList.remove('show');
-                document.body.style.overflow = '';
-            }
-
-            // Show auth modal
-            loginButton.addEventListener('click', () => {
-                showModal(authModal);
+        }
+        
+        displayLoginPrompt() {
+            document.getElementById('accountLayout').style.display = 'none';
+            document.getElementById('loginPrompt').style.display = 'block';
+            document.getElementById('promptLoginButton').addEventListener('click', () => {
+                window.location.href = 'index.html'; // Redirect to login
             });
+        }
+        
+        displayAccountLayout() {
+            document.getElementById('loginPrompt').style.display = 'none';
+            document.getElementById('accountLayout').style.display = 'grid';
+        }
 
-            // Close modals
-            closeModal.addEventListener('click', () => {
-                hideModal(authModal);
-            });
+        populateUserInfo() {
+            if (!currentUser) return;
+            
+            const { name = 'User', _id = 'N/A', email = 'N/A', balance = 0, createdAt } = currentUser;
 
-            closeForgotModal.addEventListener('click', () => {
-                hideModal(forgotPasswordModal);
-            });
-
-            // Close modal when clicking outside
-            [authModal, forgotPasswordModal].forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        hideModal(modal);
-                    }
-                });
-            });
-
+            document.getElementById('accountAvatar').textContent = name.charAt(0).toUpperCase();
+            document.getElementById('accountName').textContent = name;
+            document.getElementById('accountId').textContent = `ID: ${_id.slice(-6)}`;
+            document.getElementById('userFullName').textContent = name;
+            document.getElementById('userEmail').textContent = email;
+            document.getElementById('userRegisterDate').textContent = Utils.formatDate(createdAt);
+            document.getElementById('userAccountId').textContent = _id;
+            document.getElementById('balanceAmount').textContent = `${Utils.formatPrice(balance)}đ`;
+        }
+        
+        setupEventListeners() {
             // Tab switching
-            modalTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const targetTab = tab.dataset.tab;
-                    
-                    // Update active tab
-                    modalTabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    
-                    // Update active form
-                    modalForms.forEach(form => {
-                        form.classList.remove('active');
-                        if (form.id === targetTab + 'Form') {
-                            form.classList.add('active');
-                        }
-                    });
-                });
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', e => this.switchTab(e.currentTarget.dataset.tab));
             });
 
-            // Switch to register
-            switchToRegister.addEventListener('click', (e) => {
+            // Logout
+            document.getElementById('sidebarLogoutBtn').addEventListener('click', () => AuthManager.logout());
+            document.getElementById('headerLogoutBtn').addEventListener('click', () => AuthManager.logout());
+
+            // Modal Triggers
+            document.getElementById('depositBtn').addEventListener('click', () => ModalManager.open('depositModal'));
+            document.getElementById('withdrawBtn').addEventListener('click', () => ModalManager.open('withdrawModal'));
+            document.getElementById('changePasswordBtn').addEventListener('click', () => ModalManager.open('changePasswordModal'));
+
+            // Forms
+            document.getElementById('passwordChangeForm').addEventListener('submit', e => {
                 e.preventDefault();
-                document.querySelector('[data-tab="register"]').click();
+                this.handleChangePassword();
             });
-
-            // Switch to login
-            switchToLogin.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (link.classList.contains('switch-to-login')) {
-                        hideModal(forgotPasswordModal);
-                        showModal(authModal);
-                        document.querySelector('[data-tab="login"]').click();
-                    }
-                });
-            });
-
-            // Show forgot password modal
-            forgotPassword.addEventListener('click', (e) => {
+            document.getElementById('depositForm').addEventListener('submit', e => {
                 e.preventDefault();
-                hideModal(authModal);
-                showModal(forgotPasswordModal);
+                this.handleDeposit();
             });
 
-            // Password toggle functionality
+            // Password visibility toggles
             document.querySelectorAll('.password-toggle').forEach(toggle => {
-                toggle.addEventListener('click', function() {
-                    const input = this.previousElementSibling;
-                    const icon = this.querySelector('i');
-                    
+                toggle.addEventListener('click', e => {
+                    const input = e.currentTarget.previousElementSibling;
+                    const icon = e.currentTarget.querySelector('i');
                     if (input.type === 'password') {
                         input.type = 'text';
-                        icon.classList.remove('fa-eye');
-                        icon.classList.add('fa-eye-slash');
+                        icon.classList.replace('fa-eye', 'fa-eye-slash');
                     } else {
                         input.type = 'password';
-                        icon.classList.remove('fa-eye-slash');
-                        icon.classList.add('fa-eye');
+                        icon.classList.replace('fa-eye-slash', 'fa-eye');
                     }
                 });
             });
-
-            // Form submissions
-            document.getElementById('loginForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const submitBtn = this.querySelector('.btn-submit');
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                
-                // Add loading state
-                submitBtn.classList.add('loading');
-                
-                // Simulate API call
-                setTimeout(() => {
-                    // Check if user already exists (in real app, this would be server-side)
-                    let existingUser = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
-                    let displayName;
-                    
-                    if (existingUser[email]) {
-                        // User exists, use their registered name
-                        displayName = existingUser[email].name;
-                    } else {
-                        // New user logging in, create name from email
-                        const emailUsername = email.split('@')[0];
-                        displayName = emailUsername.charAt(0).toUpperCase() + emailUsername.slice(1);
-                        
-                        // Save this user for future logins
-                        existingUser[email] = {
-                            name: displayName,
-                            email: email
-                        };
-                        localStorage.setItem('registeredUsers', JSON.stringify(existingUser));
-                    }
-                    
-                    // Store current user data
-                    userData = {
-                        name: displayName,
-                        email: email
-                    };
-                    localStorage.setItem('userData', JSON.stringify(userData));
-                    localStorage.setItem('isLoggedIn', 'true');
-                    isLoggedIn = true;
-                    
-                    // Update UI
-                    updateUIForLoginStatus();
-                    hideModal(authModal);
-                    submitBtn.classList.remove('loading');
-                    
-                    // Show welcome animation with correct name
-                    showWelcomeAnimation(displayName);
-                }, 1500);
-            });
-
-            // Welcome animation
-            function showWelcomeAnimation(userName) {
-                const welcomeOverlay = document.getElementById('welcomeOverlay');
-                const welcomeTitle = document.getElementById('welcomeTitle');
-                const welcomeSubtitle = document.getElementById('welcomeSubtitle');
-                const welcomeParticles = document.getElementById('welcomeParticles');
-                
-                // Update welcome text
-                welcomeTitle.textContent = `Chào mừng, ${userName}!`;
-                welcomeSubtitle.textContent = 'Đăng nhập thành công';
-                
-                // Create particles
-                welcomeParticles.innerHTML = '';
-                for (let i = 0; i < 20; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
-                    particle.style.left = Math.random() * 100 + '%';
-                    particle.style.animationDelay = Math.random() * 6 + 's';
-                    particle.style.animationDuration = (3 + Math.random() * 3) + 's';
-                    welcomeParticles.appendChild(particle);
-                }
-                
-                // Show welcome overlay
-                welcomeOverlay.classList.add('show');
-                document.body.style.overflow = 'hidden';
-                
-                // Hide after 3 seconds
-                setTimeout(() => {
-                    welcomeOverlay.classList.remove('show');
-                    document.body.style.overflow = '';
-                    setTimeout(() => {
-                        welcomeParticles.innerHTML = '';
-                    }, 500);
-                }, 3000);
-            }
-
-            document.getElementById('registerForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const submitBtn = this.querySelector('.btn-submit');
-                const name = document.getElementById('registerName').value;
-                const email = document.getElementById('registerEmail').value;
-                const password = document.getElementById('registerPassword').value;
-                const confirmPassword = document.getElementById('registerConfirmPassword').value;
-                
-                // Validation
-                if (!name || !email || !password || !confirmPassword) {
-                    showAnimationOverlay('errorOverlay', '⚠️', 'Thiếu thông tin!', 'Vui lòng điền đầy đủ tất cả các trường');
-                    return;
-                }
-                
-                if (password !== confirmPassword) {
-                    showAnimationOverlay('errorOverlay', '🔒', 'Mật khẩu không khớp!', 'Vui lòng kiểm tra lại mật khẩu xác nhận');
-                    return;
-                }
-                
-                if (password.length < 6) {
-                    showAnimationOverlay('errorOverlay', '🔐', 'Mật khẩu quá ngắn!', 'Mật khẩu phải có ít nhất 6 ký tự');
-                    return;
-                }
-                
-                // Add loading state
-                submitBtn.classList.add('loading');
-                
-                // Simulate API call
-                setTimeout(() => {
-                    try {
-                        // Check if user already exists
-                        let existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
-                        
-                        if (existingUsers[email]) {
-                            submitBtn.classList.remove('loading');
-                            showAnimationOverlay('errorOverlay', '👤', 'Email đã tồn tại!', 'Vui lòng sử dụng email khác hoặc đăng nhập');
-                            return;
-                        }
-                        
-                        // Store user in registered users database
-                        existingUsers[email] = {
-                            name: name,
-                            email: email,
-                            password: password // In real app, this should be hashed
-                        };
-                        localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
-                        
-                        // Store current user data
-                        userData = {
-                            name: name,
-                            email: email
-                        };
-                        localStorage.setItem('userData', JSON.stringify(userData));
-                        localStorage.setItem('isLoggedIn', 'true');
-                        isLoggedIn = true;
-                        
-                        // Update UI
-                        updateUIForLoginStatus();
-                        hideModal(authModal);
-                        submitBtn.classList.remove('loading');
-                        
-                        // Show success animation first
-                        showAnimationOverlay('successOverlay', '🎊', 'Đăng ký thành công!', `Chào mừng ${name} đến với Shop Grow A Garden`, 2000);
-                        
-                        // Then show welcome animation
-                        setTimeout(() => {
-                            showWelcomeAnimation(name);
-                        }, 2200);
-                        
-                    } catch (error) {
-                        submitBtn.classList.remove('loading');
-                        showAnimationOverlay('errorOverlay', '❌', 'Đăng ký thất bại!', 'Có lỗi xảy ra, vui lòng thử lại');
-                    }
-                }, 1500);
-            });
-
-            document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const submitBtn = this.querySelector('.btn-submit');
-                const email = document.getElementById('forgotEmail').value;
-                
-                if (!email) {
-                    showAnimationOverlay('errorOverlay', '📧', 'Thiếu email!', 'Vui lòng nhập địa chỉ email của bạn');
-                    return;
-                }
-                
-                // Add loading state
-                submitBtn.classList.add('loading');
-                
-                // Simulate API call
-                setTimeout(() => {
-                    submitBtn.classList.remove('loading');
-                    hideModal(forgotPasswordModal);
-                    showAnimationOverlay('successOverlay', '📨', 'Email đã được gửi!', 'Vui lòng kiểm tra hộp thư của bạn');
-                }, 1500);
-            });
-
-            // Enhanced logout functionality
-            logoutButton.addEventListener('click', () => {
-                // Show logout animation
-                showAnimationOverlay('logoutOverlay', '👋', 'Tạm biệt!', 'Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi', 2000);
-                
-                // Clear data after animation
-                setTimeout(() => {
-                    localStorage.removeItem('userData');
-                    localStorage.removeItem('isLoggedIn');
-                    isLoggedIn = false;
-                    userData = {};
-                    updateUIForLoginStatus();
-                }, 1000);
-            });
-
-            // Enhanced product interactions with better favorite handling
-            document.querySelectorAll('.btn-favorite').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
+            
+            // Header dropdown
+            const userDropdown = document.querySelector('.user-dropdown');
+            if (userDropdown) {
+                userDropdown.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    
-                    this.classList.toggle('active');
-                    const icon = this.querySelector('i');
-                    
-                    if (this.classList.contains('active')) {
-                        icon.classList.remove('far');
-                        icon.classList.add('fas');
-                        
-                        // Add to favorites
-                        const productCard = this.closest('.product-card');
-                        const productId = productCard.dataset.id;
-                        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-                        if (!favorites.includes(productId)) {
-                            favorites.push(productId);
-                            localStorage.setItem('favorites', JSON.stringify(favorites));
-                        }
-                        
-                        // Show success feedback
-                        this.style.transform = 'scale(1.2)';
-                        setTimeout(() => {
-                            this.style.transform = '';
-                        }, 200);
-                        
-                    } else {
-                        icon.classList.remove('fas');
-                        icon.classList.add('far');
-                        
-                        // Remove from favorites
-                        const productCard = this.closest('.product-card');
-                        const productId = productCard.dataset.id;
-                        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-                        favorites = favorites.filter(id => id !== productId);
-                        localStorage.setItem('favorites', JSON.stringify(favorites));
-                    }
+                    userDropdown.classList.toggle('active');
                 });
-            });
+                document.addEventListener('click', () => userDropdown.classList.remove('active'));
+            }
+        }
+        
+        switchTab(tabId) {
+            document.querySelector('.menu-item.active')?.classList.remove('active');
+            document.querySelector(`.menu-item[data-tab="${tabId}"]`)?.classList.add('active');
+            
+            document.querySelector('.tab-content.active')?.classList.remove('active');
+            document.getElementById(`${tabId}Tab`)?.classList.add('active');
+        }
 
-            // Load favorite states on page load
-            function loadFavoriteStates() {
-                const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-                document.querySelectorAll('.product-card').forEach(card => {
-                    const productId = card.dataset.id;
-                    const favoriteBtn = card.querySelector('.btn-favorite');
-                    const icon = favoriteBtn.querySelector('i');
-                    
-                    if (favorites.includes(productId)) {
-                        favoriteBtn.classList.add('active');
-                        icon.classList.remove('far');
-                        icon.classList.add('fas');
-                    }
-                });
+        async handleChangePassword() {
+            const form = document.getElementById('passwordChangeForm');
+            const submitBtn = form.querySelector('.btn-submit');
+            const currentPassword = form.currentPassword.value;
+            const newPassword = form.newPassword.value;
+            const newPasswordConfirm = form.newPasswordConfirm.value;
+
+            if (!currentPassword || !newPassword || !newPasswordConfirm) {
+                return Utils.showToast('Vui lòng điền đầy đủ các trường.', 'error');
+            }
+            if (newPassword.length < 6) {
+                return Utils.showToast('Mật khẩu mới phải có ít nhất 6 ký tự.', 'error');
+            }
+            if (newPassword !== newPasswordConfirm) {
+                return Utils.showToast('Mật khẩu xác nhận không khớp.', 'error');
+            }
+            // FIX: Prevent using the same password
+            if (currentPassword === newPassword) {
+                return Utils.showToast('Mật khẩu mới không được trùng với mật khẩu cũ.', 'error');
             }
 
-            // Initialize favorite states
-            loadFavoriteStates();
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
 
-            document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const submitBtn = this.querySelector('.btn-submit');
-                
-                // Add loading state
-                submitBtn.classList.add('loading');
-                
-                // Simulate API call
-                setTimeout(() => {
-                    submitBtn.classList.remove('loading');
-                    alert('Link đặt lại mật khẩu đã được gửi đến email của bạn!');
-                    hideModal(forgotPasswordModal);
-                }, 1500);
-            });
-
-            // Logout functionality
-            logoutButton.addEventListener('click', () => {
-                localStorage.removeItem('userData');
-                localStorage.removeItem('isLoggedIn');
-                isLoggedIn = false;
-                userData = {};
-                updateUIForLoginStatus();
-                alert('Đăng xuất thành công!');
-            });
-
-            // Product interactions
-            document.querySelectorAll('.btn-favorite').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    this.classList.toggle('active');
-                    const icon = this.querySelector('i');
-                    if (this.classList.contains('active')) {
-                        icon.classList.remove('far');
-                        icon.classList.add('fas');
-                    } else {
-                        icon.classList.remove('fas');
-                        icon.classList.add('far');
-                    }
+            try {
+                await callApi('/users/updateMyPassword', 'PATCH', {
+                    passwordCurrent: currentPassword,
+                    password: newPassword,
+                    passwordConfirm: newPasswordConfirm
                 });
-            });
+                Utils.showToast('Đổi mật khẩu thành công! Bạn sẽ được đăng xuất sau giây lát.', 'success');
+                setTimeout(() => AuthManager.logout(), 2500);
+            } catch (error) {
+                Utils.showToast(error.message || 'Đổi mật khẩu thất bại.', 'error');
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+                form.reset();
+                ModalManager.close('changePasswordModal');
+            }
+        }
+        
+        handleDeposit() {
+            const form = document.getElementById('depositForm');
+            const amount = parseInt(form.depositAmount.value);
+            if (isNaN(amount) || amount < 10000) {
+                 return Utils.showToast('Vui lòng nhập số tiền hợp lệ (tối thiểu 10,000đ).', 'error');
+            }
 
-            // View product detail
-            document.querySelectorAll('.btn-view').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const productCard = this.closest('.product-card');
-                    const productId = productCard.dataset.id;
-                    
-                    // Redirect to product detail page with product ID
-                    window.location.href = `product.html?id=${productId}`;
-                });
-            });
+            Utils.showToast(`Bạn đã nạp thành công ${Utils.formatPrice(amount)}đ (Demo).`, 'success');
+            
+            // Simulate balance update
+            currentUser.balance = (currentUser.balance || 0) + amount;
+            this.populateUserInfo(); // Refresh UI
+            
+            ModalManager.close('depositModal');
+            form.reset();
+        }
+    }
 
-            document.querySelectorAll('.add-to-cart').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const productCard = this.closest('.product-card');
-                    const productId = productCard.dataset.id;
-                    
-                    // Redirect to product detail page with product ID
-                    window.location.href = `product.html?id=${productId}`;
-                });
-            });
-
-            // Filter functionality
-            const filterButton = document.getElementById('filterButton');
-            const resetButton = document.getElementById('resetButton');
-            const productCards = document.querySelectorAll('.product-card');
-
-            filterButton.addEventListener('click', () => {
-                const searchId = document.getElementById('searchId').value.toLowerCase();
-                const searchPrice = document.getElementById('searchPrice').value;
-                const searchNote = document.getElementById('searchNote').value.toLowerCase();
-
-                let visibleCount = 0;
-
-                productCards.forEach(card => {
-                    const cardId = card.dataset.id.toLowerCase();
-                    const cardPrice = parseInt(card.dataset.price);
-                    const cardNote = card.dataset.note.toLowerCase();
-
-                    let showCard = true;
-
-                    // Filter by ID
-                    if (searchId && !cardId.includes(searchId)) {
-                        showCard = false;
-                    }
-
-                    // Filter by price
-                    if (searchPrice) {
-                        switch (searchPrice) {
-                            case 'duoi-50k':
-                                if (cardPrice >= 50000) showCard = false;
-                                break;
-                            case 'tu-50k-200k':
-                                if (cardPrice < 50000 || cardPrice > 200000) showCard = false;
-                                break;
-                            case 'tu-200k-500k':
-                                if (cardPrice < 200000 || cardPrice > 500000) showCard = false;
-                                break;
-                            case 'tu-500k-1-trieu':
-                                if (cardPrice < 500000 || cardPrice > 1000000) showCard = false;
-                                break;
-                            case 'tren-1-trieu':
-                                if (cardPrice <= 1000000) showCard = false;
-                                break;
-                        }
-                    }
-
-                    // Filter by note
-                    if (searchNote && !cardNote.includes(searchNote)) {
-                        showCard = false;
-                    }
-
-                    // Show/hide card with animation
-                    if (showCard) {
-                        card.style.display = 'block';
-                        visibleCount++;
-                        setTimeout(() => {
-                            card.style.opacity = '1';
-                            card.style.transform = 'translateY(0)';
-                        }, 50);
-                    } else {
-                        card.style.opacity = '0';
-                        card.style.transform = 'translateY(20px)';
-                        setTimeout(() => {
-                            card.style.display = 'none';
-                        }, 300);
-                    }
-                });
-
-                // Show result feedback
-                if (visibleCount === 0) {
-                    showAnimationOverlay('errorOverlay', '🔍', 'Không tìm thấy sản phẩm!', 'Vui lòng thử với từ khóa khác', 2000);
-                } else {
-                    showAnimationOverlay('successOverlay', '🎯', `Tìm thấy ${visibleCount} sản phẩm!`, 'Kết quả lọc thành công', 1500);
-                }
-            });
-
-            resetButton.addEventListener('click', () => {
-                document.getElementById('searchId').value = '';
-                document.getElementById('searchPrice').value = '';
-                document.getElementById('searchNote').value = '';
-                
-                productCards.forEach(card => {
-                    card.style.display = 'block';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                });
-
-                showAnimationOverlay('successOverlay', '🔄', 'Đã xóa bộ lọc!', 'Hiển thị tất cả sản phẩm', 1500);
-            });
-
-            // Smooth scroll animation
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, observerOptions);
-
-            // Observe elements for animation
-            document.querySelectorAll('.filter-section, .product-card').forEach(el => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(20px)';
-                el.style.transition = 'all 0.6s ease';
-                observer.observe(el);
-            });
-        });
+    // =================================================================
+    // INITIALIZATION
+    // =================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        ModalManager.init();
+        new AccountPageManager();
+    });
     </script>
 </body>
 </html>
-    </script>
-<script src="main.js"></script>   <!-- Nạp "bộ não" chung trước -->
-</body>
-</html>
-
