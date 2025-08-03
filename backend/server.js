@@ -82,6 +82,17 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     validate: [validator.isEmail, 'Please provide a valid email'],
   },
+
+  // =======================================================
+  // THÊM TRƯỜNG ROLE VÀO ĐÂY
+  // =======================================================
+  role: {
+    type: String,
+    enum: ['user', 'admin'], // Chỉ cho phép giá trị 'user' hoặc 'admin'
+    default: 'user',        // Mặc định mọi tài khoản mới là 'user'
+  },
+  // =======================================================
+
   avatarText: {
     type: String,
     default: function() {
