@@ -4,32 +4,27 @@ class AdminPanel {
     constructor() {
         this.products = [];
         this.editingProductId = null;
-        
+
+        // Sử dụng Data URI cho ảnh placeholder để không phụ thuộc vào mạng và tránh lỗi kết nối
+        this.placeholderImg50 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjZWNlY2VjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpeGU9IjEwcHgiIGZpbGw9IiM5OTkiPk5vIEltZzwvdGV4dD48L3N2Zz4=';
+        this.placeholderImg80Error = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjZWNlY2VjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpeGU9IjEycHgiIGZpbGw9IiM5OTkiPkxỗi+TảiẢnhPC90ZXh0Pjwvc3ZnPg==';
+
         this.cacheDOMElements();
     }
 
     cacheDOMElements() {
-        // Screens
         this.loginScreen = document.getElementById('adminLoginScreen');
         this.dashboard = document.getElementById('adminDashboard');
-        
-        // Login elements
         this.loginForm = document.getElementById('adminLoginForm');
         this.loginError = document.getElementById('loginError');
         this.loginSubmitBtn = document.getElementById('loginSubmitBtn');
         this.logoutBtn = document.getElementById('adminLogoutBtn');
-
-        // Main form elements
         this.form = document.getElementById('productForm');
         this.formTitle = document.getElementById('formTitle');
         this.submitBtn = document.getElementById('submitBtn');
         this.submitBtnText = document.getElementById('submitBtnText');
         this.cancelEditBtn = document.getElementById('cancelEditBtn');
-        
-        // Product list
         this.productListBody = document.getElementById('productList');
-        
-        // Dynamic fields
         this.imagesInput = document.getElementById('images');
         this.imagePreview = document.getElementById('imagePreview');
         this.featuresContainer = document.getElementById('featuresContainer');
@@ -37,36 +32,36 @@ class AdminPanel {
     }
 
     init() {
+        this.bindEventListeners();
         if (window.currentUser && window.currentUser.role === 'admin') {
             this.showDashboard();
         } else {
             this.showLoginScreen();
         }
     }
-    
-    showLoginScreen() {
-        this.loginScreen.style.display = 'flex';
-        this.dashboard.style.display = 'none';
-        this.logoutBtn.style.display = 'none';
+
+    // Gán tất cả event listener một lần duy nhất để tránh rò rỉ bộ nhớ
+    bindEventListeners() {
         this.loginForm.addEventListener('submit', this.handleAdminLogin.bind(this));
-    }
-    
-    async showDashboard() {
-        this.loginScreen.style.display = 'none';
-        this.dashboard.style.display = 'block';
-        this.logoutBtn.style.display = 'inline-flex';
-        
-        this.setupDashboardEventListeners();
-        await this.fetchAndRenderProducts();
-    }
-    
-    setupDashboardEventListeners() {
         this.form.addEventListener('submit', this.handleFormSubmit.bind(this));
         this.productListBody.addEventListener('click', this.handleProductListClick.bind(this));
         this.cancelEditBtn.addEventListener('click', () => this.resetForm());
         this.imagesInput.addEventListener('input', this.renderImagePreviews.bind(this));
         this.addFeatureBtn.addEventListener('click', () => this.addFeatureInput());
         this.logoutBtn.addEventListener('click', () => window.logout());
+    }
+    
+    showLoginScreen() {
+        this.loginScreen.style.display = 'flex';
+        this.dashboard.style.display = 'none';
+        this.logoutBtn.style.display = 'none';
+    }
+    
+    async showDashboard() {
+        this.loginScreen.style.display = 'none';
+        this.dashboard.style.display = 'block';
+        this.logoutBtn.style.display = 'inline-flex';
+        await this.fetchAndRenderProducts();
     }
 
     async handleAdminLogin(e) {
@@ -79,9 +74,8 @@ class AdminPanel {
 
         try {
             const user = await window.authenticate(email, pass);
-            
             if (user && user.role === 'admin') {
-                window.Utils.showToast(`Chào mừng Admin ${user.name}!`, 'success');
+                window.Utils.showToast(`Chào mừng Admin ${this.escapeHTML(user.name)}!`, 'success');
                 this.showDashboard();
             } else {
                 localStorage.removeItem('token');
@@ -97,13 +91,13 @@ class AdminPanel {
     }
 
     async fetchAndRenderProducts() {
-        this.productListBody.innerHTML = `<tr><td colspan="5" class="loading-spinner-container"><div class="spinner" style="display:inline-block; border-top-color: var(--primary-color);"></div></td></tr>`;
+        this.productListBody.innerHTML = `<tr><td colspan="5" class="loading-spinner-container"><div class="spinner"></div></td></tr>`;
         try {
             const response = await window.callApi('/products');
             this.products = response.data.products;
             this.renderProductList();
         } catch (error) {
-            this.productListBody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">Lỗi khi tải danh sách sản phẩm. ${error.message}</td></tr>`;
+            this.productListBody.innerHTML = `<tr><td colspan="5" class="error-message">Lỗi khi tải danh sách sản phẩm. ${this.escapeHTML(error.message)}</td></tr>`;
         }
     }
 
@@ -113,30 +107,30 @@ class AdminPanel {
             return;
         }
         
-        this.productListBody.innerHTML = this.products.map(p => `
-            <tr id="product-row-${p._id}">
-                <td><img src="${p.images && p.images.length > 0 ? p.images[0] : 'https://via.placeholder.com/50?text=No+Img'}" alt="${p.title}"></td>
-                <td>${p.title}</td>
-                <td>${window.Utils.formatPrice(p.price)}</td>
-                <td>${p.stock}</td>
-                <td class="actions">
-                    <button class="btn btn-sm btn-warning" data-action="edit" data-id="${p._id}" title="Sửa"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-danger" data-action="delete" data-id="${p._id}" title="Xóa"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
-        `).join('');
+        this.productListBody.innerHTML = this.products.map(p => {
+            const imgSrc = p.images && p.images.length > 0 ? this.escapeHTML(p.images[0]) : this.placeholderImg50;
+            const title = this.escapeHTML(p.title);
+            return `
+                <tr id="product-row-${p._id}">
+                    <td><img src="${imgSrc}" alt="${title}" onerror="this.onerror=null;this.src='${this.placeholderImg50}';"></td>
+                    <td>${title}</td>
+                    <td>${window.Utils.formatPrice(p.price)}</td>
+                    <td>${p.stock}</td>
+                    <td class="actions">
+                        <button class="btn btn-sm btn-warning" data-action="edit" data-id="${p._id}" title="Sửa"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger" data-action="delete" data-id="${p._id}" title="Xóa"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
 
     async handleFormSubmit(e) {
         e.preventDefault();
-        this.toggleButtonLoading(this.submitBtn, true);
-
         const productData = this.getFormData();
-        if (!productData) { // Nếu dữ liệu không hợp lệ, getFormData sẽ trả về null
-            this.toggleButtonLoading(this.submitBtn, false);
-            return;
-        }
+        if (!productData) return;
 
+        this.toggleButtonLoading(this.submitBtn, true);
         try {
             const endpoint = this.editingProductId ? `/products/${this.editingProductId}` : '/products';
             const method = this.editingProductId ? 'PATCH' : 'POST';
@@ -147,23 +141,22 @@ class AdminPanel {
             this.resetForm();
             await this.fetchAndRenderProducts();
         } catch (error) {
-            // Hiển thị lỗi từ API để người dùng biết vấn đề
             const errorMessage = error.response?.data?.message || error.message || 'Thao tác thất bại.';
-            window.Utils.showToast(`API Error: ${errorMessage}`, 'error');
+            window.Utils.showToast(`Lỗi API: ${this.escapeHTML(errorMessage)}`, 'error');
         } finally {
             this.toggleButtonLoading(this.submitBtn, false);
         }
     }
     
     handleProductListClick(e) {
-        const button = e.target.closest('button');
+        const button = e.target.closest('button[data-action]');
         if (!button) return;
         
         const action = button.dataset.action;
         const id = button.dataset.id;
         
         if (action === 'edit') this.populateFormForEdit(id);
-        else if (action === 'delete') this.handleDelete(id);
+        else if (action === 'delete') this.handleDelete(id, button);
     }
 
     populateFormForEdit(id) {
@@ -194,17 +187,21 @@ class AdminPanel {
         this.form.scrollIntoView({ behavior: 'smooth' });
     }
 
-    async handleDelete(id) {
-        if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này? Thao tác này không thể hoàn tác.')) {
-            try {
-                await window.callApi(`/products/${id}`, 'DELETE');
-                window.Utils.showToast('Đã xóa sản phẩm.', 'success');
-                this.products = this.products.filter(p => p._id !== id);
-                this.renderProductList();
-            } catch (error) {
-                window.Utils.showToast(error.message || 'Xóa thất bại.', 'error');
-            }
+    async handleDelete(id, button) {
+        if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này? Thao tác này không thể hoàn tác.')) return;
+        
+        this.toggleButtonLoading(button, true);
+        try {
+            await window.callApi(`/products/${id}`, 'DELETE');
+            window.Utils.showToast('Đã xóa sản phẩm.', 'success');
+            // Cải tiến: Chỉ xóa khỏi mảng và render lại khi API thành công
+            this.products = this.products.filter(p => p._id !== id);
+            this.renderProductList();
+        } catch (error) {
+            window.Utils.showToast(error.message || 'Xóa thất bại.', 'error');
+            this.toggleButtonLoading(button, false);
         }
+        // Không cần `finally` ở đây vì button sẽ bị xóa khỏi DOM sau khi render lại
     }
 
     getFormData() {
@@ -225,34 +222,27 @@ class AdminPanel {
         const badge = this.form.querySelector('#badge').value.trim();
         if (badge) data.badge = badge.toUpperCase();
 
-        // === SỬA LỖI & VALIDATION ===
-        // 1. Kiểm tra các trường bắt buộc
-        // Bổ sung kiểm tra cho 'Mô tả ngắn' và 'Link hình ảnh' để tránh lỗi 500 từ server.
         if (!data.title || isNaN(data.price) || isNaN(data.stock) || !data.description) {
-            window.Utils.showToast('Vui lòng điền đầy đủ các trường bắt buộc: Tên, Giá, Tồn kho, và Mô tả ngắn.', 'error');
+            window.Utils.showToast('Vui lòng điền đầy đủ Tên, Giá, Tồn kho, và Mô tả ngắn.', 'error');
             return null;
         }
         
-        // 2. Kiểm tra link hình ảnh phải được cung cấp và hợp lệ
         if (data.images.length === 0) {
             window.Utils.showToast('Vui lòng cung cấp ít nhất một link hình ảnh.', 'error');
             return null;
         }
         for (const url of data.images) {
-            // Lỗi ERR_UNKNOWN_URL_SCHEME xảy ra khi link không bắt đầu bằng http:// hoặc https://
             if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                window.Utils.showToast(`Link hình ảnh "${url.slice(0, 30)}..." không hợp lệ. Phải bắt đầu bằng http:// hoặc https://`, 'error');
+                window.Utils.showToast(`Link ảnh "${this.escapeHTML(url.slice(0, 30))}..." không hợp lệ.`, 'error');
                 return null;
             }
         }
 
-        // 3. Kiểm tra giá trị số có quá lớn không để tránh lỗi server 500
-        const MAX_INT_VALUE = 2147483647; // Giới hạn của số nguyên 32-bit
+        const MAX_INT_VALUE = 2147483647;
         if (data.price > MAX_INT_VALUE || (data.oldPrice && data.oldPrice > MAX_INT_VALUE) || data.stock > MAX_INT_VALUE) {
-            window.Utils.showToast(`Giá hoặc số lượng tồn kho không được vượt quá ${MAX_INT_VALUE.toLocaleString('vi-VN')}.`, 'error');
+            window.Utils.showToast(`Giá hoặc tồn kho không được vượt quá ${MAX_INT_VALUE.toLocaleString('vi-VN')}.`, 'error');
             return null;
         }
-        // === KẾT THÚC SỬA LỖI ===
 
         return data;
     }
@@ -266,22 +256,18 @@ class AdminPanel {
             const img = document.createElement('img');
             img.className = 'preview-img';
 
-            // === SỬA LỖI ===
-            // Kiểm tra link trước khi gán vào src để tránh lỗi console `ERR_UNKNOWN_URL_SCHEME`
+            const safeUrl = this.escapeHTML(url);
             if (url.startsWith('http://') || url.startsWith('https://')) {
-                img.src = url;
+                img.src = safeUrl;
+                img.onerror = () => { 
+                    img.src = this.placeholderImg80Error;
+                    img.title = `Không thể tải ảnh từ: ${safeUrl}`;
+                };
             } else {
-                // Nếu link không hợp lệ, dùng ảnh thay thế để không bị lỗi
-                img.src = 'https://via.placeholder.com/80?text=Link+Sai';
-                img.title = `Link không hợp lệ: ${url}`;
+                img.src = this.placeholderImg80Error;
+                img.title = `Link không hợp lệ: ${safeUrl}`;
             }
-            // === KẾT THÚC SỬA LỖI ===
             
-            img.onerror = () => { 
-                // Xử lý trường hợp link đúng định dạng nhưng không tải được (lỗi 404, connection timeout,...)
-                img.src = 'https://via.placeholder.com/80?text=Lỗi+Tải';
-                img.title = `Không thể tải ảnh từ: ${url}`;
-             };
             imgWrapper.appendChild(img);
             this.imagePreview.appendChild(imgWrapper);
         });
@@ -290,11 +276,22 @@ class AdminPanel {
     addFeatureInput(value = '') {
         const div = document.createElement('div');
         div.className = 'feature-item';
-        div.innerHTML = `
-            <input type="text" class="form-control" value="${value}" placeholder="VD: Thân thiện với người dùng">
-            <button type="button" class="btn btn-sm btn-danger" title="Xóa tính năng"><i class="fas fa-times"></i></button>
-        `;
-        div.querySelector('button').addEventListener('click', () => div.remove());
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control';
+        input.value = this.escapeHTML(value);
+        input.placeholder = 'VD: Thân thiện với người dùng';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-sm btn-danger';
+        button.title = 'Xóa tính năng';
+        button.innerHTML = '<i class="fas fa-times"></i>';
+        button.addEventListener('click', () => div.remove());
+
+        div.appendChild(input);
+        div.appendChild(button);
         this.featuresContainer.appendChild(div);
     }
     
@@ -308,26 +305,40 @@ class AdminPanel {
         this.form.reset();
         this.featuresContainer.innerHTML = '';
         this.imagePreview.innerHTML = '';
-        
         this.formTitle.innerHTML = `<i class="fas fa-plus-circle"></i> Đăng sản phẩm mới`;
         this.submitBtnText.textContent = 'Đăng sản phẩm';
         this.cancelEditBtn.style.display = 'none';
     }
 
     toggleButtonLoading(button, isLoading) {
-        if(!button) return;
+        if (!button) return;
+        const icon = button.querySelector('i');
+        if (icon) icon.style.display = isLoading ? 'none' : '';
+        
         button.classList.toggle('loading', isLoading);
         button.disabled = isLoading;
-        const spinner = button.querySelector('.spinner');
+        // Thêm spinner vào nếu chưa có
+        let spinner = button.querySelector('.spinner');
+        if (isLoading && !spinner) {
+            spinner = document.createElement('div');
+            spinner.className = 'spinner';
+            button.prepend(spinner);
+        }
         if (spinner) {
             spinner.style.display = isLoading ? 'inline-block' : 'none';
         }
     }
+
+    // Tiện ích chống XSS
+    escapeHTML(str) {
+        const p = document.createElement('p');
+        p.textContent = str;
+        return p.innerHTML;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        const adminPanel = new AdminPanel();
-        adminPanel.init();
-    }, 100); 
+    // Không cần setTimeout, khởi tạo ngay khi DOM sẵn sàng
+    const adminPanel = new AdminPanel();
+    adminPanel.init();
 });
