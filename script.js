@@ -19,7 +19,7 @@ const localSampleProducts = [
         images: ["https://i.imgur.com/ZoX9VKo.png"], // Thêm images array để tương thích
         sales: 100,
         badge: "HOT",
-        note: "thú cưng biển độc đáo",
+        note: "thu cung bien doc dao",
         category: "pet",
         stock: 3,
         details: {
@@ -38,7 +38,7 @@ const localSampleProducts = [
         images: ["https://i.imgur.com/placeholder1.png"],
         sales: 200,
         badge: "NEW",
-        note: "bộ trồng cây mini",
+        note: "bo trong cay mini",
         category: "plant",
         stock: 10,
         details: {
@@ -57,7 +57,7 @@ const localSampleProducts = [
         images: ["https://i.imgur.com/placeholder2.png"],
         sales: 50,
         badge: "VIP",
-        note: "tài khoản game premium",
+        note: "tai khoan game premium",
         category: "gaming",
         stock: 2,
         details: {
@@ -621,4 +621,4 @@ console.log('Script.js loaded successfully');thú cưng dễ thương",
         images: ["https://i.imgur.com/8pYhB3m.png"],
         sales: 75,
         badge: "SALE",
-        note: "
+        note: "hehehehehehe"
