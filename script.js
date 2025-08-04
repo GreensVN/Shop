@@ -1,7 +1,299 @@
-// script.js - Phiên bản cuối cùng, dành cho trang INDEX.HTML
-// Tương thích hoàn toàn với main.js, sử dụng dữ liệu từ API.
+// script.js - Phiên bản hoàn chỉnh với chức năng đăng sản phẩm
+// Tương thích hoàn toàn với main.js, sử dụng dữ liệu từ API và hỗ trợ đăng sản phẩm.
 
 "use strict";
+
+// =================================================================
+// QUẢN LÝ QUYỀN ĐĂNG SẢN PHẨM
+// =================================================================
+
+// Danh sách email được ủy quyền đăng sản phẩm
+const AUTHORIZED_EMAILS = [
+    'chinhan20917976549a@gmail.com',
+    'manager@shopgrowgarden.com', 
+    'seller@shopgrowgarden.com',
+    'test@example.com', // Email test cho demo
+    'greensvn@gmail.com', // Thêm email chủ shop
+    // Thêm email được ủy quyền ở đây
+];
+
+/**
+ * Kiểm tra xem người dùng hiện tại có quyền đăng sản phẩm không
+ */
+function checkPostPermission() {
+    if (!window.currentUser || !window.currentUser.email) {
+        return false;
+    }
+    
+    const userEmail = window.currentUser.email.toLowerCase();
+    return AUTHORIZED_EMAILS.includes(userEmail);
+}
+
+/**
+ * Hiển thị hoặc ẩn nút đăng sản phẩm dựa trên quyền của người dùng
+ */
+function updatePostProductButton() {
+    let postButton = document.getElementById('postProductButton');
+    
+    if (checkPostPermission()) {
+        // Tạo nút đăng sản phẩm nếu chưa có
+        if (!postButton) {
+            postButton = document.createElement('button');
+            postButton.id = 'postProductButton';
+            postButton.className = 'btn btn-success post-product-btn';
+            postButton.innerHTML = `
+                <i class="fas fa-plus"></i>
+                <span>Đăng tin</span>
+            `;
+            
+            // Thêm sự kiện click
+            postButton.addEventListener('click', showAddProductModal);
+            
+            document.body.appendChild(postButton);
+        }
+        
+        postButton.style.display = 'flex';
+    } else {
+        // Ẩn nút nếu không có quyền
+        if (postButton) {
+            postButton.style.display = 'none';
+        }
+    }
+}
+
+/**
+ * Hiển thị modal đăng sản phẩm
+ */
+function showAddProductModal() {
+    // Tạo modal nếu chưa có
+    let modal = document.getElementById('addProductModal');
+    if (!modal) {
+        modal = createAddProductModal();
+        document.body.appendChild(modal);
+    }
+    
+    // Hiển thị modal
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('show'), 10);
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Ẩn modal đăng sản phẩm
+ */
+function hideAddProductModal() {
+    const modal = document.getElementById('addProductModal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 300);
+    }
+}
+
+/**
+ * Tạo modal đăng sản phẩm
+ */
+function createAddProductModal() {
+    const modal = document.createElement('div');
+    modal.id = 'addProductModal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content add-product-modal-content">
+            <button class="modal-close" onclick="hideAddProductModal()" aria-label="Đóng">×</button>
+            <h2 class="modal-title">
+                <i class="fas fa-plus-circle"></i> 
+                Đăng Sản Phẩm Mới
+            </h2>
+            
+            <form id="addProductForm" class="add-product-form">
+                <div class="form-grid-2col">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-tag"></i>
+                            Tên sản phẩm <span class="required">*</span>
+                        </label>
+                        <input type="text" id="productTitle" class="form-input" required 
+                               placeholder="Nhập tên sản phẩm...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-hashtag"></i>
+                            Badge/Tag
+                        </label>
+                        <select id="productBadge" class="form-input">
+                            <option value="">-- Không có --</option>
+                            <option value="HOT">🔥 HOT</option>
+                            <option value="SALE">💰 SALE</option>
+                            <option value="NEW">✨ NEW</option>
+                            <option value="BEST">⭐ BEST</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Giá bán <span class="required">*</span>
+                        </label>
+                        <input type="number" id="productPrice" class="form-input" required 
+                               min="0" step="1000" placeholder="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-users"></i>
+                            Số lượng đã bán
+                        </label>
+                        <input type="number" id="productSales" class="form-input" 
+                               min="0" value="0" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-align-left"></i>
+                        Mô tả sản phẩm <span class="required">*</span>
+                    </label>
+                    <textarea id="productDescription" class="form-textarea" required 
+                              placeholder="Mô tả chi tiết về sản phẩm..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-image"></i>
+                        URL Hình ảnh <span class="required">*</span>
+                    </label>
+                    <input type="url" id="productImage" class="form-input" required 
+                           placeholder="https://example.com/image.jpg">
+                    <div class="form-help">Nhập URL hình ảnh sản phẩm</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-link"></i>
+                        Link sản phẩm <span class="required">*</span>
+                    </label>
+                    <input type="url" id="productLink" class="form-input" required 
+                           placeholder="https://greensvn.github.io/Shop/product.html?id=123">
+                    <div class="form-help">Link đến trang chi tiết sản phẩm</div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideAddProductModal()">
+                        <i class="fas fa-times"></i>
+                        <span>Hủy</span>
+                    </button>
+                    <button type="submit" class="btn btn-success" id="submitProductBtn">
+                        <i class="fas fa-plus"></i>
+                        <span>Đăng sản phẩm</span>
+                        <div class="spinner" style="display: none;"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    // Xử lý form submit
+    const form = modal.querySelector('#addProductForm');
+    form.addEventListener('submit', handleAddProductSubmit);
+    
+    // Đóng modal khi click outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            hideAddProductModal();
+        }
+    });
+    
+    return modal;
+}
+
+/**
+ * Xử lý submit form đăng sản phẩm
+ */
+async function handleAddProductSubmit(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitProductBtn');
+    const spinner = submitBtn.querySelector('.spinner');
+    
+    // Lấy dữ liệu form
+    const formData = {
+        title: document.getElementById('productTitle').value.trim(),
+        description: document.getElementById('productDescription').value.trim(),
+        price: parseInt(document.getElementById('productPrice').value),
+        image: document.getElementById('productImage').value.trim(),
+        badge: document.getElementById('productBadge').value || null,
+        sales: parseInt(document.getElementById('productSales').value) || 0,
+        link: document.getElementById('productLink').value.trim()
+    };
+    
+    // Validate
+    if (!formData.title || !formData.description || !formData.price || !formData.image || !formData.link) {
+        window.Utils?.showToast('Vui lòng điền đầy đủ thông tin bắt buộc!', 'error');
+        return;
+    }
+    
+    // Hiển thị loading
+    submitBtn.disabled = true;
+    submitBtn.classList.add('loading');
+    spinner.style.display = 'inline-block';
+    
+    try {
+        // Tạo sản phẩm mới
+        const newProduct = {
+            _id: 'local_' + Date.now(), // ID tạm thời
+            title: formData.title,
+            description: formData.description,
+            price: formData.price,
+            oldPrice: null,
+            images: [formData.image],
+            badge: formData.badge,
+            sales: formData.sales,
+            stock: 999,
+            category: 'custom',
+            link: formData.link
+        };
+        
+        // Thêm vào danh sách sản phẩm hiện tại
+        if (window.allProducts) {
+            window.allProducts.unshift(newProduct); // Thêm vào đầu danh sách
+        } else {
+            window.allProducts = [newProduct];
+        }
+        
+        // Render lại danh sách sản phẩm
+        if (window.renderApiProducts) {
+            window.renderApiProducts(window.allProducts);
+        }
+        
+        // Thông báo thành công
+        window.Utils?.showToast('Đăng sản phẩm thành công!', 'success');
+        
+        // Reset form và đóng modal
+        document.getElementById('addProductForm').reset();
+        hideAddProductModal();
+        
+        // Scroll đến sản phẩm mới và highlight
+        setTimeout(() => {
+            const firstProduct = document.querySelector('.product-card');
+            if (firstProduct) {
+                firstProduct.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstProduct.style.animation = 'highlightProduct 2s ease-out';
+            }
+        }, 500);
+        
+    } catch (error) {
+        console.error('Error adding product:', error);
+        window.Utils?.showToast('Có lỗi xảy ra khi đăng sản phẩm!', 'error');
+    } finally {
+        // Tắt loading
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+        spinner.style.display = 'none';
+    }
+}
 
 // =================================================================
 // HÀM RENDER VÀ QUẢN LÝ SẢN PHẨM (Sử dụng dữ liệu API)
@@ -60,8 +352,8 @@ function renderLocalProducts() {
                 <p class="product-description">${product.description}</p>
                 <div class="product-price">
                     <div>
-                        <span class="product-current-price">${window.formatPrice(product.price)}đ</span>
-                        ${product.oldPrice ? `<span class="product-old-price">${window.formatPrice(product.oldPrice)}đ</span>` : ''}
+                        <span class="product-current-price">${window.formatPrice ? window.formatPrice(product.price) : product.price.toLocaleString('vi-VN')}đ</span>
+                        ${product.oldPrice ? `<span class="product-old-price">${window.formatPrice ? window.formatPrice(product.oldPrice) : product.oldPrice.toLocaleString('vi-VN')}đ</span>` : ''}
                     </div>
                     <span class="product-sales"><i class="fas fa-user"></i> ${product.sales}</span>
                 </div>
@@ -140,7 +432,9 @@ function renderApiProducts(products) {
                     <button class="btn-favorite" title="Thêm vào yêu thích" data-id="${product._id}">
                         <i class="far fa-heart"></i>
                     </button>
-                    <a href="product.html?id=${encodeURIComponent(product._id)}" class="btn-view" title="Xem chi tiết">
+                    <a href="${product.link || `product.html?id=${encodeURIComponent(product._id)}`}" 
+                       class="btn-view btn-icon" title="Xem chi tiết" 
+                       ${product.link && product.link.startsWith('http') ? 'target="_blank"' : ''}>
                         <i class="fas fa-eye"></i>
                     </a>
                 </div>
@@ -160,10 +454,12 @@ function renderApiProducts(products) {
                 </div>
                 <div class="product-id">ID: #${product._id.slice(-6)}</div>
                 <div class="product-actions">
-                    <button class="btn btn-primary add-to-cart" data-id="${product._id}">
+                    <a href="${product.link || `product.html?id=${encodeURIComponent(product._id)}`}" 
+                       class="btn btn-primary add-to-cart-link" 
+                       ${product.link && product.link.startsWith('http') ? 'target="_blank"' : ''}>
                         <i class="fas fa-shopping-cart"></i>
                         <span>Mua Ngay</span>
-                    </button>
+                    </a>
                 </div>
             </div>
         `;
@@ -187,36 +483,6 @@ function renderApiProducts(products) {
  * Gắn các trình xử lý sự kiện cho các nút trên thẻ sản phẩm.
  */
 function attachProductEventListeners() {
-    // Nút "Thêm vào giỏ hàng"
-    document.querySelectorAll('.add-to-cart').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            if (!window.currentUser) {
-                window.Utils?.showToast('Vui lòng đăng nhập để mua hàng!', 'info');
-                document.getElementById('loginButton')?.click();
-                return;
-            }
-
-            const productId = e.currentTarget.dataset.id;
-            try {
-                await window.CartManager.add(productId, 1);
-                window.Utils?.showToast('Đã thêm vào giỏ hàng!', 'success');
-                const icon = btn.querySelector('i');
-                if (icon) {
-                    btn.disabled = true;
-                    icon.className = 'fas fa-check';
-                    setTimeout(() => { 
-                        icon.className = 'fas fa-shopping-cart'; 
-                        btn.disabled = false;
-                    }, 1500);
-                }
-            } catch (error) {
-                console.error('Error adding to cart:', error);
-                window.Utils?.showToast(error.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng', 'error');
-            }
-        });
-    });
-    
     // Nút "Yêu thích"
     document.querySelectorAll('.btn-favorite').forEach(btn => {
         btn.addEventListener('click', async (e) => {
@@ -393,6 +659,9 @@ function initIndexPageScript() {
         return;
     }
     
+    // Cập nhật nút đăng sản phẩm khi trang được tải
+    updatePostProductButton();
+    
     // Gắn sự kiện cho các thành phần của bộ lọc (chỉ tồn tại ở index.html)
     const filterButton = document.getElementById('filterButton');
     const resetButton = document.getElementById('resetButton');
@@ -439,7 +708,6 @@ function initIndexPageScript() {
 // Đợi DOM được tải hoàn toàn rồi mới chạy script khởi tạo
 document.addEventListener('DOMContentLoaded', initIndexPageScript);
 
-
 // =================================================================
 // GLOBAL EXPORTS (Để main.js và các script khác có thể gọi)
 // =================================================================
@@ -447,6 +715,9 @@ document.addEventListener('DOMContentLoaded', initIndexPageScript);
 window.renderApiProducts = renderApiProducts;
 window.filterProducts = filterProducts;
 window.resetFilters = resetFilters;
+window.updatePostProductButton = updatePostProductButton;
+window.checkPostPermission = checkPostPermission;
+window.showAddProductModal = showAddProductModal;
+window.hideAddProductModal = hideAddProductModal;
 
 console.log('Script.js (for Index Page) loaded successfully and is ready for main.js');
-
