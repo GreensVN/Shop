@@ -979,46 +979,6 @@
         }
 
         /* =================================================================
-           POST PRODUCT BUTTON
-           ================================================================= */
-
-        .post-product-btn {
-            position: fixed !important;
-            bottom: 2rem;
-            right: 2rem;
-            z-index: 1000;
-            background: var(--success-gradient) !important;
-            color: white !important;
-            border-radius: 50px !important;
-            padding: 1rem 1.5rem !important;
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4) !important;
-            font-weight: 600;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            gap: 0.5rem;
-            transition: var(--transition-smooth);
-            animation: bounceIn 0.8s ease-out;
-            font-family: inherit;
-        }
-
-        .post-product-btn:hover {
-            transform: translateY(-3px) scale(1.05) !important;
-            box-shadow: 0 12px 35px rgba(16, 185, 129, 0.6) !important;
-        }
-
-        .post-product-btn:active {
-            transform: translateY(-1px) scale(1.02) !important;
-        }
-
-        .post-product-btn i {
-            font-size: 1.1rem;
-            animation: pulse 2s infinite;
-        }
-
-        /* =================================================================
            LOADING & ANIMATIONS
            ================================================================= */
 
@@ -1236,13 +1196,6 @@
             
             .form-actions {
                 flex-direction: column;
-            }
-
-            .post-product-btn {
-                bottom: 1rem !important;
-                right: 1rem !important;
-                padding: 0.875rem 1.25rem !important;
-                font-size: 0.9rem;
             }
         }
 
@@ -1463,38 +1416,40 @@
     <!-- Toast Container -->
     <div id="toastContainer"></div>
 
-    <!-- Include main.js first (for auth and core functions) -->
+    <!-- FIXED: Chỉ load mỗi script một lần -->
     <script src="main.js"></script>
-    <!-- Include script.js for index page specific functionality -->
     <script src="script.js"></script>
     
     <script>
-        // Override the loadProducts function in main.js to use renderApiProducts from script.js
+        // FIXED: Override function chỉ chạy một lần để tránh conflict
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 Setting up product loading override...');
+            
             // Wait for main.js to be ready, then override its loadProducts function
             setTimeout(() => {
-                if (window.loadProducts) {
+                if (window.loadProducts && window.renderApiProducts) {
+                    console.log('✅ Overriding loadProducts to use renderApiProducts');
+                    
+                    const originalLoadProducts = window.loadProducts;
                     window.loadProducts = async function() {
                         const productsGrid = document.getElementById('productsGrid');
                         if (!productsGrid) return;
                         
-                        // Show loading using Utils from main.js
+                        // Show loading
                         if (window.Utils) {
                             window.Utils.showLoading(productsGrid, 'Đang tải sản phẩm...');
                         }
                         
                         try {
-                            // Try to load from API first
-                            const data = await window.callApi('/products', 'GET', null, false); // Don't require auth for products
+                            // Try to load from API with auth required
+                            const data = await window.callApi('/products', 'GET', null, true);
                             const products = data.data.products || [];
                             
-                            // Store products globally for script.js to use
+                            // Store products globally
                             window.allProducts = products;
                             
                             // Use renderApiProducts from script.js
-                            if (window.renderApiProducts) {
-                                window.renderApiProducts(products);
-                            }
+                            window.renderApiProducts(products);
                             
                             // Update favorite buttons if user is logged in
                             if (window.currentUser && window.updateAllFavoriteButtons) {
@@ -1502,9 +1457,9 @@
                             }
                             
                         } catch (error) {
-                            console.error('Failed to load products from API:', error);
+                            console.error('❌ Failed to load products from API:', error);
                             
-                            // Fallback: Show message that login is required
+                            // Show auth required message
                             productsGrid.innerHTML = `
                                 <div class="auth-required-message" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
                                     <i class="fas fa-lock" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;"></i>
@@ -1518,11 +1473,13 @@
                             `;
                         }
                     };
+                } else {
+                    console.warn('⚠️ Required functions not found, retrying...');
+                    // Retry after another delay
+                    setTimeout(arguments.callee, 500);
                 }
-            }, 100);
+            }, 200);
         });
     </script>
-<script src="main.js"></script>   <!-- Nạp "bộ não" chung trước -->
-<script src="script.js"></script>   <!-- Nạp "bộ não" chung trước -->
 </body>
 </html>
