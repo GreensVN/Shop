@@ -567,6 +567,10 @@ class FloatingButtonsManager {
 // CART & FAVORITES MANAGERS
 // =================================================================
 
+// =================================================================
+// CART MANAGER
+// =================================================================
+
 const CartManager = {
     async get() {
         if (!currentUser) return [];
@@ -596,6 +600,10 @@ const CartManager = {
     }
 };
 
+// =================================================================
+// FAVORITE MANAGER
+// =================================================================
+
 const FavoriteManager = {
     async get() {
         if (!currentUser) return [];
@@ -620,7 +628,7 @@ const FavoriteManager = {
     },
 
     async updateStatus(productId, isFavorite) {
-        document.querySelectorAll(`.favorite-btn[data-id="${productId}"]`).forEach(btn => {
+        document.querySelectorAll(`.btn-favorite[data-id="${productId}"]`).forEach(btn => {
             btn.classList.toggle('active', isFavorite);
             const icon = btn.querySelector('i');
             if (icon) {
