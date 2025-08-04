@@ -779,6 +779,89 @@ class ProductManager {
                 window.renderApiProducts(allProducts);
             }
             
+            if (currentUser && window.updateAllFavoriteButtons) {
+                await window.updateAllFavoriteButtons();
+            }
+        } catch (error) {
+            const localProducts = StorageManager.loadProducts();
+            
+            if (localProducts.length > 0) {
+                allProducts = localProducts;
+                if (window.renderApiProducts) {
+                    window.renderApiProducts(localProducts);
+                }
+                Utils.showToast('Hiển thị sản phẩm offline.', 'warning');
+            } else {
+                productsGrid.innerHTML = `
+                    <div class="auth-required-message" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                        <i class="fas fa-lock" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;"></i>
+                        <h3 style="color: #1f2937; margin-bottom: 1rem;">Cần đăng nhập để xem sản phẩm</h3>
+                        <p style="color: #64748b; margin-bottom: 2rem;">Vui lòng đăng nhập để truy cập danh sách sản phẩm</p>
+                        <button class="btn btn-primary" onclick="document.getElementById('loginButton').click()">
+                            <i class="fas fa-user"></i> <span>Đăng nhập ngay</span>
+                        </button>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    static async createProduct(productData) {
+        SecurityManager.validateProduct(productData);
+        
+        const product = {
+            _id: Utils.generateId(),
+            title: SecurityManager.sanitizeInput(productData.title),
+            description: SecurityManager.sanitizeInput(productData.description),
+            price: parseInt(productData.price),
+            images: [productData.image],
+            badge: productData.badge || null,
+            sales: parseInt(productData.sales) || 0,
+            stock: parseInt(productData.stock) || 999,
+            category: productData.category || 'custom',
+            link: productData.link,
+            createdAt: new Date().toISOString(),
+            createdBy: currentUser?._id
+        };
+
+        try {
+            const apiData = { ...product };
+            delete apiData._id;
+            
+            await ApiManager.createProduct(apiData);
+            Utils.showToast('Đăng sản phẩm thành công!', 'success');
+            await ProductManager.loadProducts();
+            return true;
+        } catch (error) {
+            if (StorageManager.addProduct(product)) {
+                allProducts.unshift(product);
+                if (window.renderApiProducts) {
+                    window.renderApiProducts(allProducts);
+                }
+                Utils.showToast('Đăng sản phẩm thành công!\n(Lưu cục bộ)', 'info');
+                return true;
+            }
+        }
+        
+        throw new Error('Không thể lưu sản phẩm');
+    }
+
+    static async deleteProduct(productId) {
+        if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return;
+        
+        try {
+            if (productId.startsWith('local_')) {
+                StorageManager.deleteProduct(productId);
+            } else {
+                await ApiManager.deleteProduct(productId);
+            }
+            
+            allProducts = allProducts.filter(p => p._id !== productId);
+            
+            if (window.renderApiProducts) {
+                window.renderApiProducts(allProducts);
+            }
+
             Utils.showToast('Xóa sản phẩm thành công!', 'success');
         } catch (error) {
             Utils.showToast(error.message || 'Không thể xóa sản phẩm!', 'error');
@@ -1155,86 +1238,3 @@ document.addEventListener('DOMContentLoaded', () => {
         Utils.showToast('Không thể khởi tạo ứng dụng!', 'error');
     });
 });
-            
-            if (currentUser && window.updateAllFavoriteButtons) {
-                await window.updateAllFavoriteButtons();
-            }
-        } catch (error) {
-            const localProducts = StorageManager.loadProducts();
-            
-            if (localProducts.length > 0) {
-                allProducts = localProducts;
-                if (window.renderApiProducts) {
-                    window.renderApiProducts(localProducts);
-                }
-                Utils.showToast('Hiển thị sản phẩm offline.', 'warning');
-            } else {
-                productsGrid.innerHTML = `
-                    <div class="auth-required-message" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
-                        <i class="fas fa-lock" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;"></i>
-                        <h3 style="color: #1f2937; margin-bottom: 1rem;">Cần đăng nhập để xem sản phẩm</h3>
-                        <p style="color: #64748b; margin-bottom: 2rem;">Vui lòng đăng nhập để truy cập danh sách sản phẩm</p>
-                        <button class="btn btn-primary" onclick="document.getElementById('loginButton').click()">
-                            <i class="fas fa-user"></i> <span>Đăng nhập ngay</span>
-                        </button>
-                    </div>
-                `;
-            }
-        }
-    }
-
-    static async createProduct(productData) {
-        SecurityManager.validateProduct(productData);
-        
-        const product = {
-            _id: Utils.generateId(),
-            title: SecurityManager.sanitizeInput(productData.title),
-            description: SecurityManager.sanitizeInput(productData.description),
-            price: parseInt(productData.price),
-            images: [productData.image],
-            badge: productData.badge || null,
-            sales: parseInt(productData.sales) || 0,
-            stock: parseInt(productData.stock) || 999,
-            category: productData.category || 'custom',
-            link: productData.link,
-            createdAt: new Date().toISOString(),
-            createdBy: currentUser?._id
-        };
-
-        try {
-            const apiData = { ...product };
-            delete apiData._id;
-            
-            await ApiManager.createProduct(apiData);
-            Utils.showToast('Đăng sản phẩm thành công!', 'success');
-            await ProductManager.loadProducts();
-            return true;
-        } catch (error) {
-            if (StorageManager.addProduct(product)) {
-                allProducts.unshift(product);
-                if (window.renderApiProducts) {
-                    window.renderApiProducts(allProducts);
-                }
-                Utils.showToast('Đăng sản phẩm thành công!\n(Lưu cục bộ)', 'info');
-                return true;
-            }
-        }
-        
-        throw new Error('Không thể lưu sản phẩm');
-    }
-
-    static async deleteProduct(productId) {
-        if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return;
-        
-        try {
-            if (productId.startsWith('local_')) {
-                StorageManager.deleteProduct(productId);
-            } else {
-                await ApiManager.deleteProduct(productId);
-            }
-            
-            allProducts = allProducts.filter(p => p._id !== productId);
-            
-            if (window.renderApiProducts) {
-                window.renderApiProducts(allProducts);
-            }
