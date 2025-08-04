@@ -1,4 +1,4 @@
-// main.js - Phiên bản được sửa lỗi và tối ưu
+// main.js - Phiên bản đã sửa lỗi với Icon Đăng Tin & Messenger
 // Tệp "bộ não" trung tâm cho trang web Shop Grow A Garden
 
 "use strict";
@@ -365,6 +365,220 @@ async function checkAutoLogin() {
 }
 
 // =================================================================
+// QUẢN LÝ FLOATING BUTTONS (Đăng tin & Messenger)
+// =================================================================
+
+function createFloatingButtons() {
+    // Xóa các button cũ nếu có
+    const existingPostBtn = document.getElementById('postProductButton');
+    const existingMessengerBtn = document.getElementById('messengerButton');
+    if (existingPostBtn) existingPostBtn.remove();
+    if (existingMessengerBtn) existingMessengerBtn.remove();
+
+    // Tạo container cho floating buttons
+    let floatingContainer = document.getElementById('floatingButtonsContainer');
+    if (!floatingContainer) {
+        floatingContainer = document.createElement('div');
+        floatingContainer.id = 'floatingButtonsContainer';
+        floatingContainer.style.cssText = `
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        `;
+        document.body.appendChild(floatingContainer);
+    }
+
+    // Tạo nút Messenger (luôn hiển thị)
+    const messengerBtn = document.createElement('a');
+    messengerBtn.id = 'messengerButton';
+    messengerBtn.href = 'https://m.me/100063758577070';
+    messengerBtn.target = '_blank';
+    messengerBtn.rel = 'noopener noreferrer';
+    messengerBtn.className = 'floating-btn messenger-btn';
+    messengerBtn.innerHTML = `
+        <i class="fab fa-facebook-messenger"></i>
+        <span>Liên hệ</span>
+    `;
+    messengerBtn.title = 'Liên hệ qua Facebook Messenger';
+
+    // Tạo nút đăng tin (chỉ hiển thị cho người có quyền)
+    const postBtn = document.createElement('button');
+    postBtn.id = 'postProductButton';
+    postBtn.className = 'floating-btn post-btn';
+    postBtn.innerHTML = `
+        <i class="fas fa-plus"></i>
+        <span>Đăng tin</span>
+    `;
+    postBtn.title = 'Đăng sản phẩm mới';
+    postBtn.addEventListener('click', () => {
+        if (window.showAddProductModal) {
+            window.showAddProductModal();
+        } else {
+            Utils.showToast('Chức năng đăng tin chưa sẵn sàng!', 'error');
+        }
+    });
+
+    // Thêm styles cho floating buttons
+    addFloatingButtonStyles();
+
+    // Thêm các button vào container
+    floatingContainer.appendChild(messengerBtn);
+    
+    // Chỉ thêm nút đăng tin nếu có quyền
+    if (checkPostPermission()) {
+        floatingContainer.appendChild(postBtn);
+        postBtn.style.display = 'flex';
+    } else {
+        postBtn.style.display = 'none';
+    }
+}
+
+function addFloatingButtonStyles() {
+    // Kiểm tra xem đã có styles chưa
+    if (document.getElementById('floatingButtonStyles')) return;
+
+    const styles = document.createElement('style');
+    styles.id = 'floatingButtonStyles';
+    styles.textContent = `
+        .floating-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            font-family: inherit;
+            font-size: 14px;
+            animation: bounceIn 0.8s ease-out;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .floating-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transition: all 0.6s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .floating-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .floating-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        .floating-btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        .floating-btn i {
+            font-size: 1.1rem;
+            animation: pulse 2s infinite;
+        }
+
+        .messenger-btn {
+            background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%);
+            color: white;
+        }
+
+        .messenger-btn:hover {
+            box-shadow: 0 12px 35px rgba(0, 132, 255, 0.4);
+            color: white;
+        }
+
+        .post-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .post-btn:hover {
+            box-shadow: 0 12px 35px rgba(16, 185, 129, 0.4);
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #floatingButtonsContainer {
+                bottom: 1rem !important;
+                right: 1rem !important;
+            }
+            
+            .floating-btn {
+                padding: 0.875rem 1.25rem !important;
+                font-size: 13px;
+            }
+        }
+    `;
+    document.head.appendChild(styles);
+}
+
+function checkPostPermission() {
+    if (!currentUser || !currentUser.email) {
+        return false;
+    }
+    
+    const AUTHORIZED_EMAILS = [
+        'chinhan20917976549a@gmail.com',
+        'manager@shopgrowgarden.com', 
+        'seller@shopgrowgarden.com',
+        'test@example.com',
+        'greensvn@gmail.com'
+    ];
+    
+    const userEmail = currentUser.email.toLowerCase();
+    return AUTHORIZED_EMAILS.includes(userEmail);
+}
+
+function updateFloatingButtons() {
+    createFloatingButtons();
+}
+
+// =================================================================
 // CẬP NHẬT GIAO DIỆN NGƯỜI DÙNG - FIXED VERSION
 // =================================================================
 
@@ -404,6 +618,14 @@ async function updateUIAfterLogin() {
 
     await updateCartCount();
     await updateAllFavoriteButtons();
+    
+    // **FIX CHÍNH: Cập nhật floating buttons sau khi đăng nhập**
+    updateFloatingButtons();
+    
+    // Cập nhật nút đăng sản phẩm nếu script.js đã load
+    if (window.updatePostProductButton) {
+        window.updatePostProductButton();
+    }
 }
 
 function updateUIAfterLogout() {
@@ -423,6 +645,9 @@ function updateUIAfterLogout() {
         const icon = btn.querySelector('i');
         if (icon) icon.className = 'far fa-heart';
     });
+
+    // **FIX: Cập nhật floating buttons sau khi đăng xuất**
+    updateFloatingButtons();
 }
 
 async function updateCartCount() {
@@ -1014,6 +1239,8 @@ window.currentUser = currentUser;
 window.updateAllFavoriteButtons = updateAllFavoriteButtons;
 window.updateFavoriteStatus = updateFavoriteStatus;
 window.loadProducts = loadProducts;
+window.checkPostPermission = checkPostPermission;
+window.updateFloatingButtons = updateFloatingButtons;
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -1029,7 +1256,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 3. Kiểm tra và tự động đăng nhập nếu có token hợp lệ
         await checkAutoLogin();
 
-        // 4. Chạy logic riêng cho trang hiện tại
+        // 4. Tạo floating buttons (Messenger + Đăng tin)
+        createFloatingButtons();
+
+        // 5. Chạy logic riêng cho trang hiện tại
         const path = window.location.pathname.split("/").pop() || 'index.html';
         
         switch (path) {
