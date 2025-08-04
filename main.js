@@ -9,7 +9,7 @@ const CONFIG = {
     API_BASE_URL: 'https://shop-4mlk.onrender.com/api/v1',
     AUTHORIZED_EMAILS: [
         'chinhan20917976549a@gmail.com',
-        'manager@shopgrowgarden.com', 
+        'ryantran149@gmail.com', 
         'seller@shopgrowgarden.com',
         'greensvn@gmail.com'
     ],
