@@ -296,71 +296,7 @@ class Utils {
 // ENHANCED STORAGE MANAGER
 // =================================================================
 
-class StorageManager {
-    static encrypt(data) {
-        try {
-            return btoa(JSON.stringify(data));
-        } catch {
-            return data;
-        }
-    }
-
-    static decrypt(data) {
-        try {
-            return JSON.parse(atob(data));
-        } catch {
-            return data;
-        }
-    }
-
-    static saveProducts(products) {
-        try {
-            const encrypted = this.encrypt(products);
-            localStorage.setItem(CONFIG.STORAGE_KEYS.PRODUCTS, encrypted);
-            return true;
-        } catch (error) {
-            return false;
-        }
-    }
-
-    static loadProducts() {
-        try {
-            const stored = localStorage.getItem(CONFIG.STORAGE_KEYS.PRODUCTS);
-            if (!stored) return [];
-            return this.decrypt(stored) || [];
-        } catch {
-            return [];
-        }
-    }
-
-    static addProduct(product) {
-        const products = this.loadProducts();
-        products.unshift(product);
-        return this.saveProducts(products);
-    }
-
-    static deleteProduct(productId) {
-        const products = this.loadProducts();
-        const filtered = products.filter(p => p._id !== productId);
-        return this.saveProducts(filtered);
-    }
-
-    static updateProduct(productId, updates) {
-        const products = this.loadProducts();
-        const index = products.findIndex(p => p._id === productId);
-        if (index !== -1) {
-            products[index] = { ...products[index], ...updates };
-            return this.saveProducts(products);
-        }
-        return false;
-    }
-
-    static clearAll() {
-        Object.values(CONFIG.STORAGE_KEYS).forEach(key => {
-            localStorage.removeItem(key);
-        });
-    }
-}
+// XÓA TOÀN BỘ StorageManager và các hàm liên quan
 
 // =================================================================
 // PERMISSION MANAGER
@@ -743,6 +679,7 @@ class AuthManager {
         
         await CartManager.updateCount();
         FloatingButtonsManager.update();
+        updateDevToolsProtection(); // Call the new function here
     }
 
     static updateUIAfterLogout() {
@@ -776,12 +713,7 @@ class ProductManager {
             const data = await ApiManager.getProducts();
             let products = data.data?.products || [];
             
-            const localProducts = StorageManager.loadProducts();
-            const combinedProducts = [...localProducts, ...products];
-            
-            allProducts = Array.from(
-                new Map(combinedProducts.map(p => [p._id, p])).values()
-            );
+            allProducts = products;
             
             if (window.renderApiProducts) {
                 window.renderApiProducts(allProducts);
@@ -791,16 +723,7 @@ class ProductManager {
                 await window.updateAllFavoriteButtons();
             }
         } catch (error) {
-            const localProducts = StorageManager.loadProducts();
-            
-            if (localProducts.length > 0) {
-                allProducts = localProducts;
-                if (window.renderApiProducts) {
-                    window.renderApiProducts(localProducts);
-                }
-                Utils.showToast('Hiển thị sản phẩm offline.', 'warning');
-            } else {
-                productsGrid.innerHTML = `
+            productsGrid.innerHTML = `
                     <div class="auth-required-message" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
                         <i class="fas fa-lock" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;"></i>
                         <h3 style="color: #1f2937; margin-bottom: 1rem;">Cần đăng nhập để xem sản phẩm</h3>
@@ -810,7 +733,6 @@ class ProductManager {
                         </button>
                     </div>
                 `;
-            }
         }
     }
 
@@ -841,14 +763,7 @@ class ProductManager {
             await ProductManager.loadProducts();
             return true;
         } catch (error) {
-            if (StorageManager.addProduct(product)) {
-                allProducts.unshift(product);
-                if (window.renderApiProducts) {
-                    window.renderApiProducts(allProducts);
-                }
-                Utils.showToast('Đăng sản phẩm thành công!\n(Lưu cục bộ)', 'info');
-                return true;
-            }
+            Utils.showToast(error.message || 'Không thể lưu sản phẩm', 'error');
         }
         
         throw new Error('Không thể lưu sản phẩm');
@@ -859,7 +774,7 @@ class ProductManager {
         
         try {
             if (productId.startsWith('local_')) {
-                StorageManager.deleteProduct(productId);
+                // StorageManager.deleteProduct(productId); // XÓA
             } else {
                 await ApiManager.deleteProduct(productId);
             }
@@ -881,7 +796,7 @@ class ProductManager {
             SecurityManager.validateProduct(updates);
             
             if (productId.startsWith('local_')) {
-                StorageManager.updateProduct(productId, updates);
+                // StorageManager.updateProduct(productId, updates); // XÓA
             } else {
                 await ApiManager.updateProduct(productId, updates);
             }
@@ -986,12 +901,13 @@ class ModalManager {
             try {
                 const email = form.email.value.trim();
                 const password = form.password.value;
+                const rememberMe = form.rememberMe.checked; // Get rememberMe value
                 
                 if (!email || !password) {
                     throw new Error('Vui lòng nhập đủ thông tin!');
                 }
                 
-                const user = await AuthManager.login(email, password);
+                const user = await AuthManager.login(email, password, rememberMe); // Pass rememberMe
                 Utils.showToast(`Chào mừng ${AuthManager.getDisplayName(user)}!`, 'success');
                 
                 onSuccess();
@@ -1213,7 +1129,7 @@ window.CartManager = CartManager;
 window.FavoriteManager = FavoriteManager;
 window.PermissionManager = PermissionManager;
 window.ProductManager = ProductManager;
-window.StorageManager = StorageManager;
+// window.StorageManager = StorageManager; // XÓA
 window.ApiManager = ApiManager;
 window.SecurityManager = SecurityManager;
 window.ImageUploadHandler = ImageUploadHandler;
@@ -1233,9 +1149,53 @@ window.updateAllFavoriteButtons = async () => {
 window.addEventListener('beforeunload', () => {
     // Clear sensitive data if needed
     if (!currentUser) {
-        StorageManager.clearAll();
+        // StorageManager.clearAll(); // XÓA
     }
 });
+
+// 1. Chặn DevTools cho non-admin
+function isAdminEmail(email) {
+    return CONFIG.AUTHORIZED_EMAILS.includes(email);
+}
+
+function setupDevToolsProtection() {
+    function blockDevTools(e) {
+        if (!window.currentUser || !isAdminEmail(window.currentUser.email)) {
+            if (
+                e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.key === 'U')
+            ) {
+                e.preventDefault();
+                Utils.showToast('Chức năng này đã bị vô hiệu hóa!', 'warning');
+                return false;
+            }
+        }
+    }
+    function blockContextMenu(e) {
+        if (!window.currentUser || !isAdminEmail(window.currentUser.email)) {
+            e.preventDefault();
+            Utils.showToast('Chuột phải đã bị vô hiệu hóa!', 'warning');
+            return false;
+        }
+    }
+    document.addEventListener('keydown', blockDevTools);
+    document.addEventListener('contextmenu', blockContextMenu);
+}
+
+// Gọi khi login thành công hoặc khi load trang
+function updateDevToolsProtection() {
+    // Remove old listeners (if any)
+    document.onkeydown = null;
+    document.oncontextmenu = null;
+    setupDevToolsProtection();
+}
+
+// 4. Remember Me khi đăng nhập
+// Trong AuthManager.login:
+// Thêm tham số rememberMe, nếu true thì lưu token vào localStorage, nếu false thì lưu vào sessionStorage
+// Trong ModalManager.setupAuthForms, truyền giá trị rememberMe từ form đăng nhập vào AuthManager.login
+// 5. Không tự động đăng xuất trừ khi token hết hạn hoặc user logout
 
 // =================================================================
 // APPLICATION START
