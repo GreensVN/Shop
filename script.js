@@ -7,6 +7,90 @@
 // HÀM RENDER VÀ QUẢN LÝ SẢN PHẨM (Sử dụng dữ liệu API)
 // =================================================================
 
+// Dữ liệu sản phẩm mẫu (cục bộ cho trang index)
+const localSampleProducts = [
+    {
+        id: 1,
+        title: "Raccoon",
+        description: "Raccoon",
+        price: 250000,
+        oldPrice: 300000,
+        image: "https://i.ibb.co/Vc8YddCj/s-l1200.png",
+        sales: 100,
+        badge: "HOT",
+        details: {
+            features: ["Đầy đủ tính năng VIP", "Hỗ trợ 24/7", "Quà tặng hàng tháng"],
+            description: "Gói VIP 1 tháng cung cấp cho bạn trải nghiệm tốt nhất với đầy đủ các tính năng cao cấp..."
+        }
+    },
+    {
+        id: 2,
+        title: "Mimic Octopus",
+        description: "Mimic Octopus",
+        price: 70000,
+        oldPrice: 100000,
+        image: "https://i.ibb.co/d02TTqSw/ab66bab0-c4f1-4130-bb23-b689337484a2.jpg",
+        sales: 75,
+        badge: null,
+        details: {
+            features: ["Tính năng Premium", "Hỗ trợ nhanh", "Quà tặng định kỳ"],
+            description: "Gói Premium 3 tháng là lựa chọn tiết kiệm cho những ai muốn trải nghiệm lâu dài..."
+        }
+    }
+];
+
+// Hàm render (vẽ) các sản phẩm mẫu ra màn hình
+function renderLocalProducts() {
+    const productsGrid = document.getElementById('productsGrid');
+    if (!productsGrid) return; // Kiểm tra an toàn
+    productsGrid.innerHTML = '';
+    
+    localSampleProducts.forEach(product => {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card fade-in';
+        
+        // Sử dụng window.formatPrice từ main.js
+        productCard.innerHTML = `
+            <div class="product-image">
+                <img src="${product.image}" alt="${product.title}" loading="lazy">
+                ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
+            </div>
+            <div class="product-info">
+                <h3 class="product-title">${product.title}</h3>
+                <p class="product-description">${product.description}</p>
+                <div class="product-price">
+                    <div>
+                        <span class="product-current-price">${window.formatPrice(product.price)}đ</span>
+                        ${product.oldPrice ? `<span class="product-old-price">${window.formatPrice(product.oldPrice)}đ</span>` : ''}
+                    </div>
+                    <span class="product-sales"><i class="fas fa-user"></i> ${product.sales}</span>
+                </div>
+                <div class="product-actions">
+                    <a href="product.html?id=${encodeURIComponent(product.id)}" class="btn-add-to-cart">
+                        <i class="fas fa-shopping-cart"></i><span>Mua Ngay</span>
+                    </a>
+                    <button class="btn-wishlist" aria-label="Thêm vào yêu thích" onclick="addToWishlist(${product.id})">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        productsGrid.appendChild(productCard);
+    });
+}
+
+// Hàm tải sản phẩm (phiên bản cục bộ, dùng dữ liệu mẫu)
+function loadLocalProducts() {
+    const productsGrid = document.getElementById('productsGrid');
+    if (!productsGrid) return; // Kiểm tra an toàn
+
+    // Hiển thị loading spinner
+    productsGrid.innerHTML = `<div class="fade-in" style="grid-column: 1/-1; text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary-color);"></i></div>`;
+    
+    // Giả lập gọi API và render sau 800ms
+    setTimeout(renderLocalProducts, 800);
+}
+
 /**
  * Hiển thị danh sách sản phẩm từ API lên lưới sản phẩm.
  * @param {Array} products Mảng các đối tượng sản phẩm từ API.
@@ -365,3 +449,4 @@ window.filterProducts = filterProducts;
 window.resetFilters = resetFilters;
 
 console.log('Script.js (for Index Page) loaded successfully and is ready for main.js');
+
