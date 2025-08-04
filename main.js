@@ -1,4 +1,4 @@
-// main.js - Debug version với console logs để kiểm tra lỗi
+// main.js - Fixed version với logging và debugging tốt hơn
 "use strict";
 
 // =================================================================
@@ -7,6 +7,15 @@
 
 const API_BASE_URL = 'https://shop-4mlk.onrender.com/api/v1';
 let currentUser = null;
+
+// Danh sách email được ủy quyền đăng sản phẩm (MOVED HERE FROM SCRIPT.JS)
+const AUTHORIZED_EMAILS = [
+    'chinhan20917976549a@gmail.com',
+    'manager@shopgrowgarden.com', 
+    'seller@shopgrowgarden.com',
+    'test@example.com',
+    'greensvn@gmail.com'
+];
 
 // =================================================================
 // LỚP TIỆN ÍCH (UTILS)
@@ -129,35 +138,40 @@ class Utils {
 }
 
 // =================================================================
-// QUẢN LÝ FLOATING BUTTONS - FIXED VERSION
+// KIỂM TRA QUYỀN ĐĂNG SẢN PHẨM - FIXED VERSION
 // =================================================================
 
 function checkPostPermission() {
     console.log('🔍 Checking post permission...');
-    console.log('Current user:', currentUser);
+    console.log('📧 Current user object:', currentUser);
     
-    if (!currentUser || !currentUser.email) {
-        console.log('❌ No user or email found');
+    if (!currentUser) {
+        console.log('❌ No current user found');
         return false;
     }
     
-    const AUTHORIZED_EMAILS = [
-        'chinhan20917976549a@gmail.com',
-        'manager@shopgrowgarden.com', 
-        'seller@shopgrowgarden.com',
-        'test@example.com',
-        'greensvn@gmail.com'
-    ];
+    const userEmail = currentUser.email;
+    console.log('📧 User email from currentUser:', userEmail);
     
-    const userEmail = currentUser.email.toLowerCase();
-    console.log('User email:', userEmail);
-    console.log('Authorized emails:', AUTHORIZED_EMAILS);
+    if (!userEmail || typeof userEmail !== 'string') {
+        console.log('❌ No valid email found in user object');
+        console.log('📋 Available user properties:', Object.keys(currentUser));
+        return false;
+    }
     
-    const hasPermission = AUTHORIZED_EMAILS.includes(userEmail);
-    console.log('Has permission:', hasPermission);
+    const normalizedEmail = userEmail.toLowerCase().trim();
+    console.log('📧 Normalized email:', normalizedEmail);
+    console.log('📋 Authorized emails:', AUTHORIZED_EMAILS);
+    
+    const hasPermission = AUTHORIZED_EMAILS.map(email => email.toLowerCase()).includes(normalizedEmail);
+    console.log('✅ Has permission result:', hasPermission);
     
     return hasPermission;
 }
+
+// =================================================================
+// QUẢN LÝ FLOATING BUTTONS - ENHANCED VERSION
+// =================================================================
 
 function addFloatingButtonStyles() {
     if (document.getElementById('floatingButtonStyles')) {
@@ -345,25 +359,33 @@ function createFloatingButtons() {
     // Add buttons to container
     floatingContainer.appendChild(messengerBtn);
     
+    // FIXED: Check permission properly
     const hasPermission = checkPostPermission();
+    console.log('🔐 Permission check result:', hasPermission);
+    
     if (hasPermission) {
-        console.log('✅ User has permission - showing post button');
+        console.log('✅ User has permission - adding post button');
         floatingContainer.appendChild(postBtn);
     } else {
-        console.log('❌ User has no permission - hiding post button');
+        console.log('❌ User has no permission - post button not added');
     }
     
     // Add container to page
     document.body.appendChild(floatingContainer);
     
     console.log('✅ Floating buttons created and added to page');
-    console.log('Container element:', floatingContainer);
-    console.log('Messenger button:', messengerBtn);
-    console.log('Post button (if has permission):', hasPermission ? postBtn : 'Not added');
+    console.log('📦 Container element:', floatingContainer);
+    console.log('💬 Messenger button:', messengerBtn);
+    if (hasPermission) {
+        console.log('➕ Post button:', postBtn);
+    } else {
+        console.log('➕ Post button: Not added due to insufficient permissions');
+    }
 }
 
 function updateFloatingButtons() {
     console.log('🔄 Updating floating buttons...');
+    console.log('👤 Current user when updating buttons:', currentUser);
     
     // Always recreate to ensure fresh state
     setTimeout(() => {
@@ -463,7 +485,7 @@ const FavoriteManager = {
 };
 
 // =================================================================
-// XÁC THỰC NGƯỜI DÙNG
+// XÁC THỰC NGƯỜI DÙNG - ENHANCED VERSION
 // =================================================================
 
 async function authenticate(email, password) {
@@ -471,13 +493,17 @@ async function authenticate(email, password) {
     const data = await callApi('/users/login', 'POST', { email, password });
     localStorage.setItem('token', data.token);
     
+    // FIXED: Ensure we store complete user data
     currentUser = {
         ...data.data.user,
-        email: data.data.user.email || email
+        email: data.data.user.email || email // Fallback to provided email
     };
     
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    console.log('✅ Authentication successful, user:', currentUser);
+    console.log('✅ Authentication successful');
+    console.log('👤 User data:', currentUser);
+    console.log('📧 User email:', currentUser.email);
+    
     await updateUIAfterLogin();
     return currentUser;
 }
@@ -487,14 +513,18 @@ async function register(name, email, password, passwordConfirm) {
     const data = await callApi('/users/signup', 'POST', { name, email, password, passwordConfirm });
     localStorage.setItem('token', data.token);
     
+    // FIXED: Ensure we store complete user data
     currentUser = {
         ...data.data.user,
         name: data.data.user.name || name,
-        email: data.data.user.email || email
+        email: data.data.user.email || email // Fallback to provided email
     };
     
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    console.log('✅ Registration successful, user:', currentUser);
+    console.log('✅ Registration successful');
+    console.log('👤 User data:', currentUser);
+    console.log('📧 User email:', currentUser.email);
+    
     await updateUIAfterLogin();
     return currentUser;
 }
@@ -530,7 +560,10 @@ async function checkAutoLogin() {
             }
             
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            console.log('✅ Auto login successful, user:', currentUser);
+            console.log('✅ Auto login successful');
+            console.log('👤 User data:', currentUser);
+            console.log('📧 User email:', currentUser.email);
+            
             await updateUIAfterLogin();
         } catch (error) {
             console.error('❌ Auto-login failed:', error);
@@ -541,6 +574,7 @@ async function checkAutoLogin() {
         }
     } else {
         console.log('❌ No token found');
+        // Try to load from localStorage as fallback
         const storedUser = localStorage.getItem('currentUser');
         if (storedUser) {
             try {
@@ -602,7 +636,7 @@ async function updateUIAfterLogin() {
     await updateCartCount();
     
     // **CRITICAL: Update floating buttons after login**
-    console.log('🔄 Updating floating buttons after login...');
+    console.log('🔄 Updating floating buttons after successful login...');
     updateFloatingButtons();
 }
 
@@ -803,7 +837,7 @@ async function loadProducts() {
         Utils.showLoading(productsGrid, 'Đang tải sản phẩm...');
         
         try {
-            const data = await callApi('/products', 'GET', null, false);
+            const data = await callApi('/products', 'GET', null, true); // Require auth for products
             const products = data.data.products || [];
             
             window.allProducts = products;
@@ -814,13 +848,13 @@ async function loadProducts() {
             }
             
         } catch (error) {
-            console.error('API requires authentication for products:', error);
+            console.error('Failed to load products:', error);
             
             productsGrid.innerHTML = `
                 <div class="auth-required-message" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
                     <i class="fas fa-lock" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;"></i>
                     <h3 style="color: #1f2937; margin-bottom: 1rem;">Cần đăng nhập để xem sản phẩm</h3>
-                    <p style="color: #64748b; margin-bottom: 2rem;">API yêu cầu xác thực để truy cập danh sách sản phẩm</p>
+                    <p style="color: #64748b; margin-bottom: 2rem;">Vui lòng đăng nhập để truy cập danh sách sản phẩm của chúng tôi</p>
                     <button class="btn btn-primary" onclick="document.getElementById('loginButton').click()">
                         <i class="fas fa-user"></i>
                         <span>Đăng nhập ngay</span>
@@ -871,7 +905,7 @@ window.checkPostPermission = checkPostPermission;
 window.updateFloatingButtons = updateFloatingButtons;
 
 // =================================================================
-// KHỞI CHẠY CHÍNH
+// KHỞI CHẠY CHÍNH - ENHANCED VERSION
 // =================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -890,11 +924,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 3. Kiểm tra và tự động đăng nhập nếu có token hợp lệ
         await checkAutoLogin();
 
-        // 4. Tạo floating buttons NGAY LẬP TỨC (không cần đợi)
-        console.log('🎯 Creating initial floating buttons...');
-        createFloatingButtons();
-
-        // 5. Chạy logic riêng cho trang hiện tại
+        // 4. Chạy logic riêng cho trang hiện tại
         const path = window.location.pathname.split("/").pop() || 'index.html';
         console.log('📄 Current page:', path);
         
@@ -914,11 +944,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 break;
         }
         
-        // 6. Đảm bảo floating buttons được tạo sau khi tất cả đã load
+        // 5. Tạo floating buttons sau khi mọi thứ đã sẵn sàng
+        console.log('🎯 Creating floating buttons after initialization...');
         setTimeout(() => {
-            console.log('⏰ Final floating buttons update after 2 seconds...');
-            updateFloatingButtons();
-        }, 2000);
+            createFloatingButtons();
+        }, 500);
         
         console.log('✅ Shop Grow A Garden initialized successfully');
         console.log('🔍 Current user after init:', currentUser);
