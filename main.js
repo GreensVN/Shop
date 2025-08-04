@@ -1,6 +1,4 @@
-// main.js - Phiên bản đã sửa lỗi với Icon Đăng Tin & Messenger
-// Tệp "bộ não" trung tâm cho trang web Shop Grow A Garden
-
+// main.js - Debug version với console logs để kiểm tra lỗi
 "use strict";
 
 // =================================================================
@@ -11,7 +9,7 @@ const API_BASE_URL = 'https://shop-4mlk.onrender.com/api/v1';
 let currentUser = null;
 
 // =================================================================
-// LỚP TIỆN ÍCH (UTILS) - CLEAN VERSION
+// LỚP TIỆN ÍCH (UTILS)
 // =================================================================
 
 class Utils {
@@ -75,7 +73,6 @@ class Utils {
 
         toastContainer.appendChild(toast);
         
-        // Animate in
         requestAnimationFrame(() => {
             toast.style.transform = 'translateX(0)';
             toast.style.opacity = '1';
@@ -132,320 +129,48 @@ class Utils {
 }
 
 // =================================================================
-// GỌI API - ENHANCED VERSION
+// QUẢN LÝ FLOATING BUTTONS - FIXED VERSION
 // =================================================================
 
-async function callApi(endpoint, method = 'GET', body = null, requireAuth = true) {
-    const headers = { 'Content-Type': 'application/json' };
-    const token = localStorage.getItem('token');
+function checkPostPermission() {
+    console.log('🔍 Checking post permission...');
+    console.log('Current user:', currentUser);
     
-    if (token && requireAuth) {
-        headers['Authorization'] = `Bearer ${token}`;
+    if (!currentUser || !currentUser.email) {
+        console.log('❌ No user or email found');
+        return false;
     }
-
-    try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method,
-            headers,
-            body: body ? JSON.stringify(body) : null
-        });
-
-        if (response.status === 204) return true;
-
-        const data = await response.json();
-        
-        // Handle 401 Unauthorized for optional auth endpoints
-        if (response.status === 401 && !requireAuth) {
-            console.log('401 on optional auth endpoint, returning empty data');
-            return { data: { products: [], favorites: [], cart: [] } };
-        }
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Có lỗi xảy ra từ máy chủ.');
-        }
-        
-        return data;
-    } catch (error) {
-        console.error(`API Error on ${endpoint}:`, error);
-        throw error;
-    }
-}
-
-// =================================================================
-// QUẢN LÝ GIỎ HÀNG (CART MANAGER)
-// =================================================================
-
-const CartManager = {
-    async get() {
-        if (!currentUser) return [];
-        
-        try {
-            const result = await callApi('/cart');
-            return result.data.cart || [];
-        } catch (error) {
-            console.log('Cart access requires login:', error.message);
-            return [];
-        }
-    },
-
-    async add(productId, quantity = 1) {
-        if (!currentUser) {
-            throw new Error('Vui lòng đăng nhập để thêm vào giỏ hàng!');
-        }
-        
-        await callApi('/cart', 'POST', { productId, quantity });
-        await updateCartCount();
-    },
-
-    async remove(productId) {
-        if (!currentUser) return;
-        
-        await callApi(`/cart/${productId}`, 'DELETE');
-        await updateCartCount();
-        if (window.location.pathname.includes('cart.html')) {
-            await loadCartPage();
-        }
-    },
-
-    async updateQuantity(productId, quantity) {
-        if (!currentUser) return;
-        
-        await callApi('/cart', 'PATCH', { cart: [{ product: productId, quantity }] });
-        if (window.location.pathname.includes('cart.html')) {
-            await loadCartPage();
-        }
-    },
-
-    async clear() {
-        if (!currentUser) return;
-        
-        await callApi('/cart', 'PATCH', { cart: [] });
-        await updateCartCount();
-        if (window.location.pathname.includes('cart.html')) {
-            await loadCartPage();
-        }
-    }
-};
-
-// =================================================================
-// QUẢN LÝ YÊU THÍCH (FAVORITE MANAGER)
-// =================================================================
-
-const FavoriteManager = {
-    async get() {
-        if (!currentUser) return [];
-        
-        try {
-            const result = await callApi('/favorites');
-            return result.data.favorites || [];
-        } catch (error) {
-            console.log('Favorites access requires login:', error.message);
-            return [];
-        }
-    },
-
-    async add(productId) {
-        if (!currentUser) {
-            throw new Error('Vui lòng đăng nhập để thêm vào yêu thích!');
-        }
-        
-        await callApi('/favorites', 'POST', { productId });
-        await updateFavoriteStatus(productId, true);
-    },
-
-    async remove(productId) {
-        if (!currentUser) return;
-        
-        await callApi(`/favorites/${productId}`, 'DELETE');
-        await updateFavoriteStatus(productId, false);
-        if (window.location.pathname.includes('favorite.html')) {
-            await loadFavoritesPage();
-        }
-    },
-
-    async getStatus() {
-        if (!currentUser) return {};
-        
-        const favorites = await this.get();
-        const status = {};
-        favorites.forEach(fav => {
-            if (fav && fav._id) {
-                status[fav._id] = true;
-            }
-        });
-        return status;
-    }
-};
-
-// =================================================================
-// XÁC THỰC NGƯỜI DÙNG - FIXED VERSION
-// =================================================================
-
-async function authenticate(email, password) {
-    const data = await callApi('/users/login', 'POST', { email, password });
-    localStorage.setItem('token', data.token);
     
-    currentUser = {
-        ...data.data.user,
-        email: data.data.user.email || email
-    };
+    const AUTHORIZED_EMAILS = [
+        'chinhan20917976549a@gmail.com',
+        'manager@shopgrowgarden.com', 
+        'seller@shopgrowgarden.com',
+        'test@example.com',
+        'greensvn@gmail.com'
+    ];
     
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    await updateUIAfterLogin();
-    return currentUser;
-}
-
-async function register(name, email, password, passwordConfirm) {
-    const data = await callApi('/users/signup', 'POST', { name, email, password, passwordConfirm });
-    localStorage.setItem('token', data.token);
+    const userEmail = currentUser.email.toLowerCase();
+    console.log('User email:', userEmail);
+    console.log('Authorized emails:', AUTHORIZED_EMAILS);
     
-    currentUser = {
-        ...data.data.user,
-        name: data.data.user.name || name,
-        email: data.data.user.email || email
-    };
+    const hasPermission = AUTHORIZED_EMAILS.includes(userEmail);
+    console.log('Has permission:', hasPermission);
     
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    await updateUIAfterLogin();
-    return currentUser;
-}
-
-function logout() {
-    if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) return;
-    
-    localStorage.removeItem('token');
-    localStorage.removeItem('currentUser');
-    currentUser = null;
-    updateUIAfterLogout();
-    Utils.showToast('Đăng xuất thành công!', 'success');
-
-    const protectedPages = ['account.html', 'cart.html', 'favorite.html'];
-    if (protectedPages.some(page => window.location.pathname.includes(page))) {
-        setTimeout(() => window.location.href = 'index.html', 1000);
-    }
-}
-
-async function checkAutoLogin() {
-    const token = localStorage.getItem('token');
-    if (token) {
-        try {
-            const data = await callApi('/users/me');
-            currentUser = data.data.user;
-            
-            if (!currentUser.email) {
-                throw new Error('Invalid user data: missing email');
-            }
-            
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            await updateUIAfterLogin();
-        } catch (error) {
-            console.error('Auto-login failed:', error);
-            localStorage.removeItem('token');
-            localStorage.removeItem('currentUser');
-            currentUser = null;
-            updateUIAfterLogout();
-        }
-    } else {
-        const storedUser = localStorage.getItem('currentUser');
-        if (storedUser) {
-            try {
-                const userData = JSON.parse(storedUser);
-                if (userData && userData.email) {
-                    currentUser = userData;
-                    await updateUIAfterLogin();
-                } else {
-                    localStorage.removeItem('currentUser');
-                }
-            } catch (error) {
-                console.error('Error parsing stored user data:', error);
-                localStorage.removeItem('currentUser');
-            }
-        }
-    }
-}
-
-// =================================================================
-// QUẢN LÝ FLOATING BUTTONS (Đăng tin & Messenger)
-// =================================================================
-
-function createFloatingButtons() {
-    // Xóa các button cũ nếu có
-    const existingPostBtn = document.getElementById('postProductButton');
-    const existingMessengerBtn = document.getElementById('messengerButton');
-    if (existingPostBtn) existingPostBtn.remove();
-    if (existingMessengerBtn) existingMessengerBtn.remove();
-
-    // Tạo container cho floating buttons
-    let floatingContainer = document.getElementById('floatingButtonsContainer');
-    if (!floatingContainer) {
-        floatingContainer = document.createElement('div');
-        floatingContainer.id = 'floatingButtonsContainer';
-        floatingContainer.style.cssText = `
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        `;
-        document.body.appendChild(floatingContainer);
-    }
-
-    // Tạo nút Messenger (luôn hiển thị)
-    const messengerBtn = document.createElement('a');
-    messengerBtn.id = 'messengerButton';
-    messengerBtn.href = 'https://m.me/100063758577070';
-    messengerBtn.target = '_blank';
-    messengerBtn.rel = 'noopener noreferrer';
-    messengerBtn.className = 'floating-btn messenger-btn';
-    messengerBtn.innerHTML = `
-        <i class="fab fa-facebook-messenger"></i>
-        <span>Liên hệ</span>
-    `;
-    messengerBtn.title = 'Liên hệ qua Facebook Messenger';
-
-    // Tạo nút đăng tin (chỉ hiển thị cho người có quyền)
-    const postBtn = document.createElement('button');
-    postBtn.id = 'postProductButton';
-    postBtn.className = 'floating-btn post-btn';
-    postBtn.innerHTML = `
-        <i class="fas fa-plus"></i>
-        <span>Đăng tin</span>
-    `;
-    postBtn.title = 'Đăng sản phẩm mới';
-    postBtn.addEventListener('click', () => {
-        if (window.showAddProductModal) {
-            window.showAddProductModal();
-        } else {
-            Utils.showToast('Chức năng đăng tin chưa sẵn sàng!', 'error');
-        }
-    });
-
-    // Thêm styles cho floating buttons
-    addFloatingButtonStyles();
-
-    // Thêm các button vào container
-    floatingContainer.appendChild(messengerBtn);
-    
-    // Chỉ thêm nút đăng tin nếu có quyền
-    if (checkPostPermission()) {
-        floatingContainer.appendChild(postBtn);
-        postBtn.style.display = 'flex';
-    } else {
-        postBtn.style.display = 'none';
-    }
+    return hasPermission;
 }
 
 function addFloatingButtonStyles() {
-    // Kiểm tra xem đã có styles chưa
-    if (document.getElementById('floatingButtonStyles')) return;
+    if (document.getElementById('floatingButtonStyles')) {
+        console.log('💫 Floating button styles already exist');
+        return;
+    }
 
+    console.log('🎨 Adding floating button styles...');
     const styles = document.createElement('style');
     styles.id = 'floatingButtonStyles';
     styles.textContent = `
         .floating-btn {
-            display: flex;
+            display: flex !important;
             align-items: center;
             gap: 0.5rem;
             padding: 1rem 1.5rem;
@@ -463,6 +188,7 @@ function addFloatingButtonStyles() {
             -webkit-backdrop-filter: blur(10px);
             position: relative;
             overflow: hidden;
+            white-space: nowrap;
         }
 
         .floating-btn::before {
@@ -497,22 +223,33 @@ function addFloatingButtonStyles() {
         }
 
         .messenger-btn {
-            background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%);
-            color: white;
+            background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%) !important;
+            color: white !important;
         }
 
         .messenger-btn:hover {
-            box-shadow: 0 12px 35px rgba(0, 132, 255, 0.4);
-            color: white;
+            box-shadow: 0 12px 35px rgba(0, 132, 255, 0.4) !important;
+            color: white !important;
+            text-decoration: none !important;
         }
 
         .post-btn {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: white !important;
         }
 
         .post-btn:hover {
-            box-shadow: 0 12px 35px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 12px 35px rgba(16, 185, 129, 0.4) !important;
+        }
+
+        #floatingButtonsContainer {
+            position: fixed !important;
+            bottom: 2rem !important;
+            right: 2rem !important;
+            z-index: 1000 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 1rem !important;
         }
 
         @keyframes bounceIn {
@@ -541,7 +278,6 @@ function addFloatingButtonStyles() {
             }
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             #floatingButtonsContainer {
                 bottom: 1rem !important;
@@ -550,36 +286,282 @@ function addFloatingButtonStyles() {
             
             .floating-btn {
                 padding: 0.875rem 1.25rem !important;
-                font-size: 13px;
+                font-size: 13px !important;
             }
         }
     `;
     document.head.appendChild(styles);
+    console.log('✅ Floating button styles added');
 }
 
-function checkPostPermission() {
-    if (!currentUser || !currentUser.email) {
-        return false;
+function createFloatingButtons() {
+    console.log('🚀 Creating floating buttons...');
+    
+    // Add styles first
+    addFloatingButtonStyles();
+    
+    // Remove existing buttons
+    const existingContainer = document.getElementById('floatingButtonsContainer');
+    if (existingContainer) {
+        console.log('🗑️ Removing existing floating buttons');
+        existingContainer.remove();
+    }
+
+    // Create container
+    const floatingContainer = document.createElement('div');
+    floatingContainer.id = 'floatingButtonsContainer';
+    
+    // Create Messenger button (always visible)
+    const messengerBtn = document.createElement('a');
+    messengerBtn.id = 'messengerButton';
+    messengerBtn.href = 'https://m.me/100063758577070';
+    messengerBtn.target = '_blank';
+    messengerBtn.rel = 'noopener noreferrer';
+    messengerBtn.className = 'floating-btn messenger-btn';
+    messengerBtn.innerHTML = `
+        <i class="fab fa-facebook-messenger"></i>
+        <span>Liên hệ</span>
+    `;
+    messengerBtn.title = 'Liên hệ qua Facebook Messenger';
+
+    // Create post button (conditional)
+    const postBtn = document.createElement('button');
+    postBtn.id = 'postProductButton';
+    postBtn.className = 'floating-btn post-btn';
+    postBtn.innerHTML = `
+        <i class="fas fa-plus"></i>
+        <span>Đăng tin</span>
+    `;
+    postBtn.title = 'Đăng sản phẩm mới';
+    postBtn.addEventListener('click', () => {
+        console.log('📝 Post button clicked');
+        if (window.showAddProductModal) {
+            window.showAddProductModal();
+        } else {
+            Utils.showToast('Chức năng đăng tin chưa sẵn sàng!', 'error');
+        }
+    });
+
+    // Add buttons to container
+    floatingContainer.appendChild(messengerBtn);
+    
+    const hasPermission = checkPostPermission();
+    if (hasPermission) {
+        console.log('✅ User has permission - showing post button');
+        floatingContainer.appendChild(postBtn);
+    } else {
+        console.log('❌ User has no permission - hiding post button');
     }
     
-    const AUTHORIZED_EMAILS = [
-        'chinhan20917976549a@gmail.com',
-        'manager@shopgrowgarden.com', 
-        'seller@shopgrowgarden.com',
-        'test@example.com',
-        'greensvn@gmail.com'
-    ];
+    // Add container to page
+    document.body.appendChild(floatingContainer);
     
-    const userEmail = currentUser.email.toLowerCase();
-    return AUTHORIZED_EMAILS.includes(userEmail);
+    console.log('✅ Floating buttons created and added to page');
+    console.log('Container element:', floatingContainer);
+    console.log('Messenger button:', messengerBtn);
+    console.log('Post button (if has permission):', hasPermission ? postBtn : 'Not added');
 }
 
 function updateFloatingButtons() {
-    createFloatingButtons();
+    console.log('🔄 Updating floating buttons...');
+    
+    // Always recreate to ensure fresh state
+    setTimeout(() => {
+        createFloatingButtons();
+    }, 100);
 }
 
 // =================================================================
-// CẬP NHẬT GIAO DIỆN NGƯỜI DÙNG - FIXED VERSION
+// GỌI API
+// =================================================================
+
+async function callApi(endpoint, method = 'GET', body = null, requireAuth = true) {
+    const headers = { 'Content-Type': 'application/json' };
+    const token = localStorage.getItem('token');
+    
+    if (token && requireAuth) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method,
+            headers,
+            body: body ? JSON.stringify(body) : null
+        });
+
+        if (response.status === 204) return true;
+
+        const data = await response.json();
+        
+        if (response.status === 401 && !requireAuth) {
+            console.log('401 on optional auth endpoint, returning empty data');
+            return { data: { products: [], favorites: [], cart: [] } };
+        }
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Có lỗi xảy ra từ máy chủ.');
+        }
+        
+        return data;
+    } catch (error) {
+        console.error(`API Error on ${endpoint}:`, error);
+        throw error;
+    }
+}
+
+// =================================================================
+// QUẢN LÝ GIỎ HÀNG & YÊU THÍCH
+// =================================================================
+
+const CartManager = {
+    async get() {
+        if (!currentUser) return [];
+        try {
+            const result = await callApi('/cart');
+            return result.data.cart || [];
+        } catch (error) {
+            console.log('Cart access requires login:', error.message);
+            return [];
+        }
+    },
+
+    async add(productId, quantity = 1) {
+        if (!currentUser) {
+            throw new Error('Vui lòng đăng nhập để thêm vào giỏ hàng!');
+        }
+        await callApi('/cart', 'POST', { productId, quantity });
+        await updateCartCount();
+    }
+};
+
+const FavoriteManager = {
+    async get() {
+        if (!currentUser) return [];
+        try {
+            const result = await callApi('/favorites');
+            return result.data.favorites || [];
+        } catch (error) {
+            console.log('Favorites access requires login:', error.message);
+            return [];
+        }
+    },
+
+    async add(productId) {
+        if (!currentUser) {
+            throw new Error('Vui lòng đăng nhập để thêm vào yêu thích!');
+        }
+        await callApi('/favorites', 'POST', { productId });
+        await updateFavoriteStatus(productId, true);
+    },
+
+    async remove(productId) {
+        if (!currentUser) return;
+        await callApi(`/favorites/${productId}`, 'DELETE');
+        await updateFavoriteStatus(productId, false);
+    }
+};
+
+// =================================================================
+// XÁC THỰC NGƯỜI DÙNG
+// =================================================================
+
+async function authenticate(email, password) {
+    console.log('🔐 Authenticating user:', email);
+    const data = await callApi('/users/login', 'POST', { email, password });
+    localStorage.setItem('token', data.token);
+    
+    currentUser = {
+        ...data.data.user,
+        email: data.data.user.email || email
+    };
+    
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    console.log('✅ Authentication successful, user:', currentUser);
+    await updateUIAfterLogin();
+    return currentUser;
+}
+
+async function register(name, email, password, passwordConfirm) {
+    console.log('📝 Registering user:', email);
+    const data = await callApi('/users/signup', 'POST', { name, email, password, passwordConfirm });
+    localStorage.setItem('token', data.token);
+    
+    currentUser = {
+        ...data.data.user,
+        name: data.data.user.name || name,
+        email: data.data.user.email || email
+    };
+    
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    console.log('✅ Registration successful, user:', currentUser);
+    await updateUIAfterLogin();
+    return currentUser;
+}
+
+function logout() {
+    if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) return;
+    
+    console.log('👋 Logging out user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
+    currentUser = null;
+    updateUIAfterLogout();
+    Utils.showToast('Đăng xuất thành công!', 'success');
+
+    const protectedPages = ['account.html', 'cart.html', 'favorite.html'];
+    if (protectedPages.some(page => window.location.pathname.includes(page))) {
+        setTimeout(() => window.location.href = 'index.html', 1000);
+    }
+}
+
+async function checkAutoLogin() {
+    console.log('🔍 Checking auto login...');
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+        console.log('🎫 Token found, checking validity...');
+        try {
+            const data = await callApi('/users/me');
+            currentUser = data.data.user;
+            
+            if (!currentUser.email) {
+                throw new Error('Invalid user data: missing email');
+            }
+            
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            console.log('✅ Auto login successful, user:', currentUser);
+            await updateUIAfterLogin();
+        } catch (error) {
+            console.error('❌ Auto-login failed:', error);
+            localStorage.removeItem('token');
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            updateUIAfterLogout();
+        }
+    } else {
+        console.log('❌ No token found');
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) {
+            try {
+                const userData = JSON.parse(storedUser);
+                if (userData && userData.email) {
+                    currentUser = userData;
+                    console.log('📱 Using stored user data:', currentUser);
+                    await updateUIAfterLogin();
+                } else {
+                    localStorage.removeItem('currentUser');
+                }
+            } catch (error) {
+                console.error('Error parsing stored user data:', error);
+                localStorage.removeItem('currentUser');
+            }
+        }
+    }
+}
+
+// =================================================================
+// CẬP NHẬT GIAO DIỆN
 // =================================================================
 
 function getDisplayName(user) {
@@ -597,6 +579,7 @@ function getDisplayName(user) {
 }
 
 async function updateUIAfterLogin() {
+    console.log('🎨 Updating UI after login...');
     if (!currentUser) return;
 
     const loginButton = document.getElementById('loginButton');
@@ -617,18 +600,14 @@ async function updateUIAfterLogin() {
     });
 
     await updateCartCount();
-    await updateAllFavoriteButtons();
     
-    // **FIX CHÍNH: Cập nhật floating buttons sau khi đăng nhập**
+    // **CRITICAL: Update floating buttons after login**
+    console.log('🔄 Updating floating buttons after login...');
     updateFloatingButtons();
-    
-    // Cập nhật nút đăng sản phẩm nếu script.js đã load
-    if (window.updatePostProductButton) {
-        window.updatePostProductButton();
-    }
 }
 
 function updateUIAfterLogout() {
+    console.log('🎨 Updating UI after logout...');
     const loginButton = document.getElementById('loginButton');
     const userDropdown = document.getElementById('userDropdown');
     
@@ -639,14 +618,9 @@ function updateUIAfterLogout() {
         el.textContent = '0';
         el.style.display = 'none';
     });
-    
-    document.querySelectorAll('.favorite-btn').forEach(btn => {
-        btn.classList.remove('active');
-        const icon = btn.querySelector('i');
-        if (icon) icon.className = 'far fa-heart';
-    });
 
-    // **FIX: Cập nhật floating buttons sau khi đăng xuất**
+    // **Update floating buttons after logout**
+    console.log('🔄 Updating floating buttons after logout...');
     updateFloatingButtons();
 }
 
@@ -662,8 +636,27 @@ async function updateCartCount() {
     });
 }
 
+async function updateFavoriteStatus(productId, isFavorite) {
+    document.querySelectorAll(`.favorite-btn[data-id="${productId}"]`).forEach(btn => {
+        btn.classList.toggle('active', isFavorite);
+        const icon = btn.querySelector('i');
+        if (icon) {
+            icon.className = isFavorite ? 'fas fa-heart' : 'far fa-heart';
+        }
+    });
+}
+
+async function updateAllFavoriteButtons() {
+    if (!currentUser) return;
+    
+    const favoriteStatus = await FavoriteManager.getStatus();
+    Object.keys(favoriteStatus).forEach(productId => {
+        updateFavoriteStatus(productId, true);
+    });
+}
+
 // =================================================================
-// MODAL XÁC THỰC - CLEAN VERSION
+// MODAL XÁC THỰC
 // =================================================================
 
 function initAuthModal() {
@@ -739,7 +732,6 @@ function handleFormSubmit(form, submitAction, onSuccess) {
             onSuccess();
             form.reset();
             
-            // Reload products after login if on index page
             if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
                 setTimeout(() => {
                     if (window.loadProducts) window.loadProducts();
@@ -798,28 +790,23 @@ function handleRegisterForm(onSuccess) {
 }
 
 // =================================================================
-// LOGIC RIÊNG CHO CÁC TRANG - UPDATED
+// LOAD PRODUCTS
 // =================================================================
 
 async function loadProducts() {
     const productsGrid = document.getElementById('productsGrid');
     if (!productsGrid) return;
     
-    // Check if we have renderApiProducts from script.js (for index page)
     if (window.renderApiProducts) {
         console.log('Using renderApiProducts from script.js for index page');
         
         Utils.showLoading(productsGrid, 'Đang tải sản phẩm...');
         
         try {
-            // Try to load from API without requiring auth first
             const data = await callApi('/products', 'GET', null, false);
             const products = data.data.products || [];
             
-            // Store products globally for script.js
             window.allProducts = products;
-            
-            // Use renderApiProducts from script.js
             window.renderApiProducts(products);
             
             if (currentUser) {
@@ -829,7 +816,6 @@ async function loadProducts() {
         } catch (error) {
             console.error('API requires authentication for products:', error);
             
-            // Show login required message
             productsGrid.innerHTML = `
                 <div class="auth-required-message" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
                     <i class="fas fa-lock" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;"></i>
@@ -844,133 +830,11 @@ async function loadProducts() {
         }
         return;
     }
-    
-    // Fallback for other pages (product.html, etc.)
-    Utils.showLoading(productsGrid, 'Đang tải sản phẩm...');
-    
-    try {
-        const data = await callApi('/products');
-        const products = data.data.products;
-        
-        if (!products || products.length === 0) {
-            productsGrid.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">Không có sản phẩm nào để hiển thị.</p>';
-            return;
-        }
-        
-        productsGrid.innerHTML = products.map(createProductCardHTML).join('');
-        attachProductEventListeners();
-        
-        if (currentUser) {
-            await updateAllFavoriteButtons();
-        }
-    } catch (error) {
-        Utils.showError(productsGrid, 'Không thể tải sản phẩm. Vui lòng đăng nhập và thử lại.');
-    }
 }
-
-function createProductCardHTML(product) {
-    return `
-        <div class="product-card" data-id="${product._id}" data-price="${product.price}" data-note="${product.description || ''}">
-            <div class="product-image">
-                <img src="${product.images[0] || 'https://via.placeholder.com/300'}" alt="${product.title}" loading="lazy">
-                ${product.badge ? `<span class="product-badge ${product.badge.toLowerCase()}">${product.badge}</span>` : ''}
-                <div class="product-overlay">
-                    <button class="btn-icon favorite-btn" data-id="${product._id}" title="Thêm vào yêu thích">
-                        <i class="far fa-heart"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="product-info">
-                <h3 class="product-title">${product.title}</h3>
-                <p class="product-description">${product.description || ''}</p>
-                <div class="product-price">${Utils.formatPrice(product.price)}đ</div>
-            </div>
-            <div class="product-actions">
-                <button class="btn btn-primary add-to-cart" data-id="${product._id}">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span>Thêm vào giỏ</span>
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-function attachProductEventListeners() {
-    document.querySelectorAll('.add-to-cart').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            if (!currentUser) {
-                Utils.showToast('Vui lòng đăng nhập để mua hàng!', 'info');
-                document.getElementById('loginButton').click();
-                return;
-            }
-            
-            const productId = e.currentTarget.dataset.id;
-            try {
-                await CartManager.add(productId);
-                Utils.showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
-            } catch (error) {
-                Utils.showToast(error.message || 'Không thể thêm vào giỏ hàng.', 'error');
-            }
-        });
-    });
-
-    document.querySelectorAll('.favorite-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-
-            if (!currentUser) {
-                Utils.showToast('Vui lòng đăng nhập để yêu thích!', 'info');
-                document.getElementById('loginButton').click();
-                return;
-            }
-            
-            const productId = e.currentTarget.dataset.id;
-            const isFavorite = e.currentTarget.classList.contains('active');
-            
-            try {
-                if (isFavorite) {
-                    await FavoriteManager.remove(productId);
-                    Utils.showToast('Đã xóa khỏi danh sách yêu thích!', 'info');
-                } else {
-                    await FavoriteManager.add(productId);
-                    Utils.showToast('Đã thêm vào danh sách yêu thích!', 'success');
-                }
-            } catch (error) {
-                Utils.showToast(error.message || 'Thao tác thất bại.', 'error');
-            }
-        });
-    });
-}
-
-async function updateFavoriteStatus(productId, isFavorite) {
-    document.querySelectorAll(`.favorite-btn[data-id="${productId}"]`).forEach(btn => {
-        btn.classList.toggle('active', isFavorite);
-        const icon = btn.querySelector('i');
-        if (icon) {
-            icon.className = isFavorite ? 'fas fa-heart' : 'far fa-heart';
-        }
-    });
-}
-
-async function updateAllFavoriteButtons() {
-    if (!currentUser) return;
-    
-    const favoriteStatus = await FavoriteManager.getStatus();
-    Object.keys(favoriteStatus).forEach(productId => {
-        updateFavoriteStatus(productId, true);
-    });
-}
-
-// =================================================================
-// TRANG CHỦ (INDEX.HTML) - UPDATED
-// =================================================================
 
 function initIndexPage() {
-    // Load products (will use script.js renderApiProducts if available)
     loadProducts();
     
-    // Filter functionality (only if elements exist - for index page)
     const filterButton = document.getElementById('filterButton');
     const resetButton = document.getElementById('resetButton');
     
@@ -992,245 +856,9 @@ function initIndexPage() {
 }
 
 // =================================================================
-// TRANG TÀI KHOẢN (ACCOUNT.HTML)
+// EXPORTS
 // =================================================================
 
-function initAccountPage() {
-    const accountLayout = document.getElementById('accountLayout');
-    const loginPrompt = document.getElementById('loginPrompt');
-    
-    if (!accountLayout) return;
-
-    if (!currentUser) {
-        if (accountLayout) accountLayout.style.display = 'none';
-        if (loginPrompt) loginPrompt.style.display = 'block';
-        return;
-    }
-    
-    if (accountLayout) accountLayout.style.display = 'grid';
-    if (loginPrompt) loginPrompt.style.display = 'none';
-
-    const displayName = getDisplayName(currentUser);
-    const userId = currentUser._id || 'N/A';
-    const firstLetter = displayName.charAt(0).toUpperCase();
-    
-    const updateElement = (id, value) => {
-        const element = document.getElementById(id);
-        if (element) element.textContent = value;
-    };
-    
-    updateElement('accountName', displayName);
-    updateElement('accountId', `ID: ${userId.slice(-6)}`);
-    updateElement('userFullName', displayName);
-    updateElement('userEmail', currentUser.email || 'Email không có sẵn');
-    updateElement('userRegisterDate', Utils.formatDate(currentUser.createdAt));
-    updateElement('userAccountId', userId);
-    updateElement('balanceAmount', `${Utils.formatPrice(currentUser.balance || 0)}đ`);
-    
-    const avatarElement = document.getElementById('accountAvatar');
-    if (avatarElement) avatarElement.textContent = firstLetter;
-    
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.addEventListener('click', () => {
-            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-            
-            document.querySelectorAll('.tab-content').forEach(t => {
-                t.classList.toggle('active', t.id === `${item.dataset.tab}Tab`);
-            });
-        });
-    });
-}
-
-// =================================================================
-// HIỂN THỊ THÔNG BÁO ĐĂNG NHẬP
-// =================================================================
-
-function displayLoginPrompt(container, message, title) {
-    container.innerHTML = `
-        <div class="empty-state" style="text-align: center; padding: 40px; grid-column: 1 / -1;">
-            <i class="fas fa-sign-in-alt" style="font-size: 4rem; color: #ccc; margin-bottom: 20px;"></i>
-            <h3 style="font-size: 22px; margin-bottom: 10px;">${title}</h3>
-            <p style="margin-bottom: 20px;">${message}</p>
-            <button class="btn btn-primary" id="promptLoginButton">Đăng nhập ngay</button>
-        </div>
-    `;
-    
-    const promptLoginButton = document.getElementById('promptLoginButton');
-    if (promptLoginButton) {
-        promptLoginButton.addEventListener('click', () => {
-            const loginButton = document.getElementById('loginButton');
-            if (loginButton) loginButton.click();
-        });
-    }
-}
-
-// =================================================================
-// TRANG YÊU THÍCH (FAVORITE.HTML)
-// =================================================================
-
-async function loadFavoritesPage() {
-    const favoritesGrid = document.getElementById('favoritesGrid');
-    if (!favoritesGrid) return;
-    
-    if (!currentUser) {
-        displayLoginPrompt(favoritesGrid, 'Bạn cần đăng nhập để xem danh sách sản phẩm yêu thích của mình.', 'Vui lòng đăng nhập');
-        return;
-    }
-    
-    Utils.showLoading(favoritesGrid, 'Đang tải danh sách yêu thích...');
-    
-    try {
-        const favorites = await FavoriteManager.get();
-        
-        if (favorites.length === 0) {
-            favoritesGrid.innerHTML = `
-                <div class="empty-state" style="text-align: center; padding: 40px; grid-column: 1 / -1;">
-                    <i class="far fa-heart" style="font-size: 4rem; color: #ccc; margin-bottom: 20px;"></i>
-                    <h3>Danh sách yêu thích trống</h3>
-                    <p style="margin-bottom: 20px;">Hãy khám phá và thêm những sản phẩm bạn yêu thích vào đây nhé!</p>
-                    <a href="index.html" class="btn btn-primary">Khám phá ngay</a>
-                </div>
-            `;
-            return;
-        }
-        
-        favoritesGrid.innerHTML = favorites.map(createProductCardHTML).join('');
-        attachProductEventListeners();
-        await updateAllFavoriteButtons();
-    } catch (error) {
-        Utils.showError(favoritesGrid, 'Lỗi khi tải danh sách yêu thích.');
-    }
-}
-
-// =================================================================
-// TRANG GIỎ HÀNG (CART.HTML)
-// =================================================================
-
-async function loadCartPage() {
-    const cartContainer = document.getElementById('cartContainer');
-    if (!cartContainer) return;
-    
-    if (!currentUser) {
-        displayLoginPrompt(cartContainer, 'Bạn cần đăng nhập để xem giỏ hàng và tiến hành thanh toán.', 'Giỏ hàng của bạn');
-        return;
-    }
-    
-    Utils.showLoading(cartContainer, 'Đang tải giỏ hàng...');
-    
-    try {
-        const cart = await CartManager.get();
-        
-        if (cart.length === 0) {
-            cartContainer.innerHTML = `
-                <div class="empty-state" style="text-align: center; padding: 40px;">
-                    <i class="fas fa-shopping-bag" style="font-size: 4rem; color: #ccc; margin-bottom: 20px;"></i>
-                    <h3>Giỏ hàng của bạn đang trống</h3>
-                    <p style="margin-bottom: 20px;">Hãy lựa chọn những sản phẩm tuyệt vời và thêm vào giỏ hàng nhé.</p>
-                    <a href="index.html" class="btn btn-primary">Tiếp tục mua sắm</a>
-                </div>
-            `;
-            return;
-        }
-
-        let subtotal = 0;
-        const itemsHTML = cart.map(item => {
-            const product = item.product;
-            if (!product) return '';
-            
-            const itemTotal = product.price * item.quantity;
-            subtotal += itemTotal;
-            
-            return `
-                <div class="cart-item" data-id="${product._id}">
-                    <img src="${product.images[0]}" alt="${product.title}" class="cart-item-image">
-                    <div class="cart-item-details">
-                        <h3 class="cart-item-title">${product.title}</h3>
-                        <div class="cart-item-price">${Utils.formatPrice(product.price)}đ</div>
-                    </div>
-                    <div class="cart-item-quantity">
-                        <button class="btn-quantity minus" data-id="${product._id}">-</button>
-                        <input type="number" value="${item.quantity}" min="1" class="quantity-input" data-id="${product._id}" data-product-id="${product._id}">
-                        <button class="btn-quantity plus" data-id="${product._id}">+</button>
-                    </div>
-                    <div class="cart-item-total">${Utils.formatPrice(itemTotal)}đ</div>
-                    <button class="btn-remove" data-id="${product._id}"><i class="fas fa-trash"></i></button>
-                </div>
-            `;
-        }).join('');
-
-        cartContainer.innerHTML = `
-            <div class="cart-layout">
-                <div class="cart-items-list">${itemsHTML}</div>
-                <div class="cart-summary">
-                    <h3>Tổng Cộng</h3>
-                    <div class="summary-row"><span>Tạm tính</span><span id="subtotal">${Utils.formatPrice(subtotal)}đ</span></div>
-                    <div class="summary-row"><span>Phí vận chuyển</span><span>Miễn phí</span></div>
-                    <div class="summary-divider"></div>
-                    <div class="summary-row total"><span>Thành tiền</span><span id="total">${Utils.formatPrice(subtotal)}đ</span></div>
-                    <button class="btn btn-primary btn-block" id="checkoutButton">Tiến Hành Thanh Toán</button>
-                </div>
-            </div>
-        `;
-        
-        attachCartPageEventListeners();
-
-    } catch (error) {
-        Utils.showError(cartContainer, 'Không thể tải giỏ hàng.');
-    }
-}
-
-function attachCartPageEventListeners() {
-    document.querySelectorAll('.btn-remove').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const productId = e.currentTarget.dataset.id;
-            Utils.showToast('Đang xóa sản phẩm...', 'info');
-            CartManager.remove(productId);
-        });
-    });
-
-    let debounceTimer;
-    const debouncedUpdateQuantity = (productId, newQuantity) => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            CartManager.updateQuantity(productId, newQuantity);
-        }, 500);
-    };
-
-    document.querySelectorAll('.plus, .minus').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const input = e.currentTarget.parentElement.querySelector('input');
-            let quantity = parseInt(input.value);
-            quantity += e.currentTarget.classList.contains('plus') ? 1 : -1;
-            
-            if (quantity > 0) {
-                input.value = quantity;
-                debouncedUpdateQuantity(input.dataset.productId, quantity);
-            }
-        });
-    });
-
-    document.querySelectorAll('.quantity-input').forEach(input => {
-        input.addEventListener('change', (e) => {
-            const quantity = Math.max(1, parseInt(e.currentTarget.value));
-            e.currentTarget.value = quantity;
-            debouncedUpdateQuantity(e.currentTarget.dataset.productId, quantity);
-        });
-    });
-    
-    const checkoutButton = document.getElementById('checkoutButton');
-    if (checkoutButton) {
-        checkoutButton.addEventListener('click', () => {
-            Utils.showToast('Tính năng thanh toán đang được phát triển.', 'info');
-        });
-    }
-}
-
-// =================================================================
-// KHỞI CHẠY CHÍNH
-// =================================================================
-
-// Export các hàm quan trọng để các file khác có thể sử dụng
 window.Utils = Utils;
 window.CartManager = CartManager;
 window.FavoriteManager = FavoriteManager;
@@ -1242,8 +870,14 @@ window.loadProducts = loadProducts;
 window.checkPostPermission = checkPostPermission;
 window.updateFloatingButtons = updateFloatingButtons;
 
+// =================================================================
+// KHỞI CHẠY CHÍNH
+// =================================================================
+
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        console.log('🚀 Starting Shop Grow A Garden initialization...');
+        
         // 1. Khởi tạo các thành phần chung
         Utils.createToastContainer();
         initAuthModal();
@@ -1256,11 +890,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 3. Kiểm tra và tự động đăng nhập nếu có token hợp lệ
         await checkAutoLogin();
 
-        // 4. Tạo floating buttons (Messenger + Đăng tin)
+        // 4. Tạo floating buttons NGAY LẬP TỨC (không cần đợi)
+        console.log('🎯 Creating initial floating buttons...');
         createFloatingButtons();
 
         // 5. Chạy logic riêng cho trang hiện tại
         const path = window.location.pathname.split("/").pop() || 'index.html';
+        console.log('📄 Current page:', path);
         
         switch (path) {
             case 'index.html':
@@ -1268,20 +904,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                 initIndexPage();
                 break;
             case 'account.html':
-                initAccountPage();
+                // initAccountPage(); // Implement if needed
                 break;
             case 'cart.html':
-                await loadCartPage();
+                // await loadCartPage(); // Implement if needed
                 break;
             case 'favorite.html':
-                await loadFavoritesPage();
+                // await loadFavoritesPage(); // Implement if needed
                 break;
         }
         
-        console.log('Shop Grow A Garden initialized successfully');
+        // 6. Đảm bảo floating buttons được tạo sau khi tất cả đã load
+        setTimeout(() => {
+            console.log('⏰ Final floating buttons update after 2 seconds...');
+            updateFloatingButtons();
+        }, 2000);
+        
+        console.log('✅ Shop Grow A Garden initialized successfully');
+        console.log('🔍 Current user after init:', currentUser);
         
     } catch (error) {
-        console.error('Lỗi nghiêm trọng khi khởi tạo trang:', error);
+        console.error('❌ Critical error during initialization:', error);
         Utils.showToast('Có lỗi xảy ra khi khởi tạo trang web', 'error');
     }
 });
