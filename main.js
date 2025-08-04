@@ -55,27 +55,6 @@ class SecurityManager {
         }
     }
 
-    static disableDevTools() {
-        if (typeof window !== 'undefined') {
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'F12' || 
-                    (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-                    (e.ctrlKey && e.shiftKey && e.key === 'C') ||
-                    (e.ctrlKey && e.key === 'U')) {
-                    e.preventDefault();
-                    Utils.showToast('Chức năng này đã bị vô hiệu hóa!', 'warning');
-                    return false;
-                }
-            });
-
-            document.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                Utils.showToast('Click chuột phải đã bị vô hiệu hóa!', 'warning');
-                return false;
-            });
-        }
-    }
-
     static validateImageFile(file) {
         if (!file) throw new Error('Vui lòng chọn file hình ảnh!');
         if (!CONFIG.ALLOWED_IMAGE_TYPES.includes(file.type)) {
@@ -1028,7 +1007,6 @@ class App {
     static async init() {
         // Initialize security
         SecurityManager.obfuscateConsole();
-        SecurityManager.disableDevTools();
         
         // Initialize UI components
         Utils.getToastContainer();
@@ -1154,12 +1132,19 @@ window.addEventListener('beforeunload', () => {
 });
 
 // 1. Chặn DevTools cho non-admin
+let _devToolsKeydownHandler = null;
+let _devToolsContextMenuHandler = null;
+
 function isAdminEmail(email) {
     return CONFIG.AUTHORIZED_EMAILS.includes(email);
 }
 
 function setupDevToolsProtection() {
-    function blockDevTools(e) {
+    // Remove old listeners if exist
+    if (_devToolsKeydownHandler) document.removeEventListener('keydown', _devToolsKeydownHandler);
+    if (_devToolsContextMenuHandler) document.removeEventListener('contextmenu', _devToolsContextMenuHandler);
+
+    _devToolsKeydownHandler = function(e) {
         if (!window.currentUser || !isAdminEmail(window.currentUser.email)) {
             if (
                 e.key === 'F12' ||
@@ -1171,23 +1156,19 @@ function setupDevToolsProtection() {
                 return false;
             }
         }
-    }
-    function blockContextMenu(e) {
+    };
+    _devToolsContextMenuHandler = function(e) {
         if (!window.currentUser || !isAdminEmail(window.currentUser.email)) {
             e.preventDefault();
             Utils.showToast('Chuột phải đã bị vô hiệu hóa!', 'warning');
             return false;
         }
-    }
-    document.addEventListener('keydown', blockDevTools);
-    document.addEventListener('contextmenu', blockContextMenu);
+    };
+    document.addEventListener('keydown', _devToolsKeydownHandler);
+    document.addEventListener('contextmenu', _devToolsContextMenuHandler);
 }
 
-// Gọi khi login thành công hoặc khi load trang
 function updateDevToolsProtection() {
-    // Remove old listeners (if any)
-    document.onkeydown = null;
-    document.oncontextmenu = null;
     setupDevToolsProtection();
 }
 
