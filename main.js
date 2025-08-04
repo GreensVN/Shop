@@ -1,4 +1,4 @@
-// main.js - Enhanced Professional Version
+// main.js - Enhanced Professional Version (Production Ready)
 "use strict";
 
 // =================================================================
@@ -9,7 +9,7 @@ const CONFIG = {
     API_BASE_URL: 'https://shop-4mlk.onrender.com/api/v1',
     AUTHORIZED_EMAILS: [
         'chinhan20917976549a@gmail.com',
-        'manager@shopgrowgarden.com', 
+        'ryantran149@gmail.com', 
         'seller@shopgrowgarden.com',
         'greensvn@gmail.com'
     ],
@@ -234,10 +234,10 @@ class PermissionManager {
     static checkDeletePermission(product) {
         if (!currentUser) return false;
         
-        // Admin có thể xóa tất cả
+        // Admin (người có quyền đăng bài) có thể xóa tất cả
         if (this.checkPostPermission()) return true;
         
-        // User chỉ có thể xóa sản phẩm của mình
+        // User chỉ có thể xóa sản phẩm của chính mình (nếu sản phẩm có thông tin createdBy)
         return product.createdBy === currentUser._id;
     }
 }
@@ -293,7 +293,9 @@ class ApiManager {
     }
 
     static async getProducts() {
-        return await this.call('/products', 'GET', null, false);
+        // Thay đổi: getProducts sẽ thử lấy token nếu có, để API có thể trả về dữ liệu cá nhân hóa
+        const hasToken = !!localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
+        return await this.call('/products', 'GET', null, hasToken);
     }
 }
 
@@ -314,54 +316,22 @@ class FloatingButtonsManager {
         styles.id = 'floatingButtonStyles';
         styles.textContent = `
             .floating-btn {
-                display: flex !important;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 1rem 1.5rem;
-                border-radius: 50px;
-                font-weight: 600;
-                text-decoration: none;
-                border: none;
-                cursor: pointer;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-                font-family: inherit;
-                font-size: 14px;
-                backdrop-filter: blur(10px);
-                position: relative;
-                overflow: hidden;
-                white-space: nowrap;
+                display: flex !important; align-items: center; gap: 0.5rem; padding: 1rem 1.5rem;
+                border-radius: 50px; font-weight: 600; text-decoration: none; border: none;
+                cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); font-family: inherit; font-size: 14px;
+                backdrop-filter: blur(10px); position: relative; overflow: hidden; white-space: nowrap;
             }
-
-            .floating-btn:hover {
-                transform: translateY(-3px) scale(1.05);
-            }
-
-            .messenger-btn {
-                background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%) !important;
-                color: white !important;
-            }
-
-            .post-btn {
-                background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-                color: white !important;
-            }
-
+            .floating-btn:hover { transform: translateY(-3px) scale(1.05); }
+            .messenger-btn { background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%) !important; color: white !important; }
+            .post-btn { background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; color: white !important; }
             #floatingButtonsContainer {
-                position: fixed !important;
-                bottom: 2rem !important;
-                right: 2rem !important;
-                z-index: 1000 !important;
-                display: flex !important;
-                flex-direction: column !important;
+                position: fixed !important; bottom: 2rem !important; right: 2rem !important;
+                z-index: 1000 !important; display: flex !important; flex-direction: column !important;
                 gap: 1rem !important;
             }
-
             @media (max-width: 768px) {
-                #floatingButtonsContainer {
-                    bottom: 1rem !important;
-                    right: 1rem !important;
-                }
+                #floatingButtonsContainer { bottom: 1rem !important; right: 1rem !important; }
             }
         `;
         document.head.appendChild(styles);
@@ -374,11 +344,9 @@ class FloatingButtonsManager {
         const container = document.createElement('div');
         container.id = 'floatingButtonsContainer';
         
-        // Messenger button
         const messengerBtn = this.createMessengerButton();
         container.appendChild(messengerBtn);
         
-        // Post button (only for authorized users)
         if (PermissionManager.checkPostPermission()) {
             const postBtn = this.createPostButton();
             container.appendChild(postBtn);
@@ -404,7 +372,8 @@ class FloatingButtonsManager {
         btn.innerHTML = `<i class="fas fa-plus"></i><span>Đăng tin</span>`;
         btn.title = 'Đăng sản phẩm mới';
         btn.addEventListener('click', () => {
-            if (window.ProductModal) {
+            // Thay đổi: Sử dụng window.ProductModal được định nghĩa trong script.js
+            if (window.ProductModal && typeof window.ProductModal.show === 'function') {
                 window.ProductModal.show();
             } else {
                 Utils.showToast('Chức năng đăng tin chưa sẵn sàng!', 'error');
@@ -428,25 +397,17 @@ const CartManager = {
         try {
             const result = await ApiManager.call('/cart');
             return result.data.cart || [];
-        } catch {
-            return [];
-        }
+        } catch { return []; }
     },
-
     async add(productId, quantity = 1) {
-        if (!currentUser) {
-            throw new Error('Vui lòng đăng nhập để thêm vào giỏ hàng!');
-        }
+        if (!currentUser) throw new Error('Vui lòng đăng nhập để thêm vào giỏ hàng!');
         await ApiManager.call('/cart', 'POST', { productId, quantity });
         await this.updateCount();
     },
-
     async updateCount() {
         if (!currentUser) return;
-        
         const cart = await this.get();
         const count = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
-        
         document.querySelectorAll('.cart-count, #cartCount').forEach(el => {
             el.textContent = count;
             el.style.display = count > 0 ? 'inline-flex' : 'none';
@@ -460,32 +421,23 @@ const FavoriteManager = {
         try {
             const result = await ApiManager.call('/favorites');
             return result.data.favorites || [];
-        } catch {
-            return [];
-        }
+        } catch { return []; }
     },
-
     async add(productId) {
-        if (!currentUser) {
-            throw new Error('Vui lòng đăng nhập để thêm vào yêu thích!');
-        }
+        if (!currentUser) throw new Error('Vui lòng đăng nhập để thêm vào yêu thích!');
         await ApiManager.call('/favorites', 'POST', { productId });
         await this.updateStatus(productId, true);
     },
-
     async remove(productId) {
         if (!currentUser) return;
         await ApiManager.call(`/favorites/${productId}`, 'DELETE');
         await this.updateStatus(productId, false);
     },
-
     async updateStatus(productId, isFavorite) {
         document.querySelectorAll(`.favorite-btn[data-id="${productId}"]`).forEach(btn => {
             btn.classList.toggle('active', isFavorite);
             const icon = btn.querySelector('i');
-            if (icon) {
-                icon.className = isFavorite ? 'fas fa-heart' : 'far fa-heart';
-            }
+            if (icon) icon.className = isFavorite ? 'fas fa-heart' : 'far fa-heart';
         });
     }
 };
@@ -498,30 +450,16 @@ class AuthManager {
     static async login(email, password) {
         const data = await ApiManager.call('/users/login', 'POST', { email, password });
         localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
-        
-        currentUser = {
-            ...data.data.user,
-            email: data.data.user.email || email
-        };
-        
+        currentUser = { ...data.data.user, email: data.data.user.email || email };
         localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
         await this.updateUIAfterLogin();
         return currentUser;
     }
 
     static async register(name, email, password, passwordConfirm) {
-        const data = await ApiManager.call('/users/signup', 'POST', { 
-            name, email, password, passwordConfirm 
-        });
-        
+        const data = await ApiManager.call('/users/signup', 'POST', { name, email, password, passwordConfirm });
         localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
-        
-        currentUser = {
-            ...data.data.user,
-            name: data.data.user.name || name,
-            email: data.data.user.email || email
-        };
-        
+        currentUser = { ...data.data.user, name: data.data.user.name || name, email: data.data.user.email || email };
         localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
         await this.updateUIAfterLogin();
         return currentUser;
@@ -529,13 +467,11 @@ class AuthManager {
 
     static logout() {
         if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) return;
-        
         localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
         localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);
         currentUser = null;
         this.updateUIAfterLogout();
         Utils.showToast('Đăng xuất thành công!', 'success');
-
         const protectedPages = ['account.html', 'cart.html', 'favorite.html'];
         if (protectedPages.some(page => window.location.pathname.includes(page))) {
             setTimeout(() => window.location.href = 'index.html', 1000);
@@ -544,16 +480,11 @@ class AuthManager {
 
     static async checkAutoLogin() {
         const token = localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
-        
         if (token) {
             try {
                 const data = await ApiManager.call('/users/me');
                 currentUser = data.data.user;
-                
-                if (!currentUser.email) {
-                    throw new Error('Invalid user data: missing email');
-                }
-                
+                if (!currentUser.email) throw new Error('Invalid user data: missing email');
                 localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
                 await this.updateUIAfterLogin();
             } catch (error) {
@@ -563,52 +494,27 @@ class AuthManager {
                 this.updateUIAfterLogout();
             }
         } else {
-            const storedUser = localStorage.getItem(CONFIG.STORAGE_KEYS.USER);
-            if (storedUser) {
-                try {
-                    const userData = JSON.parse(storedUser);
-                    if (userData?.email) {
-                        currentUser = userData;
-                        await this.updateUIAfterLogin();
-                    } else {
-                        localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);
-                    }
-                } catch {
-                    localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);
-                }
-            }
+            this.updateUIAfterLogout();
         }
     }
 
     static getDisplayName(user) {
         if (!user) return 'User';
-        
         if (user.name?.trim()) return user.name.trim();
         if (user.email?.includes('@')) return user.email.split('@')[0];
-        
         return 'User';
     }
 
     static async updateUIAfterLogin() {
         if (!currentUser) return;
-
         const loginButton = document.getElementById('loginButton');
         const userDropdown = document.getElementById('userDropdown');
-        
         if (loginButton) loginButton.style.display = 'none';
         if (userDropdown) userDropdown.style.display = 'flex';
-        
         const displayName = this.getDisplayName(currentUser);
         const firstLetter = displayName.charAt(0).toUpperCase();
-        
-        document.querySelectorAll('.user-name, #userName').forEach(el => {
-            if (el) el.textContent = displayName;
-        });
-        
-        document.querySelectorAll('.user-avatar, #userAvatar').forEach(el => {
-            if (el) el.textContent = firstLetter;
-        });
-
+        document.querySelectorAll('.user-name, #userName').forEach(el => { if (el) el.textContent = displayName; });
+        document.querySelectorAll('.user-avatar, #userAvatar').forEach(el => { if (el) el.textContent = firstLetter; });
         await CartManager.updateCount();
         FloatingButtonsManager.update();
     }
@@ -616,15 +522,12 @@ class AuthManager {
     static updateUIAfterLogout() {
         const loginButton = document.getElementById('loginButton');
         const userDropdown = document.getElementById('userDropdown');
-        
         if (loginButton) loginButton.style.display = 'flex';
         if (userDropdown) userDropdown.style.display = 'none';
-
         document.querySelectorAll('.cart-count, #cartCount').forEach(el => {
             el.textContent = '0';
             el.style.display = 'none';
         });
-
         FloatingButtonsManager.update();
     }
 }
@@ -637,45 +540,42 @@ class ProductManager {
     static async loadProducts() {
         const productsGrid = document.getElementById('productsGrid');
         if (!productsGrid) return;
-        
         Utils.showLoading(productsGrid, 'Đang tải sản phẩm...');
         
         try {
-            // Try API first
             const data = await ApiManager.getProducts();
             let products = data.data?.products || [];
             
-            // Merge with local products
             const localProducts = StorageManager.loadProducts();
-            products = [...localProducts, ...products];
+            // Merge và loại bỏ trùng lặp nếu có sản phẩm từ server
+            const combinedProducts = [...localProducts, ...products];
+            const uniqueProducts = Array.from(new Map(combinedProducts.map(p => [p._id, p])).values());
             
-            allProducts = products;
+            allProducts = uniqueProducts;
             
             if (window.renderApiProducts) {
-                window.renderApiProducts(products);
+                window.renderApiProducts(allProducts);
             }
-            
             if (currentUser && window.updateAllFavoriteButtons) {
                 await window.updateAllFavoriteButtons();
             }
-            
         } catch (error) {
-            // Fallback to local storage only
             const localProducts = StorageManager.loadProducts();
             if (localProducts.length > 0) {
                 allProducts = localProducts;
                 if (window.renderApiProducts) {
                     window.renderApiProducts(localProducts);
                 }
+                Utils.showToast('Không thể tải dữ liệu mới, hiển thị sản phẩm offline.', 'warning');
             } else {
-                productsGrid.innerHTML = `
+                // Hiển thị thông báo yêu cầu đăng nhập khi không có cả dữ liệu API và local
+                 productsGrid.innerHTML = `
                     <div class="auth-required-message" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
                         <i class="fas fa-lock" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;"></i>
                         <h3 style="color: #1f2937; margin-bottom: 1rem;">Cần đăng nhập để xem sản phẩm</h3>
                         <p style="color: #64748b; margin-bottom: 2rem;">Vui lòng đăng nhập để truy cập danh sách sản phẩm</p>
                         <button class="btn btn-primary" onclick="document.getElementById('loginButton').click()">
-                            <i class="fas fa-user"></i>
-                            <span>Đăng nhập ngay</span>
+                            <i class="fas fa-user"></i> <span>Đăng nhập ngay</span>
                         </button>
                     </div>
                 `;
@@ -685,7 +585,7 @@ class ProductManager {
 
     static async createProduct(productData) {
         const product = {
-            _id: Utils.generateId(),
+            _id: Utils.generateId(), // ID tạm thời cho local
             title: Utils.sanitizeInput(productData.title),
             description: Utils.sanitizeInput(productData.description),
             price: parseInt(productData.price),
@@ -699,40 +599,24 @@ class ProductManager {
             createdBy: currentUser?._id
         };
 
-        // Try API first
         try {
-            if (currentUser) {
-                const apiData = {
-                    title: product.title,
-                    description: product.description,
-                    price: product.price,
-                    images: product.images,
-                    badge: product.badge,
-                    sales: product.sales,
-                    stock: product.stock,
-                    category: product.category,
-                    link: product.link
-                };
-                
-                await ApiManager.createProduct(apiData);
-                Utils.showToast('Đăng sản phẩm thành công!', 'success');
-                await this.loadProducts();
+            // Luôn thử gọi API trước
+            const apiData = { ...product };
+            delete apiData._id; // Xóa ID local trước khi gửi
+            const result = await ApiManager.createProduct(apiData);
+            Utils.showToast('Đăng sản phẩm thành công!', 'success');
+            await this.loadProducts(); // Tải lại toàn bộ danh sách để có ID thật từ server
+            return true;
+        } catch (error) {
+            // Nếu API thất bại, lưu vào local
+            if (StorageManager.addProduct(product)) {
+                allProducts.unshift(product);
+                if (window.renderApiProducts) {
+                    window.renderApiProducts(allProducts);
+                }
+                Utils.showToast('Đăng sản phẩm thành công! (Lưu cục bộ)', 'info');
                 return true;
             }
-        } catch (error) {
-            // Fallback to local storage
-        }
-
-        // Save locally
-        if (StorageManager.addProduct(product)) {
-            allProducts.unshift(product);
-            
-            if (window.renderApiProducts) {
-                window.renderApiProducts(allProducts);
-            }
-            
-            Utils.showToast('Đăng sản phẩm thành công! (Lưu cục bộ)', 'success');
-            return true;
         }
         
         throw new Error('Không thể lưu sản phẩm');
@@ -742,26 +626,27 @@ class ProductManager {
         if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return;
         
         try {
-            // Try API first
             if (productId.startsWith('local_')) {
+                // Chỉ cần xóa ở local
                 StorageManager.deleteProduct(productId);
             } else {
+                // Cố gắng xóa trên API
                 await ApiManager.deleteProduct(productId);
             }
             
-            // Update UI
+            // Cập nhật UI ngay lập tức
             allProducts = allProducts.filter(p => p._id !== productId);
-            
             if (window.renderApiProducts) {
                 window.renderApiProducts(allProducts);
             }
             
             Utils.showToast('Xóa sản phẩm thành công!', 'success');
         } catch (error) {
-            Utils.showToast('Không thể xóa sản phẩm!', 'error');
+            Utils.showToast(error.message || 'Không thể xóa sản phẩm!', 'error');
         }
     }
 }
+
 
 // =================================================================
 // MODAL MANAGER
@@ -771,33 +656,12 @@ class ModalManager {
     static initAuthModal() {
         const authModal = document.getElementById('authModal');
         const loginButton = document.getElementById('loginButton');
-        
         if (!authModal || !loginButton) return;
-
-        const showModal = () => {
-            authModal.style.display = 'flex';
-            setTimeout(() => authModal.classList.add('show'), 10);
-            document.body.style.overflow = 'hidden';
-        };
-        
-        const hideModal = () => {
-            authModal.classList.remove('show');
-            setTimeout(() => {
-                authModal.style.display = 'none';
-                document.body.style.overflow = '';
-            }, 300);
-        };
-
+        const showModal = () => { authModal.style.display = 'flex'; setTimeout(() => authModal.classList.add('show'), 10); document.body.style.overflow = 'hidden'; };
+        const hideModal = () => { authModal.classList.remove('show'); setTimeout(() => { authModal.style.display = 'none'; document.body.style.overflow = ''; }, 300); };
         loginButton.addEventListener('click', showModal);
-        
-        authModal.querySelectorAll('.modal-close').forEach(btn => {
-            btn.addEventListener('click', hideModal);
-        });
-        
-        authModal.addEventListener('click', (e) => {
-            if (e.target === authModal) hideModal();
-        });
-
+        authModal.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', hideModal));
+        authModal.addEventListener('click', (e) => { if (e.target === authModal) hideModal(); });
         this.setupAuthTabs(authModal);
         this.setupAuthForms(authModal, hideModal);
     }
@@ -805,23 +669,18 @@ class ModalManager {
     static setupAuthTabs(authModal) {
         const tabs = authModal.querySelectorAll('.modal-tab');
         const forms = authModal.querySelectorAll('.modal-form');
-        
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 tabs.forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
-                forms.forEach(f => {
-                    f.classList.toggle('active', f.id === `${tab.dataset.tab}Form`);
-                });
+                forms.forEach(f => f.classList.toggle('active', f.id === `${tab.dataset.tab}Form`));
             });
         });
-
         authModal.querySelectorAll('.switch-to-register, .switch-to-login').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const targetTab = e.target.classList.contains('switch-to-register') ? 'register' : 'login';
-                const targetTabElement = authModal.querySelector(`.modal-tab[data-tab="${targetTab}"]`);
-                if (targetTabElement) targetTabElement.click();
+                authModal.querySelector(`.modal-tab[data-tab="${targetTab}"]`)?.click();
             });
         });
     }
@@ -833,34 +692,21 @@ class ModalManager {
 
     static setupLoginForm(form, onSuccess) {
         if (!form) return;
-        
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const submitBtn = form.querySelector('.btn-submit');
             const spinner = submitBtn.querySelector('.spinner');
-
             this.setLoadingState(submitBtn, spinner, true);
-
             try {
                 const email = form.email.value.trim();
                 const password = form.password.value;
-                
-                if (!email || !password) {
-                    throw new Error('Vui lòng nhập đầy đủ thông tin!');
-                }
-                
+                if (!email || !password) throw new Error('Vui lòng nhập đầy đủ thông tin!');
                 const user = await AuthManager.login(email, password);
                 const displayName = AuthManager.getDisplayName(user);
                 Utils.showToast(`Chào mừng ${displayName}!`, 'success');
-                
                 onSuccess();
                 form.reset();
-                
-                setTimeout(() => {
-                    if (window.loadProducts) window.loadProducts();
-                }, 500);
-                
+                setTimeout(() => window.ProductManager?.loadProducts(), 500);
             } catch (error) {
                 Utils.showToast(error.message || 'Đăng nhập thất bại!', 'error');
             } finally {
@@ -871,44 +717,25 @@ class ModalManager {
 
     static setupRegisterForm(form, onSuccess) {
         if (!form) return;
-        
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const submitBtn = form.querySelector('.btn-submit');
             const spinner = submitBtn.querySelector('.spinner');
-
             this.setLoadingState(submitBtn, spinner, true);
-
             try {
                 const name = form.name.value.trim();
                 const email = form.email.value.trim();
                 const password = form.password.value;
                 const confirmPassword = form.confirmPassword.value;
-
-                if (!name || !email || !password || !confirmPassword) {
-                    throw new Error('Vui lòng nhập đầy đủ thông tin!');
-                }
-                
-                if (password.length < 6) {
-                    throw new Error('Mật khẩu phải có ít nhất 6 ký tự!');
-                }
-                
-                if (password !== confirmPassword) {
-                    throw new Error('Mật khẩu xác nhận không khớp!');
-                }
-                
+                if (!name || !email || !password || !confirmPassword) throw new Error('Vui lòng nhập đầy đủ thông tin!');
+                if (password.length < 6) throw new Error('Mật khẩu phải có ít nhất 6 ký tự!');
+                if (password !== confirmPassword) throw new Error('Mật khẩu xác nhận không khớp!');
                 const user = await AuthManager.register(name, email, password, confirmPassword);
                 const displayName = AuthManager.getDisplayName(user);
                 Utils.showToast(`Chào mừng ${displayName}!`, 'success');
-                
                 onSuccess();
                 form.reset();
-                
-                setTimeout(() => {
-                    if (window.loadProducts) window.loadProducts();
-                }, 500);
-                
+                setTimeout(() => window.ProductManager?.loadProducts(), 500);
             } catch (error) {
                 Utils.showToast(error.message || 'Đăng ký thất bại!', 'error');
             } finally {
@@ -936,122 +763,59 @@ class ModalManager {
 
 class App {
     static async init() {
-        try {
-            // Create essential elements
-            Utils.getToastContainer();
-            ModalManager.initAuthModal();
-            
-            // Setup logout handlers
-            document.querySelectorAll('#logoutButton, #sidebarLogoutBtn').forEach(btn => {
-                if (btn) btn.addEventListener('click', AuthManager.logout);
-            });
-            
-            // Check auto login
-            await AuthManager.checkAutoLogin();
-
-            // Initialize page-specific features
-            await this.initCurrentPage();
-            
-            // Setup floating buttons
-            setTimeout(() => {
-                FloatingButtonsManager.init();
-            }, 500);
-            
-        } catch (error) {
-            Utils.showToast('Có lỗi xảy ra khi khởi tạo ứng dụng', 'error');
-        }
+        Utils.getToastContainer();
+        ModalManager.initAuthModal();
+        document.querySelectorAll('#logoutButton, #sidebarLogoutBtn').forEach(btn => {
+            if (btn) btn.addEventListener('click', AuthManager.logout);
+        });
+        await AuthManager.checkAutoLogin();
+        await this.initCurrentPage();
+        setTimeout(() => FloatingButtonsManager.init(), 500);
     }
 
     static async initCurrentPage() {
         const path = window.location.pathname.split("/").pop() || 'index.html';
-        
         switch (path) {
-            case 'index.html':
-            case '':
-                await this.initIndexPage();
-                break;
-            case 'account.html':
-                await this.initAccountPage();
-                break;
-            case 'cart.html':
-                await this.initCartPage();
-                break;
-            case 'favorite.html':
-                await this.initFavoritePage();
-                break;
+            case 'index.html': case '': await this.initIndexPage(); break;
+            case 'account.html': await this.initAccountPage(); break;
+            case 'cart.html': await this.initCartPage(); break;
+            case 'favorite.html': await this.initFavoritePage(); break;
         }
     }
 
     static async initIndexPage() {
         await ProductManager.loadProducts();
-        
         const filterButton = document.getElementById('filterButton');
         const resetButton = document.getElementById('resetButton');
-        
-        if (filterButton) {
-            filterButton.addEventListener('click', () => {
-                if (window.filterProducts) window.filterProducts();
-            });
-        }
-
-        if (resetButton) {
-            resetButton.addEventListener('click', () => {
-                if (window.resetFilters) window.resetFilters();
-            });
-        }
+        if (filterButton) filterButton.addEventListener('click', () => window.filterProducts?.());
+        if (resetButton) resetButton.addEventListener('click', () => window.resetFilters?.());
     }
 
-    static async initAccountPage() {
-        // Account page initialization
-        if (!currentUser) {
-            setTimeout(() => window.location.href = 'index.html', 1000);
-            return;
-        }
-    }
-
-    static async initCartPage() {
-        // Cart page initialization
-        if (!currentUser) {
-            setTimeout(() => window.location.href = 'index.html', 1000);
-            return;
-        }
-    }
-
-    static async initFavoritePage() {
-        // Favorite page initialization
-        if (!currentUser) {
-            setTimeout(() => window.location.href = 'index.html', 1000);
-            return;
-        }
-    }
+    static async initAccountPage() { if (!currentUser) setTimeout(() => window.location.href = 'index.html', 1000); }
+    static async initCartPage() { if (!currentUser) setTimeout(() => window.location.href = 'index.html', 1000); }
+    static async initFavoritePage() { if (!currentUser) setTimeout(() => window.location.href = 'index.html', 1000); }
 }
 
 // =================================================================
 // GLOBAL EXPORTS
 // =================================================================
 
-// Export for other scripts
 window.Utils = Utils;
 window.CartManager = CartManager;
 window.FavoriteManager = FavoriteManager;
-window.currentUser = () => currentUser;
-window.allProducts = () => allProducts;
 window.PermissionManager = PermissionManager;
 window.ProductManager = ProductManager;
 window.StorageManager = StorageManager;
 window.ApiManager = ApiManager;
 
 // Legacy compatibility
-window.callApi = ApiManager.call;
-window.checkPostPermission = PermissionManager.checkPostPermission;
-window.updateFloatingButtons = FloatingButtonsManager.update;
-window.loadProducts = ProductManager.loadProducts;
 window.updateAllFavoriteButtons = async () => {
     if (!currentUser) return;
-    const favorites = await FavoriteManager.get();
-    favorites.forEach(fav => FavoriteManager.updateStatus(fav.productId, true));
+    try {
+        const favorites = await FavoriteManager.get();
+        favorites.forEach(fav => FavoriteManager.updateStatus(fav.productId, true));
+    } catch {}
 };
-window.updateFavoriteStatus = FavoriteManager.updateStatus;
 
 // =================================================================
 // APPLICATION START
