@@ -1,51 +1,27 @@
-// script.js - Phiên bản đã sửa lỗi với chức năng đăng sản phẩm
-// Tương thích hoàn toàn với main.js mới, sử dụng floating buttons
+// script.js - Fixed version, compatible với main.js mới
+// Loại bỏ duplicate constants và sử dụng từ main.js
 
 "use strict";
 
 // =================================================================
-// QUẢN LÝ QUYỀN ĐĂNG SẢN PHẨM
+// KIỂM TRA DEPENDENCIES
 // =================================================================
 
-// Danh sách email được ủy quyền đăng sản phẩm
-const AUTHORIZED_EMAILS = [
-    'chinhan20917976549a@gmail.com',
-    'manager@shopgrowgarden.com', 
-    'seller@shopgrowgarden.com',
-    'test@example.com', // Email test cho demo
-    'greensvn@gmail.com', // Thêm email chủ shop
-    // Thêm email được ủy quyền ở đây
-];
-
-/**
- * Kiểm tra xem người dùng hiện tại có quyền đăng sản phẩm không
- */
-function checkPostPermission() {
-    if (!window.currentUser || !window.currentUser.email) {
-        return false;
-    }
-    
-    const userEmail = window.currentUser.email.toLowerCase();
-    return AUTHORIZED_EMAILS.includes(userEmail);
+// Đợi main.js load xong trước khi chạy
+if (typeof window.Utils === 'undefined') {
+    console.warn('⚠️ main.js chưa load xong, đợi...');
 }
 
-/**
- * Cập nhật quyền đăng sản phẩm (sẽ được gọi bởi main.js)
- * LƯU Ý: Hàm này đã được thay thế bằng floating buttons trong main.js
- */
-function updatePostProductButton() {
-    // Hàm này đã được di chuyển vào main.js với tên updateFloatingButtons()
-    if (window.updateFloatingButtons) {
-        window.updateFloatingButtons();
-    }
-}
+// =================================================================
+// QUẢN LÝ MODAL ĐĂNG SẢN PHẨM
+// =================================================================
 
 /**
  * Hiển thị modal đăng sản phẩm
  */
 function showAddProductModal() {
     // Kiểm tra quyền trước khi hiển thị modal
-    if (!checkPostPermission()) {
+    if (!window.checkPostPermission || !window.checkPostPermission()) {
         window.Utils?.showToast('Bạn không có quyền đăng sản phẩm!', 'error');
         return;
     }
@@ -226,9 +202,42 @@ async function handleAddProductSubmit(e) {
     spinner.style.display = 'inline-block';
     
     try {
-        // Tạo sản phẩm mới
+        // Thử gọi API để tạo sản phẩm trước
+        if (window.callApi) {
+            try {
+                const apiData = {
+                    title: formData.title,
+                    description: formData.description,
+                    price: formData.price,
+                    images: [formData.image],
+                    badge: formData.badge,
+                    sales: formData.sales,
+                    stock: 999,
+                    category: 'custom',
+                    link: formData.link
+                };
+                
+                const result = await window.callApi('/products', 'POST', apiData);
+                console.log('✅ Product created via API:', result);
+                
+                // Nếu thành công, reload products từ API
+                if (window.loadProducts) {
+                    await window.loadProducts();
+                }
+                
+                window.Utils?.showToast('Đăng sản phẩm thành công!', 'success');
+                document.getElementById('addProductForm').reset();
+                hideAddProductModal();
+                return;
+                
+            } catch (apiError) {
+                console.log('⚠️ API failed, falling back to local storage:', apiError.message);
+            }
+        }
+        
+        // Fallback: Tạo sản phẩm local nếu API không hoạt động
         const newProduct = {
-            _id: 'local_' + Date.now(), // ID tạm thời
+            _id: 'local_' + Date.now(),
             title: formData.title,
             description: formData.description,
             price: formData.price,
@@ -238,12 +247,13 @@ async function handleAddProductSubmit(e) {
             sales: formData.sales,
             stock: 999,
             category: 'custom',
-            link: formData.link
+            link: formData.link,
+            createdAt: new Date().toISOString()
         };
         
         // Thêm vào danh sách sản phẩm hiện tại
         if (window.allProducts) {
-            window.allProducts.unshift(newProduct); // Thêm vào đầu danh sách
+            window.allProducts.unshift(newProduct);
         } else {
             window.allProducts = [newProduct];
         }
@@ -254,7 +264,7 @@ async function handleAddProductSubmit(e) {
         }
         
         // Thông báo thành công
-        window.Utils?.showToast('Đăng sản phẩm thành công!', 'success');
+        window.Utils?.showToast('Đăng sản phẩm thành công! (Chế độ local)', 'success');
         
         // Reset form và đóng modal
         document.getElementById('addProductForm').reset();
@@ -295,7 +305,7 @@ function renderApiProducts(products) {
         return;
     }
 
-    console.log('Rendering', products.length, 'products from API');
+    console.log('📦 Rendering', products.length, 'products from API');
 
     // Xóa nội dung cũ hoặc spinner tải trang
     productsGrid.innerHTML = '';
@@ -307,14 +317,14 @@ function renderApiProducts(products) {
                 <p style="color: #64748b; font-size: 1.1rem;">Không tìm thấy sản phẩm nào phù hợp.</p>
             </div>
         `;
-        hideFilterResult(); // Ẩn thông báo kết quả lọc nếu có
+        hideFilterResult();
         return;
     }
     
     products.forEach((product, index) => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card fade-in';
-        productCard.dataset.id = product._id; // Sử dụng _id từ API
+        productCard.dataset.id = product._id;
         productCard.dataset.price = product.price;
         productCard.dataset.note = product.description || '';
         productCard.dataset.category = product.category || '';
@@ -377,7 +387,7 @@ function renderApiProducts(products) {
         window.updateAllFavoriteButtons();
     }
     
-    console.log('API products rendered successfully.');
+    console.log('✅ API products rendered successfully.');
 }
 
 /**
@@ -398,9 +408,9 @@ function attachProductEventListeners() {
 
             const productId = e.currentTarget.dataset.id;
             const icon = btn.querySelector('i');
-            const isFavorite = icon.classList.contains('fas'); // Kiểm tra trạng thái hiện tại
+            const isFavorite = icon.classList.contains('fas');
 
-            btn.disabled = true; // Vô hiệu hóa nút để tránh click liên tục
+            btn.disabled = true;
 
             try {
                 if (isFavorite) {
@@ -410,12 +420,11 @@ function attachProductEventListeners() {
                     await window.FavoriteManager.add(productId);
                     window.Utils?.showToast('Đã thêm vào yêu thích!', 'success');
                 }
-                // Trạng thái nút sẽ được cập nhật tự động bởi FavoriteManager thông qua hàm updateFavoriteStatus
             } catch (error) {
                 console.error('Error toggling favorite:', error);
                 window.Utils?.showToast(error.message || 'Có lỗi xảy ra', 'error');
             } finally {
-                btn.disabled = false; // Kích hoạt lại nút
+                btn.disabled = false;
             }
         });
     });
@@ -426,7 +435,7 @@ function attachProductEventListeners() {
 // =================================================================
 
 function filterProducts() {
-    console.log('Filtering products...');
+    console.log('🔍 Filtering products...');
     
     const searchId = document.getElementById('searchId')?.value?.toLowerCase().trim() || '';
     const searchPrice = document.getElementById('searchPrice')?.value || '';
@@ -442,7 +451,7 @@ function filterProducts() {
         let isVisible = true;
         
         // Lọc theo ID (chỉ cần khớp phần cuối)
-        if (searchId && !cardId.endsWith(searchId)) {
+        if (searchId && !cardId.includes(searchId)) {
             isVisible = false;
         }
         
@@ -476,11 +485,11 @@ function filterProducts() {
     });
     
     showFilterResult(visibleCount);
-    console.log(`Filter applied. ${visibleCount} products visible.`);
+    console.log(`✅ Filter applied. ${visibleCount} products visible.`);
 }
 
 function resetFilters() {
-    console.log('Resetting filters...');
+    console.log('🔄 Resetting filters...');
     
     // Xóa các giá trị trong ô input
     const searchId = document.getElementById('searchId');
@@ -500,7 +509,7 @@ function resetFilters() {
     });
     
     hideFilterResult();
-    console.log(`Filters reset. ${totalCount} products visible.`);
+    console.log(`✅ Filters reset. ${totalCount} products visible.`);
 }
 
 function showFilterResult(count) {
@@ -547,16 +556,16 @@ function hideFilterResult() {
 // =================================================================
 
 function initIndexPageScript() {
-    console.log('Initializing index page script (filters and events)...');
+    console.log('🎯 Initializing index page script (filters and events)...');
     
-    // Kiểm tra xem có đang ở trang chủ không bằng cách tìm #productsGrid
+    // Kiểm tra xem có đang ở trang chủ không
     const productsGrid = document.getElementById('productsGrid');
     if (!productsGrid) {
-        console.log('Not on the index page, skipping script initialization.');
+        console.log('ℹ️ Not on the index page, skipping script initialization.');
         return;
     }
     
-    // Gắn sự kiện cho các thành phần của bộ lọc (chỉ tồn tại ở index.html)
+    // Gắn sự kiện cho các thành phần của bộ lọc
     const filterButton = document.getElementById('filterButton');
     const resetButton = document.getElementById('resetButton');
     
@@ -591,8 +600,7 @@ function initIndexPageScript() {
         priceSelect.addEventListener('change', filterProducts);
     }
     
-    console.log('Index page filter script initialized successfully.');
-    // LƯU Ý: Việc tải và hiển thị sản phẩm lần đầu sẽ do main.js điều khiển bằng cách gọi hàm window.renderApiProducts.
+    console.log('✅ Index page filter script initialized successfully.');
 }
 
 // =================================================================
@@ -600,7 +608,10 @@ function initIndexPageScript() {
 // =================================================================
 
 // Đợi DOM được tải hoàn toàn rồi mới chạy script khởi tạo
-document.addEventListener('DOMContentLoaded', initIndexPageScript);
+document.addEventListener('DOMContentLoaded', () => {
+    // Đợi một chút để main.js load xong
+    setTimeout(initIndexPageScript, 100);
+});
 
 // =================================================================
 // GLOBAL EXPORTS (Để main.js và các script khác có thể gọi)
@@ -609,9 +620,7 @@ document.addEventListener('DOMContentLoaded', initIndexPageScript);
 window.renderApiProducts = renderApiProducts;
 window.filterProducts = filterProducts;
 window.resetFilters = resetFilters;
-window.updatePostProductButton = updatePostProductButton;
-window.checkPostPermission = checkPostPermission;
 window.showAddProductModal = showAddProductModal;
 window.hideAddProductModal = hideAddProductModal;
 
-console.log('Script.js (for Index Page) loaded successfully and is ready for main.js');
+console.log('✅ Script.js (for Index Page) loaded successfully and is ready for main.js');
