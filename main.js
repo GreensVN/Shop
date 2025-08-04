@@ -306,31 +306,25 @@ class PermissionManager {
 class ApiManager {
     static async call(endpoint, method = 'GET', body = null, requireAuth = true) {
         const headers = { 'Content-Type': 'application/json' };
-        const token = localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
-        
+        // Lấy token từ localStorage hoặc sessionStorage
+        const token = localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN) || sessionStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
         if (token && requireAuth) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-
         try {
             const response = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
                 method,
                 headers,
                 body: body ? JSON.stringify(body) : null
             });
-
             if (response.status === 204) return { success: true };
-            
             const data = await response.json();
-            
             if (response.status === 401 && !requireAuth) {
                 return { data: { products: [], favorites: [], cart: [] } };
             }
-            
             if (!response.ok) {
                 throw new Error(data.message || 'Server error occurred');
             }
-            
             return data;
         } catch (error) {
             throw error;
@@ -350,8 +344,8 @@ class ApiManager {
     }
 
     static async getProducts() {
-        const hasToken = !!localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
-        return await this.call('/products', 'GET', null, hasToken);
+        // Luôn cho phép GET sản phẩm không cần token
+        return await this.call('/products', 'GET', null, false);
     }
 }
 
@@ -558,15 +552,20 @@ const FavoriteManager = {
 // =================================================================
 
 class AuthManager {
-    static async login(email, password) {
+    static async login(email, password, rememberMe = true) {
         const data = await ApiManager.call('/users/login', 'POST', { email, password });
-        localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
-        
+        // Lưu token đúng nơi
+        if (rememberMe) {
+            localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
+            sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+        } else {
+            sessionStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
+            localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+        }
         currentUser = {
             ...data.data.user,
             email: data.data.user.email || email
         };
-        
         localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
         await AuthManager.updateUIAfterLogin();
         return currentUser;
@@ -607,19 +606,19 @@ class AuthManager {
     }
 
     static async checkAutoLogin() {
-        const token = localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
-        
+        // Ưu tiên lấy token từ localStorage, nếu không có thì lấy từ sessionStorage
+        let token = localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
+        if (!token) token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
         if (token) {
             try {
                 const data = await ApiManager.call('/users/me');
                 currentUser = data.data.user;
-                
                 if (!currentUser.email) throw new Error('Invalid user data');
-                
                 localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
                 await AuthManager.updateUIAfterLogin();
             } catch (error) {
                 localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+                sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
                 localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);
                 currentUser = null;
                 AuthManager.updateUIAfterLogout();
