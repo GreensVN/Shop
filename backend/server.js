@@ -1142,10 +1142,12 @@ app.get('/api/v1/users/logout', authController.logout);
 app.post('/api/v1/users/forgotPassword', authController.forgotPassword);
 app.patch('/api/v1/users/resetPassword/:token', authController.resetPassword);
 
-// Protected routes
-app.use(authController.protect);
+// Public product routes (ai cũng xem được)
+app.get('/api/v1/products', productController.getAllProducts);
+app.get('/api/v1/products/:id', productController.getProduct);
 
-app.patch('/api/v1/users/updateMyPassword', authController.updatePassword);
+// Protected routes (phải đăng nhập)
+app.use(authController.protect);
 app.get('/api/v1/users/me', userController.getMe);
 app.get('/api/v1/users/me/balance', userController.getMyBalance);
 app.patch('/api/v1/users/updateMe', userController.updateMe);
@@ -1173,9 +1175,7 @@ app.patch('/api/v1/users/:id', userController.updateUser);
 app.delete('/api/v1/users/:id', userController.deleteUser);
 
 // Product routes
-app.get('/api/v1/products', productController.getAllProducts);
 app.post('/api/v1/products', productController.createProduct);
-app.get('/api/v1/products/:id', productController.getProduct);
 app.patch('/api/v1/products/:id', productController.updateProduct);
 app.delete('/api/v1/products/:id', productController.deleteProduct);
 
