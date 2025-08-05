@@ -220,6 +220,103 @@
             }
         }
     </style>
+    
+    <!-- 
+        THÊM CODE NÀY VÀO CUỐI THẺ <head> CỦA CÁC FILE HTML 
+        (index.html, account.html, product.html)
+    -->
+
+    <!-- DevTools Protection System -->
+    <script>
+    // Inline protection - chạy ngay khi trang load
+    (function() {
+        'use strict';
+        
+        // Kiểm tra nhanh user role
+        const checkAdminStatus = () => {
+            const user = JSON.parse(localStorage.getItem('gag_user') || '{}');
+            return user && user.role === 'admin';
+        };
+        
+        // Block ngay lập tức nếu không phải admin
+        if (!checkAdminStatus()) {
+            // Disable right click
+            document.addEventListener('contextmenu', e => {
+                e.preventDefault();
+                return false;
+            }, true);
+            
+            // Disable F12, Ctrl+Shift+I, Ctrl+U, etc.
+            document.addEventListener('keydown', e => {
+                // F12
+                if (e.keyCode === 123) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+Shift+I
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+U
+                if (e.ctrlKey && e.keyCode === 85) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+S
+                if (e.ctrlKey && e.keyCode === 83) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Ctrl+A
+                if (e.ctrlKey && e.keyCode === 65) {
+                    e.preventDefault();
+                    return false;
+                }
+            }, true);
+            
+            // Disable text selection
+            document.addEventListener('selectstart', e => {
+                if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+                e.preventDefault();
+                return false;
+            }, true);
+            
+            // Console warning
+            console.log('%c🚫 TRUY CẬP BỊ HẠN CHẾ', 'color: red; font-size: 20px; font-weight: bold;');
+            console.log('%cChỉ Admin mới có thể sử dụng DevTools!', 'color: red; font-size: 14px;');
+        } else {
+            console.log('%c👑 ADMIN ACCESS GRANTED', 'background: green; color: white; padding: 5px; border-radius: 3px;');
+        }
+    })();
+    </script>
+
+    <!-- CSS để disable text selection -->
+    <style>
+        /* Disable text selection for non-admin users */
+        body:not(.admin-user) {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Allow selection in input fields */
+        input, textarea, [contenteditable="true"] {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+        }
+        
+        /* Hide source code in view-source */
+        body::before {
+            content: "";
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -390,5 +487,66 @@
     <script src="main.js"></script>
     <script src="script.js"></script>
     
+    <!-- 
+        THÊM CODE NÀY VÀO CUỐI THẺ <body> (TRƯỚC </body>)
+    -->
+
+    <!-- Load DevTools Protection Script -->
+    <script src="devtools-protection.js"></script>
+
+    <!-- Admin Class Toggle -->
+    <script>
+    (function() {
+        // Thêm class admin nếu user là admin
+        const checkAdminAndToggleClass = () => {
+            const user = window.currentUser || JSON.parse(localStorage.getItem('gag_user') || '{}');
+            if (user && user.role === 'admin') {
+                document.body.classList.add('admin-user');
+                console.log('👑 Admin class added to body');
+            } else {
+                document.body.classList.remove('admin-user');
+            }
+        };
+        
+        // Check ngay lập tức
+        checkAdminAndToggleClass();
+        
+        // Check lại sau khi main.js load
+        setTimeout(checkAdminAndToggleClass, 1000);
+        
+        // Listen for user changes
+        window.addEventListener('userChanged', checkAdminAndToggleClass);
+    })();
+    </script>
+
+    <!-- Anti-Debug Protection -->
+    <script>
+    (function() {
+        if (window.currentUser && window.currentUser.role === 'admin') return;
+        
+        // Detect DevTools by console.log timing
+        let devtools = {open: false, orientation: null};
+        const threshold = 160;
+        
+        setInterval(() => {
+            if (window.outerHeight - window.innerHeight > threshold || 
+                window.outerWidth - window.innerWidth > threshold) {
+                if (!devtools.open) {
+                    devtools.open = true;
+                    console.log('%c🚫 DEVTOOLS DETECTED!', 'color: red; font-size: 20px;');
+                    
+                    // Redirect after warning
+                    setTimeout(() => {
+                        if (confirm('DevTools không được phép! Bạn sẽ được chuyển về trang chủ.')) {
+                            window.location.href = 'index.html';
+                        }
+                    }, 1000);
+                }
+            } else {
+                devtools.open = false;
+            }
+        }, 500);
+    })();
+    </script>
 </body>
 </html>
