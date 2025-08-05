@@ -762,6 +762,9 @@ class AuthManager {
         
         await CartManager.updateCount();
         FloatingButtonsManager.update();
+        
+        // Re-setup DevTools protection with updated user
+        setTimeout(setupDevToolsProtection, 100);
     }
 
     static updateUIAfterLogout() {
@@ -826,12 +829,22 @@ class ProductManager {
 
     static async createProduct(productData) {
         console.log('🎯 Creating product:', productData);
+        console.log('Current user:', currentUser);
+        console.log('Has permission:', PermissionManager.checkPostPermission());
         
         if (!PermissionManager.checkPostPermission()) {
-            throw new Error('Bạn không có quyền đăng sản phẩm!');
+            const errorMsg = 'Bạn không có quyền đăng sản phẩm!';
+            console.error('❌ Permission denied:', errorMsg);
+            throw new Error(errorMsg);
         }
         
-        SecurityManager.validateProduct(productData);
+        try {
+            SecurityManager.validateProduct(productData);
+            console.log('✅ Product validation passed');
+        } catch (validationError) {
+            console.error('❌ Product validation failed:', validationError);
+            throw validationError;
+        }
         
         const product = {
             title: SecurityManager.sanitizeInput(productData.title),
@@ -847,7 +860,10 @@ class ProductManager {
             createdBy: currentUser?._id
         };
 
+        console.log('📦 Final product object:', product);
+
         try {
+            console.log('🚀 Sending API request...');
             const result = await ApiManager.createProduct(product);
             console.log('✅ Product created successfully:', result);
             
@@ -856,6 +872,11 @@ class ProductManager {
             return true;
         } catch (error) {
             console.error('❌ Failed to create product:', error);
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack,
+                response: error.response
+            });
             Utils.showToast(error.message || 'Không thể lưu sản phẩm', 'error');
             throw error;
         }
@@ -1266,8 +1287,18 @@ function setupDevToolsProtection() {
     if (_devToolsKeydownHandler) document.removeEventListener('keydown', _devToolsKeydownHandler);
     if (_devToolsContextMenuHandler) document.removeEventListener('contextmenu', _devToolsContextMenuHandler);
 
-    _devToolsKeydownHandler = function(e) {
-        if (!currentUser || !isAdminEmail(currentUser.email)) {
+    // Check if current user is admin
+    const isCurrentUserAdmin = currentUser && isAdminEmail(currentUser.email);
+    
+    console.log('🔒 Setting up DevTools protection...');
+    console.log('Current user:', currentUser);
+    console.log('Is admin:', isCurrentUserAdmin);
+    
+    // Only apply restrictions for NON-admin users
+    if (!isCurrentUserAdmin) {
+        console.log('❌ Applying DevTools restrictions for non-admin user');
+        
+        _devToolsKeydownHandler = function(e) {
             if (
                 e.key === 'F12' ||
                 (e.ctrlKey && e.shiftKey && e.key === 'I') ||
@@ -1277,19 +1308,19 @@ function setupDevToolsProtection() {
                 Utils.showToast('Chức năng này đã bị vô hiệu hóa!', 'warning');
                 return false;
             }
-        }
-    };
-    
-    _devToolsContextMenuHandler = function(e) {
-        if (!currentUser || !isAdminEmail(currentUser.email)) {
+        };
+        
+        _devToolsContextMenuHandler = function(e) {
             e.preventDefault();
             Utils.showToast('Chuột phải đã bị vô hiệu hóa!', 'warning');
             return false;
-        }
-    };
-    
-    document.addEventListener('keydown', _devToolsKeydownHandler);
-    document.addEventListener('contextmenu', _devToolsContextMenuHandler);
+        };
+        
+        document.addEventListener('keydown', _devToolsKeydownHandler);
+        document.addEventListener('contextmenu', _devToolsContextMenuHandler);
+    } else {
+        console.log('✅ Admin user detected - DevTools restrictions DISABLED');
+    }
 }
 
 function updateDevToolsProtection() {
