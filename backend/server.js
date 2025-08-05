@@ -66,7 +66,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // =================================================================
-// DATABASE CONNECTION (IMPROVED ERROR HANDLING)
+// DATABASE CONNECTION & ADMIN SETUP (IMPROVED) 🔥
 // =================================================================
 
 const DB = process.env.DATABASE.replace(
@@ -81,9 +81,61 @@ const connectDB = async () => {
       useUnifiedTopology: true,
     });
     console.log('✅ MongoDB connection successful!');
+    
+    // Create default admin user if not exists
+    await createDefaultAdmin();
+    
   } catch (error) {
     console.error('❌ MongoDB connection failed:', error.message);
     process.exit(1);
+  }
+};
+
+// 🔥 FUNCTION TO CREATE DEFAULT ADMIN USER
+const createDefaultAdmin = async () => {
+  try {
+    console.log('🔍 Checking for default admin users...');
+    
+    // List of admin emails
+    const adminEmails = [
+      'chinhan20917976549a@gmail.com',
+      'ryantran149@gmail.com'
+    ];
+    
+    for (const email of adminEmails) {
+      let user = await User.findOne({ email: email.toLowerCase() });
+      
+      if (user) {
+        // User exists, check if admin
+        if (user.role !== 'admin') {
+          console.log(`🔧 Updating ${email} to admin role...`);
+          user.role = 'admin';
+          await user.save({ validateBeforeSave: false });
+          console.log(`✅ ${email} is now admin!`);
+        } else {
+          console.log(`✅ ${email} already has admin role`);
+        }
+      } else {
+        // Create new admin user
+        console.log(`🚀 Creating admin user: ${email}`);
+        
+        const adminData = {
+          name: email === 'chinhan20917976549a@gmail.com' ? 'Co-owner (Chí Nghĩa)' : 'Ryan Tran Admin',
+          email: email.toLowerCase(),
+          password: 'admin123456', // Default password
+          passwordConfirm: 'admin123456',
+          role: 'admin'
+        };
+        
+        user = await User.create(adminData);
+        console.log(`✅ Admin user created: ${email} with role: ${user.role}`);
+      }
+    }
+    
+    console.log('🎯 Admin setup completed!');
+    
+  } catch (error) {
+    console.error('❌ Error setting up admin users:', error.message);
   }
 };
 
@@ -559,7 +611,12 @@ const authController = {
       });
     }
 
-    console.log('✅ Login successful:', { email, role: user.role });
+    console.log('✅ Login successful for:', {
+      email: user.email,
+      name: user.name, 
+      role: user.role,
+      id: user._id
+    });
 
     createSendToken(user, 200, res);
   }),
@@ -834,6 +891,45 @@ const userController = {
     res.status(204).json({
       status: 'success',
       data: null,
+    });
+  }),
+
+  // Admin utility routes
+  makeUserAdmin: catchAsync(async (req, res, next) => {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please provide email address'
+      });
+    }
+    
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    
+    if (!user) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'User not found'
+      });
+    }
+    
+    user.role = 'admin';
+    await user.save({ validateBeforeSave: false });
+    
+    console.log(`🎯 User ${email} promoted to admin by ${req.user.email}`);
+    
+    res.status(200).json({
+      status: 'success',
+      message: `${email} is now an admin`,
+      data: {
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      }
     });
   }),
 };
@@ -1423,6 +1519,31 @@ app.get('/api/v1/health', (req, res) => {
   });
 });
 
+// Debug route (temporary - for checking user roles)
+app.get('/api/v1/debug/user-role/:email', catchAsync(async (req, res) => {
+  const { email } = req.params;
+  
+  const user = await User.findOne({ email: email.toLowerCase() });
+  
+  if (!user) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'User not found'
+    });
+  }
+  
+  res.status(200).json({
+    status: 'success',
+    data: {
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      active: user.active,
+      createdAt: user.createdAt
+    }
+  });
+}));
+
 // =================================================================
 // PUBLIC ROUTES (No authentication required)
 // =================================================================
@@ -1502,6 +1623,9 @@ app.route('/api/v1/users/:id')
   .get(userController.getUser)
   .patch(userController.updateUser)
   .delete(userController.deleteUser);
+
+// Admin utility routes
+app.post('/api/v1/users/make-admin', userController.makeUserAdmin);
 
 // Admin product management
 app.route('/api/v1/products')
