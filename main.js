@@ -1,4 +1,4 @@
-// main.js - Enhanced Production Version with Security (FIXED AUTH SYSTEM)
+// main.js - FIXED Authentication System
 "use strict";
 
 // =================================================================
@@ -7,7 +7,6 @@
 
 const CONFIG = {
     API_BASE_URL: 'https://shop-4mlk.onrender.com/api/v1',
-    // 🔥 BỎ DANH SÁCH EMAIL CỨNG - SỬ DỤNG ROLE TỪ BACKEND
     STORAGE_KEYS: {
         TOKEN: 'gag_token',
         USER: 'gag_user',
@@ -29,83 +28,10 @@ const CONFIG = {
 
 let currentUser = null;
 let allProducts = [];
+let isInitialized = false;
 
 // =================================================================
-// SECURITY & VALIDATION UTILITIES
-// =================================================================
-
-class SecurityManager {
-    static obfuscateConsole() {
-        if (typeof window !== 'undefined') {
-            const methods = ['log', 'warn', 'error', 'info', 'debug'];
-            methods.forEach(method => {
-                const original = console[method];
-                console[method] = function(...args) {
-                    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-                        return;
-                    }
-                    original.apply(console, args);
-                };
-            });
-        }
-    }
-
-    static validateImageFile(file) {
-        if (!file) throw new Error('Vui lòng chọn file hình ảnh!');
-        if (!CONFIG.ALLOWED_IMAGE_TYPES.includes(file.type)) {
-            throw new Error('Chỉ hỗ trợ file JPG, PNG, WEBP!');
-        }
-        if (file.size > CONFIG.MAX_IMAGE_SIZE) {
-            throw new Error('Kích thước file không được vượt quá 5MB!');
-        }
-        return true;
-    }
-
-    static sanitizeInput(input) {
-        if (typeof input !== 'string') return '';
-        return input
-            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-            .replace(/javascript:/gi, '')
-            .replace(/on\w+\s*=/gi, '')
-            .replace(/data:/gi, '')
-            .trim();
-    }
-
-    static validateProduct(data) {
-        const errors = [];
-        const { TITLE_MIN, TITLE_MAX, DESC_MIN, DESC_MAX, PRICE_MIN, PRICE_MAX } = CONFIG.PRODUCT_VALIDATION;
-
-        if (!data.title || data.title.length < TITLE_MIN || data.title.length > TITLE_MAX) {
-            errors.push(`Tên sản phẩm phải từ ${TITLE_MIN} đến ${TITLE_MAX} ký tự`);
-        }
-
-        if (!data.description || data.description.length < DESC_MIN || data.description.length > DESC_MAX) {
-            errors.push(`Mô tả phải từ ${DESC_MIN} đến ${DESC_MAX} ký tự`);
-        }
-
-        const price = parseInt(data.price);
-        if (isNaN(price) || price < PRICE_MIN || price > PRICE_MAX) {
-            errors.push(`Giá phải từ ${Utils.formatPrice(PRICE_MIN)} đến ${Utils.formatPrice(PRICE_MAX)}`);
-        }
-
-        if (!Utils.validateURL(data.image)) {
-            errors.push('URL hình ảnh không hợp lệ');
-        }
-
-        if (!Utils.validateURL(data.link)) {
-            errors.push('Link sản phẩm không hợp lệ');
-        }
-
-        if (errors.length > 0) {
-            throw new Error(errors.join('\n'));
-        }
-
-        return true;
-    }
-}
-
-// =================================================================
-// ENHANCED UTILITY CLASS
+// UTILITY CLASS
 // =================================================================
 
 class Utils {
@@ -270,60 +196,7 @@ class Utils {
 }
 
 // =================================================================
-// PERMISSION MANAGER (COMPLETELY FIXED) 🔥
-// =================================================================
-
-class PermissionManager {
-    static checkPostPermission() {
-        console.log('🔍 Checking post permission...');
-        
-        if (!currentUser) {
-            console.log('❌ No current user');
-            return false;
-        }
-        
-        // 🎯 SỬ DỤNG ROLE TỪ BACKEND THAY VÌ EMAIL LIST
-        const userRole = currentUser.role;
-        console.log('User role:', userRole);
-        console.log('Current user:', currentUser);
-        
-        if (!userRole) {
-            console.log('❌ No user role found');
-            return false;
-        }
-        
-        const hasPermission = userRole === 'admin';
-        console.log('Has admin permission:', hasPermission);
-        
-        return hasPermission;
-    }
-
-    static checkDeletePermission(product) {
-        if (!currentUser) return false;
-        
-        // Admin có thể xóa tất cả
-        if (this.checkPostPermission()) return true;
-        
-        // Người tạo có thể xóa sản phẩm của mình
-        return product.createdBy === currentUser._id;
-    }
-
-    static checkAdminPermission() {
-        return this.checkPostPermission();
-    }
-
-    static debugPermissions() {
-        console.log('=== PERMISSION DEBUG (FIXED) ===');
-        console.log('Current User:', currentUser);
-        console.log('User Role:', currentUser?.role);
-        console.log('Has Post Permission:', this.checkPostPermission());
-        console.log('Is Admin:', currentUser?.role === 'admin');
-        console.log('================================');
-    }
-}
-
-// =================================================================
-// ENHANCED API MANAGER
+// API MANAGER
 // =================================================================
 
 class ApiManager {
@@ -341,8 +214,6 @@ class ApiManager {
         }
         
         console.log(`🌐 API Call: ${method} ${CONFIG.API_BASE_URL}${endpoint}`);
-        console.log('Headers:', headers);
-        console.log('Body:', body);
         
         try {
             const response = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
@@ -352,7 +223,6 @@ class ApiManager {
             });
             
             console.log('Response status:', response.status);
-            console.log('Response headers:', Object.fromEntries(response.headers.entries()));
             
             if (response.status === 204) return { success: true };
             
@@ -401,7 +271,514 @@ class ApiManager {
 }
 
 // =================================================================
-// ENHANCED FLOATING BUTTONS MANAGER
+// PERMISSION MANAGER (FIXED)
+// =================================================================
+
+class PermissionManager {
+    static checkPostPermission() {
+        console.log('🔍 Checking post permission...');
+        
+        if (!currentUser) {
+            console.log('❌ No current user');
+            return false;
+        }
+        
+        const userRole = currentUser.role;
+        console.log('User role:', userRole);
+        
+        if (!userRole) {
+            console.log('❌ No user role found');
+            return false;
+        }
+        
+        const hasPermission = userRole === 'admin';
+        console.log('Has admin permission:', hasPermission);
+        
+        return hasPermission;
+    }
+
+    static checkDeletePermission(product) {
+        if (!currentUser) return false;
+        
+        // Admin có thể xóa tất cả
+        if (this.checkPostPermission()) return true;
+        
+        // Người tạo có thể xóa sản phẩm của mình
+        return product.createdBy === currentUser._id;
+    }
+
+    static checkAdminPermission() {
+        return this.checkPostPermission();
+    }
+
+    static debugPermissions() {
+        console.log('=== PERMISSION DEBUG ===');
+        console.log('Current User:', currentUser);
+        console.log('User Role:', currentUser?.role);
+        console.log('Has Post Permission:', this.checkPostPermission());
+        console.log('Is Admin:', currentUser?.role === 'admin');
+        console.log('========================');
+    }
+}
+
+// =================================================================
+// AUTHENTICATION MANAGER (COMPLETELY FIXED) 🔥
+// =================================================================
+
+class AuthManager {
+    static async login(email, password, rememberMe = true) {
+        console.log('🔐 Attempting login for:', email);
+        
+        try {
+            const data = await ApiManager.call('/users/login', 'POST', { email, password }, false);
+            
+            console.log('✅ Login successful, received data:', data);
+            
+            // Lưu token
+            if (rememberMe) {
+                localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
+                sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+            } else {
+                sessionStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
+                localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+            }
+            
+            // Lưu thông tin user
+            currentUser = {
+                _id: data.data.user._id || data.data.user.id,
+                name: data.data.user.name,
+                email: data.data.user.email || email,
+                role: data.data.user.role || 'user',
+                ...data.data.user
+            };
+            
+            console.log('👤 Setting currentUser with role:', currentUser);
+            
+            localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
+            
+            // Cập nhật UI
+            await this.updateUIAfterLogin();
+            
+            return currentUser;
+        } catch (error) {
+            console.error('❌ Login failed:', error);
+            throw new Error(error.message || 'Đăng nhập thất bại. Vui lòng thử lại!');
+        }
+    }
+
+    static async register(name, email, password, passwordConfirm) {
+        console.log('📝 Attempting registration for:', email);
+        
+        try {
+            const data = await ApiManager.call('/users/signup', 'POST', {
+                name, email, password, passwordConfirm
+            }, false);
+            
+            console.log('✅ Registration successful:', data);
+            
+            localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
+            
+            currentUser = {
+                _id: data.data.user._id || data.data.user.id,
+                name: data.data.user.name || name,
+                email: data.data.user.email || email,
+                role: data.data.user.role || 'user',
+                ...data.data.user
+            };
+            
+            localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
+            await this.updateUIAfterLogin();
+            
+            return currentUser;
+        } catch (error) {
+            console.error('❌ Registration failed:', error);
+            throw new Error(error.message || 'Đăng ký thất bại. Vui lòng thử lại!');
+        }
+    }
+
+    static logout() {
+        if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) return;
+        
+        localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+        sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);
+        currentUser = null;
+        
+        this.updateUIAfterLogout();
+        Utils.showToast('Đăng xuất thành công!', 'success');
+        
+        const protectedPages = ['account.html', 'cart.html', 'favorite.html'];
+        if (protectedPages.some(page => window.location.pathname.includes(page))) {
+            setTimeout(() => window.location.href = 'index.html', 1000);
+        }
+    }
+
+    static async checkAutoLogin() {
+        console.log('🔍 Checking auto login...');
+        
+        let token = localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
+        if (!token) token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
+        
+        if (token) {
+            console.log('🎫 Found token, verifying...');
+            try {
+                const data = await ApiManager.call('/users/me');
+                
+                currentUser = {
+                    _id: data.data.user._id || data.data.user.id,
+                    name: data.data.user.name,
+                    email: data.data.user.email,
+                    role: data.data.user.role || 'user',
+                    ...data.data.user
+                };
+                
+                console.log('✅ Auto login successful with role:', currentUser);
+                
+                if (!currentUser.email) {
+                    throw new Error('Invalid user data - no email');
+                }
+                
+                localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
+                await this.updateUIAfterLogin();
+            } catch (error) {
+                console.log('❌ Auto login failed:', error);
+                ApiManager.clearAuthData();
+                this.updateUIAfterLogout();
+            }
+        } else {
+            console.log('📤 No token found');
+            this.updateUIAfterLogout();
+        }
+    }
+
+    static getDisplayName(user) {
+        if (!user) return 'User';
+        if (user.name?.trim()) return user.name.trim();
+        if (user.email?.includes('@')) return user.email.split('@')[0];
+        return 'User';
+    }
+
+    static async updateUIAfterLogin() {
+        if (!currentUser) return;
+        
+        console.log('🎨 Updating UI after login for:', currentUser);
+        
+        const loginButton = document.getElementById('loginButton');
+        const userDropdown = document.getElementById('userDropdown');
+        
+        if (loginButton) loginButton.style.display = 'none';
+        if (userDropdown) userDropdown.style.display = 'flex';
+        
+        const displayName = this.getDisplayName(currentUser);
+        const firstLetter = displayName.charAt(0).toUpperCase();
+        
+        document.querySelectorAll('.user-name, #userName').forEach(el => {
+            if (el) el.textContent = displayName;
+        });
+        
+        document.querySelectorAll('.user-avatar, #userAvatar').forEach(el => {
+            if (el) el.textContent = firstLetter;
+        });
+        
+        // Update global variable
+        window.currentUser = currentUser;
+        
+        if (window.FloatingButtonsManager) {
+            window.FloatingButtonsManager.update();
+        }
+    }
+
+    static updateUIAfterLogout() {
+        const loginButton = document.getElementById('loginButton');
+        const userDropdown = document.getElementById('userDropdown');
+        
+        if (loginButton) loginButton.style.display = 'flex';
+        if (userDropdown) userDropdown.style.display = 'none';
+        
+        // Clear global variable
+        window.currentUser = null;
+        
+        if (window.FloatingButtonsManager) {
+            window.FloatingButtonsManager.update();
+        }
+    }
+}
+
+// =================================================================
+// UI CONTROLLER (FIXED MODAL SYSTEM) 🔥
+// =================================================================
+
+class UIController {
+    static init() {
+        console.log('🎨 Initializing UI Controller...');
+        this.initAuthModal();
+        this.initEventListeners();
+        console.log('✅ UI Controller initialized');
+    }
+
+    static initAuthModal() {
+        // Tìm modal có sẵn trong HTML
+        const modal = document.getElementById('authModal');
+        if (!modal) {
+            console.error('❌ Auth modal not found in HTML');
+            return;
+        }
+
+        console.log('✅ Found auth modal in HTML');
+
+        // Setup modal event listeners
+        const closeBtn = modal.querySelector('.modal-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.hideAuthModal());
+        }
+
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.hideAuthModal();
+            }
+        });
+
+        // Setup tab switching
+        const tabs = modal.querySelectorAll('.modal-tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.dataset.tab;
+                this.switchAuthTab(targetTab);
+            });
+        });
+
+        // Setup form switching links
+        const switchToRegister = modal.querySelector('.switch-to-register');
+        const switchToLogin = modal.querySelector('.switch-to-login');
+        
+        if (switchToRegister) {
+            switchToRegister.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.switchAuthTab('register');
+            });
+        }
+
+        if (switchToLogin) {
+            switchToLogin.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.switchAuthTab('login');
+            });
+        }
+
+        // Setup forms
+        this.initLoginForm();
+        this.initRegisterForm();
+    }
+
+    static initLoginForm() {
+        const loginForm = document.getElementById('loginForm');
+        if (!loginForm) {
+            console.error('❌ Login form not found');
+            return;
+        }
+
+        console.log('✅ Initializing login form');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log('📝 Login form submitted');
+
+            const formData = new FormData(loginForm);
+            const email = formData.get('email')?.trim();
+            const password = formData.get('password');
+            const rememberMe = formData.get('rememberMe') === 'on';
+
+            console.log('Login data:', { email, rememberMe });
+
+            // Validation
+            if (!email || !password) {
+                Utils.showToast('Vui lòng nhập đầy đủ thông tin!', 'error');
+                return;
+            }
+
+            const submitBtn = loginForm.querySelector('button[type="submit"]');
+            const spinner = submitBtn.querySelector('.spinner');
+            const btnText = submitBtn.querySelector('span');
+
+            // Set loading state
+            submitBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Đang đăng nhập...';
+
+            try {
+                const user = await AuthManager.login(email, password, rememberMe);
+                
+                Utils.showToast(`Chào mừng ${user.name || user.email}!`, 'success');
+                this.hideAuthModal();
+                
+                // Reset form
+                loginForm.reset();
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                Utils.showToast(error.message, 'error');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Đăng nhập';
+            }
+        });
+    }
+
+    static initRegisterForm() {
+        const registerForm = document.getElementById('registerForm');
+        if (!registerForm) {
+            console.error('❌ Register form not found');
+            return;
+        }
+
+        console.log('✅ Initializing register form');
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log('📝 Register form submitted');
+
+            const formData = new FormData(registerForm);
+            const name = formData.get('name')?.trim();
+            const email = formData.get('email')?.trim();
+            const password = formData.get('password');
+            const confirmPassword = formData.get('confirmPassword');
+
+            console.log('Register data:', { name, email });
+
+            // Validation
+            if (!name || !email || !password || !confirmPassword) {
+                Utils.showToast('Vui lòng nhập đầy đủ thông tin!', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                Utils.showToast('Mật khẩu xác nhận không khớp!', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                Utils.showToast('Mật khẩu phải có ít nhất 6 ký tự!', 'error');
+                return;
+            }
+
+            const submitBtn = registerForm.querySelector('button[type="submit"]');
+            const spinner = submitBtn.querySelector('.spinner');
+            const btnText = submitBtn.querySelector('span');
+
+            // Set loading state
+            submitBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Đang đăng ký...';
+
+            try {
+                const user = await AuthManager.register(name, email, password, confirmPassword);
+                
+                Utils.showToast(`Đăng ký thành công! Chào mừng ${user.name}!`, 'success');
+                this.hideAuthModal();
+                
+                // Reset form
+                registerForm.reset();
+                
+            } catch (error) {
+                console.error('Register error:', error);
+                Utils.showToast(error.message, 'error');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Đăng ký';
+            }
+        });
+    }
+
+    static initEventListeners() {
+        // Login button
+        const loginButton = document.getElementById('loginButton');
+        if (loginButton) {
+            loginButton.addEventListener('click', () => {
+                console.log('🔑 Login button clicked');
+                this.showAuthModal('login');
+            });
+        }
+
+        // Logout button
+        const logoutButton = document.getElementById('logoutButton');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', () => {
+                console.log('🚪 Logout button clicked');
+                AuthManager.logout();
+            });
+        }
+
+        // ESC key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.hideAuthModal();
+            }
+        });
+    }
+
+    static showAuthModal(tab = 'login') {
+        console.log('🎭 Showing auth modal, tab:', tab);
+        
+        const modal = document.getElementById('authModal');
+        if (!modal) {
+            console.error('❌ Auth modal not found');
+            return;
+        }
+
+        // Show modal
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10);
+        document.body.style.overflow = 'hidden';
+
+        // Switch to correct tab
+        this.switchAuthTab(tab);
+    }
+
+    static hideAuthModal() {
+        console.log('🎭 Hiding auth modal');
+        
+        const modal = document.getElementById('authModal');
+        if (!modal) return;
+
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 300);
+
+        // Reset forms
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        
+        if (loginForm) loginForm.reset();
+        if (registerForm) registerForm.reset();
+    }
+
+    static switchAuthTab(tab) {
+        console.log('🔄 Switching to tab:', tab);
+        
+        const modal = document.getElementById('authModal');
+        if (!modal) return;
+
+        // Update tabs
+        modal.querySelectorAll('.modal-tab').forEach(tabEl => {
+            tabEl.classList.toggle('active', tabEl.dataset.tab === tab);
+        });
+
+        // Update forms
+        modal.querySelectorAll('.modal-form').forEach(form => {
+            form.classList.toggle('active', form.id === (tab + 'Form'));
+        });
+    }
+}
+
+// =================================================================
+// FLOATING BUTTONS MANAGER
 // =================================================================
 
 class FloatingButtonsManager {
@@ -499,10 +876,9 @@ class FloatingButtonsManager {
     static createPostButton() {
         const hasPermission = PermissionManager.checkPostPermission();
         
-        // 🎯 KIỂM TRA ROLE THAY VÌ EMAIL
         if (!hasPermission) {
             console.log('🔒 User không có role admin - ẩn nút đăng tin');
-            return null; // Không tạo nút
+            return null;
         }
         
         const btn = document.createElement('button');
@@ -523,6 +899,180 @@ class FloatingButtonsManager {
 
     static update() {
         setTimeout(() => this.create(), 100);
+    }
+}
+
+// =================================================================
+// PRODUCT MANAGER
+// =================================================================
+
+class ProductManager {
+    static async loadProducts() {
+        const productsGrid = document.getElementById('productsGrid');
+        if (!productsGrid) return;
+        
+        Utils.showLoading(productsGrid, 'Đang tải sản phẩm...');
+        
+        try {
+            const data = await ApiManager.getProducts();
+            let products = data.data?.products || [];
+            
+            console.log('📦 Loaded products:', products.length);
+            
+            // Sort products by creation date (newest first)
+            products = products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            allProducts = products;
+            window.allProducts = products;
+            
+            // Render products using the global function
+            if (window.renderApiProducts) {
+                window.renderApiProducts(products);
+            } else {
+                this.renderProductsBasic(products, productsGrid);
+            }
+            
+        } catch (error) {
+            console.error('❌ Error loading products:', error);
+            Utils.showError(productsGrid, 'Không thể tải sản phẩm. Vui lòng thử lại.');
+            Utils.showToast('Lỗi tải sản phẩm: ' + error.message, 'error');
+        }
+    }
+
+    static renderProductsBasic(products, container) {
+        if (!products || products.length === 0) {
+            container.innerHTML = `
+                <div class="no-products-found" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-search" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #64748b; margin-bottom: 1rem;">Không có sản phẩm nào</h3>
+                    <p style="color: #9ca3af; font-size: 1rem;">Hiện tại chưa có sản phẩm nào được đăng.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = '';
+        products.forEach(product => {
+            const productCard = this.createBasicProductCard(product);
+            container.appendChild(productCard);
+        });
+    }
+
+    static createBasicProductCard(product) {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card fade-in';
+        productCard.innerHTML = `
+            <div class="product-image">
+                <img src="${product.images?.[0] || product.image || 'https://via.placeholder.com/300x200?text=No+Image'}" 
+                     alt="${product.title}" loading="lazy">
+                ${product.badge ? `<span class="product-badge ${product.badge.toLowerCase()}">${product.badge}</span>` : ''}
+            </div>
+            <div class="product-info">
+                <h3 class="product-title">${product.title}</h3>
+                <p class="product-description">${product.description}</p>
+                <div class="product-price">
+                    <span class="product-current-price">${Utils.formatPrice(product.price)}</span>
+                </div>
+                <div class="product-actions">
+                    <a href="${product.link || '#'}" class="add-to-cart-link" target="_blank">
+                        <i class="fas fa-shopping-cart"></i><span>Mua Ngay</span>
+                    </a>
+                </div>
+            </div>
+        `;
+        return productCard;
+    }
+
+    static async createProduct(productData) {
+        try {
+            console.log('🚀 Creating product:', productData);
+            
+            if (!currentUser) {
+                throw new Error('Vui lòng đăng nhập để đăng sản phẩm!');
+            }
+
+            if (!PermissionManager.checkPostPermission()) {
+                throw new Error('Bạn không có quyền đăng sản phẩm!');
+            }
+
+            // Prepare data for API
+            const apiData = {
+                title: productData.title,
+                description: productData.description,
+                price: parseInt(productData.price),
+                category: 'services', // Default category
+                images: [productData.image], // Convert single image to array
+                badge: productData.badge || undefined,
+                sales: parseInt(productData.sales) || 0,
+                link: productData.link
+            };
+
+            console.log('📡 Sending to API:', apiData);
+
+            const result = await ApiManager.createProduct(apiData);
+            
+            console.log('✅ Product created successfully:', result);
+
+            // Reload products to show new product
+            await this.loadProducts();
+            
+            return true;
+        } catch (error) {
+            console.error('❌ Error creating product:', error);
+            throw error;
+        }
+    }
+
+    static async updateProduct(productId, productData) {
+        try {
+            console.log('📝 Updating product:', productId, productData);
+            
+            const result = await ApiManager.updateProduct(productId, productData);
+            
+            console.log('✅ Product updated successfully:', result);
+            
+            // Reload products
+            await this.loadProducts();
+            
+            return result;
+        } catch (error) {
+            console.error('❌ Error updating product:', error);
+            throw error;
+        }
+    }
+
+    static async deleteProduct(productId) {
+        try {
+            console.log('🗑️ Deleting product:', productId);
+            
+            const product = allProducts.find(p => p._id === productId);
+            if (!PermissionManager.checkDeletePermission(product)) {
+                throw new Error('Bạn không có quyền xóa sản phẩm này!');
+            }
+
+            await ApiManager.deleteProduct(productId);
+            
+            console.log('✅ Product deleted successfully');
+            
+            Utils.showToast('Xóa sản phẩm thành công!', 'success');
+            
+            // Remove from UI immediately
+            const productCard = document.querySelector(`[data-id="${productId}"]`);
+            if (productCard) {
+                productCard.style.transition = 'all 0.3s ease';
+                productCard.style.transform = 'scale(0)';
+                productCard.style.opacity = '0';
+                setTimeout(() => productCard.remove(), 300);
+            }
+            
+            // Reload products
+            setTimeout(() => this.loadProducts(), 500);
+            
+            return true;
+        } catch (error) {
+            console.error('❌ Error deleting product:', error);
+            throw error;
+        }
     }
 }
 
@@ -594,208 +1144,99 @@ const FavoriteManager = {
 };
 
 // =================================================================
-// ENHANCED AUTHENTICATION MANAGER (COMPLETELY FIXED) 🔥
+// MAIN INITIALIZATION
 // =================================================================
 
-class AuthManager {
-    static async login(email, password, rememberMe = true) {
-        console.log('🔐 Attempting login for:', email);
+class MainApp {
+    static async init() {
+        console.log('🚀 Initializing Main Application...');
         
         try {
-            const data = await ApiManager.call('/users/login', 'POST', { email, password }, false);
+            // Initialize UI first
+            UIController.init();
             
-            console.log('✅ Login successful, received data:', data);
+            // Check auto login
+            await AuthManager.checkAutoLogin();
             
-            // Lưu token
-            if (rememberMe) {
-                localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
-                sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
-            } else {
-                sessionStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
-                localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+            // Initialize floating buttons
+            FloatingButtonsManager.init();
+            
+            // Load products
+            if (document.getElementById('productsGrid')) {
+                await ProductManager.loadProducts();
             }
             
-            // 🎯 ĐẢM BẢO LẤY ĐÚNG ROLE TỪ BACKEND
-            currentUser = {
-                _id: data.data.user._id || data.data.user.id,
-                name: data.data.user.name,
-                email: data.data.user.email || email,
-                role: data.data.user.role || 'user', // 🔥 QUAN TRỌNG: Lấy role từ backend
-                ...data.data.user
-            };
+            // Setup filter handlers
+            this.setupFilterHandlers();
             
-            console.log('👤 Setting currentUser with role:', currentUser);
+            // Mark as initialized
+            isInitialized = true;
+            window.isInitialized = true;
             
-            // Lưu user data
-            localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
+            console.log('✅ Main Application initialized successfully');
             
-            // Cập nhật UI
-            await this.updateUIAfterLogin();
-            
-            return currentUser;
         } catch (error) {
-            console.error('❌ Login failed:', error);
-            throw new Error(error.message || 'Đăng nhập thất bại. Vui lòng thử lại!');
+            console.error('💥 Failed to initialize application:', error);
+            Utils.showToast('Lỗi khởi tạo ứng dụng: ' + error.message, 'error');
         }
     }
 
-    static async register(name, email, password, passwordConfirm) {
-        console.log('📝 Attempting registration for:', email);
+    static setupFilterHandlers() {
+        const filterButton = document.getElementById('filterButton');
+        const resetButton = document.getElementById('resetButton');
         
-        try {
-            const data = await ApiManager.call('/users/signup', 'POST', {
-                name, email, password, passwordConfirm
-            }, false);
-            
-            console.log('✅ Registration successful:', data);
-            
-            localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
-            
-            // 🎯 ĐẢM BẢO LẤY ĐÚNG ROLE TỪ BACKEND
-            currentUser = {
-                _id: data.data.user._id || data.data.user.id,
-                name: data.data.user.name || name,
-                email: data.data.user.email || email,
-                role: data.data.user.role || 'user', // 🔥 QUAN TRỌNG: Lấy role từ backend
-                ...data.data.user
-            };
-            
-            localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
-            await this.updateUIAfterLogin();
-            
-            return currentUser;
-        } catch (error) {
-            console.error('❌ Registration failed:', error);
-            throw new Error(error.message || 'Đăng ký thất bại. Vui lòng thử lại!');
+        if (filterButton && window.filterProducts) {
+            filterButton.addEventListener('click', window.filterProducts);
         }
-    }
-
-    static logout() {
-        if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) return;
         
-        localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
-        sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
-        localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);
-        currentUser = null;
-        
-        this.updateUIAfterLogout();
-        Utils.showToast('Đăng xuất thành công!', 'success');
-        
-        const protectedPages = ['account.html', 'cart.html', 'favorite.html'];
-        if (protectedPages.some(page => window.location.pathname.includes(page))) {
-            setTimeout(() => window.location.href = 'index.html', 1000);
+        if (resetButton && window.resetFilters) {
+            resetButton.addEventListener('click', window.resetFilters);
         }
-    }
-
-    static async checkAutoLogin() {
-        console.log('🔍 Checking auto login...');
-        
-        let token = localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
-        if (!token) token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
-        
-        if (token) {
-            console.log('🎫 Found token, verifying...');
-            try {
-                const data = await ApiManager.call('/users/me');
-                
-                // 🎯 ĐẢM BẢO LẤY ĐÚNG ROLE TỪ BACKEND
-                currentUser = {
-                    _id: data.data.user._id || data.data.user.id,
-                    name: data.data.user.name,
-                    email: data.data.user.email,
-                    role: data.data.user.role || 'user', // 🔥 QUAN TRỌNG: Lấy role từ backend
-                    ...data.data.user
-                };
-                
-                console.log('✅ Auto login successful with role:', currentUser);
-                
-                if (!currentUser.email) {
-                    throw new Error('Invalid user data - no email');
-                }
-                
-                localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
-                await this.updateUIAfterLogin();
-            } catch (error) {
-                console.log('❌ Auto login failed:', error);
-                ApiManager.clearAuthData();
-                this.updateUIAfterLogout();
-            }
-        } else {
-            console.log('📤 No token found');
-            this.updateUIAfterLogout();
-        }
-    }
-
-    static getDisplayName(user) {
-        if (!user) return 'User';
-        if (user.name?.trim()) return user.name.trim();
-        if (user.email?.includes('@')) return user.email.split('@')[0];
-        return 'User';
-    }
-
-    static async updateUIAfterLogin() {
-        if (!currentUser) return;
-        
-        console.log('🎨 Updating UI after login for:', currentUser);
-        console.log('🔑 User role:', currentUser.role);
-        
-        const loginButton = document.getElementById('loginButton');
-        const userDropdown = document.getElementById('userDropdown');
-        
-        if (loginButton) loginButton.style.display = 'none';
-        if (userDropdown) userDropdown.style.display = 'flex';
-        
-        const displayName = this.getDisplayName(currentUser);
-        const firstLetter = displayName.charAt(0).toUpperCase();
-        
-        document.querySelectorAll('.user-name, #userName').forEach(el => {
-            if (el) el.textContent = displayName;
-        });
-        
-        document.querySelectorAll('.user-avatar, #userAvatar').forEach(el => {
-            if (el) el.textContent = firstLetter;
-        });
-        
-        // Update global variable
-        window.currentUser = currentUser;
-        
-        await CartManager.updateCount();
-        FloatingButtonsManager.update();
-        
-        // Re-setup DevTools protection with updated user
-        setTimeout(setupDevToolsProtection, 100);
-    }
-
-    static updateUIAfterLogout() {
-        const loginButton = document.getElementById('loginButton');
-        const userDropdown = document.getElementById('userDropdown');
-        
-        if (loginButton) loginButton.style.display = 'flex';
-        if (userDropdown) userDropdown.style.display = 'none';
-        
-        document.querySelectorAll('.cart-count, #cartCount').forEach(el => {
-            el.textContent = '0';
-            el.style.display = 'none';
-        });
-        
-        // Clear global variable
-        window.currentUser = null;
-        
-        FloatingButtonsManager.update();
     }
 }
 
 // =================================================================
-// ENHANCED PRODUCT MANAGER
+// GLOBAL EXPORTS
 // =================================================================
 
-class ProductManager {
-    static async loadProducts() {
-        const productsGrid = document.getElementById('productsGrid');
-        if (!productsGrid) return;
-        
-        Utils.showLoading(productsGrid, 'Đang tải sản phẩm...');
-        
-        try {
-            const data = await ApiManager.getProducts();
-            let products = data.data?.products || [];
+// Export to window object
+window.Utils = Utils;
+window.ApiManager = ApiManager;
+window.AuthManager = AuthManager;
+window.PermissionManager = PermissionManager;
+window.UIController = UIController;
+window.ProductManager = ProductManager;
+window.FloatingButtonsManager = FloatingButtonsManager;
+window.CartManager = CartManager;
+window.FavoriteManager = FavoriteManager;
+window.currentUser = currentUser;
+window.allProducts = allProducts;
+
+// Debug function for permissions
+window.debugPermissions = () => PermissionManager.debugPermissions();
+
+// =================================================================
+// AUTO INITIALIZATION
+// =================================================================
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => MainApp.init(), 100);
+    });
+} else {
+    // DOM already loaded
+    setTimeout(() => MainApp.init(), 100);
+}
+
+// Also listen for page visibility change
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && isInitialized) {
+        // Page became visible, refresh data
+        if (currentUser && document.getElementById('productsGrid')) {
+            ProductManager.loadProducts();
+        }
+    }
+});
+
+console.log('📦 Main.js loaded successfully');
