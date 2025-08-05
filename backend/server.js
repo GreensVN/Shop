@@ -32,7 +32,7 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   'https://greensvn.github.io',
-  'http://localhost:3000',
+  'https://greensvn.github.io/Shop2/',
   'http://127.0.0.1:3000',
   'http://localhost:5500',
   'http://127.0.0.1:5500'
