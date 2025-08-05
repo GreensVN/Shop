@@ -565,8 +565,13 @@
                 return adminEmails.map(e => e.toLowerCase()).includes(user.email.toLowerCase());
             }
 
+            console.log('🔒 Checking security for user:', window.currentUser);
+            console.log('Is admin:', isAdmin());
+
             // Only apply restrictions for non-admin users
             if (!isAdmin()) {
+                console.log('❌ Applying security restrictions for non-admin user');
+                
                 // Disable right-click context menu
                 document.addEventListener('contextmenu', e => {
                     e.preventDefault();
@@ -587,23 +592,28 @@
                         return false;
                     }
                 });
+            } else {
+                console.log('✅ Admin user detected - Security restrictions DISABLED');
             }
         }
 
         // Apply security after user authentication is checked
         document.addEventListener('DOMContentLoaded', () => {
             // Delay security setup to allow user authentication to complete
-            setTimeout(setupSecurityProtection, 1000);
-            
-            // Re-apply security when user logs in/out
-            const originalUpdateUI = window.AuthManager?.updateUIAfterLogin;
-            if (originalUpdateUI) {
-                window.AuthManager.updateUIAfterLogin = async function() {
-                    await originalUpdateUI.call(this);
-                    setupSecurityProtection();
-                };
-            }
+            setTimeout(() => {
+                console.log('🔐 Initial security setup...');
+                setupSecurityProtection();
+            }, 2000);
         });
+
+        // Re-apply security when authentication state changes
+        let authCheckInterval = setInterval(() => {
+            if (window.AuthManager && window.currentUser !== undefined) {
+                console.log('🔄 Re-applying security after auth check...');
+                setupSecurityProtection();
+                clearInterval(authCheckInterval);
+            }
+        }, 1000);
 
         // Console warning for non-admin users
         setTimeout(() => {
