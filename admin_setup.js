@@ -183,7 +183,7 @@ async function main() {
   // 🎯 THÔNG TIN ADMIN MẶC ĐỊNH
   const ADMIN_USERS = [
     {
-      name: 'Chin Han Admin',
+      name: 'co-owner (chí nghĩa)',
       email: 'chinhan20917976549a@gmail.com',
       password: 'admin123456'
     },
