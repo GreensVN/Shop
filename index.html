@@ -245,6 +245,55 @@
                 opacity: 1;
             }
         }
+
+        /* Debug Panel Styles */
+        .debug-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 300px;
+            z-index: 10000;
+            display: none;
+        }
+
+        .debug-panel.show {
+            display: block;
+        }
+
+        .debug-panel h4 {
+            margin: 0 0 10px 0;
+            color: #4ade80;
+        }
+
+        .debug-panel p {
+            margin: 5px 0;
+            word-break: break-all;
+        }
+
+        .debug-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #374151;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10001;
+            transition: all 0.3s ease;
+        }
+
+        .debug-toggle:hover {
+            background: #4b5563;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -373,7 +422,7 @@
                     <input type="password" id="loginPassword" name="password" placeholder="Nhập mật khẩu" required>
                 </div>
                 <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
-                    <input type="checkbox" id="rememberMeCheckbox" name="rememberMe" style="width: 18px; height: 18px;">
+                    <input type="checkbox" id="rememberMeCheckbox" name="rememberMe" style="width: 18px; height: 18px;" checked>
                     <label for="rememberMeCheckbox" style="margin: 0; font-weight: 400; cursor: pointer;">Ghi nhớ đăng nhập</label>
                 </div>
                 <div class="modal-actions">
@@ -407,35 +456,152 @@
         </div>
     </div>
 
+    <!-- Debug Panel (Only for development) -->
+    <button class="debug-toggle" id="debugToggle" onclick="toggleDebugPanel()" title="Toggle Debug Panel">🐛</button>
+    <div class="debug-panel" id="debugPanel">
+        <h4>🔍 Debug Information</h4>
+        <p><strong>Current User:</strong> <span id="debugUser">None</span></p>
+        <p><strong>Has Admin Permission:</strong> <span id="debugPermission">false</span></p>
+        <p><strong>Products Count:</strong> <span id="debugProductsCount">0</span></p>
+        <p><strong>Token:</strong> <span id="debugToken">None</span></p>
+        <button onclick="window.debugPermissions?.()" class="btn btn-secondary" style="margin-top: 10px; font-size: 10px; padding: 5px 10px;">Check Permissions</button>
+    </div>
+
     <!-- Toast Container -->
     <div id="toastContainer"></div>
 
     <!-- Scripts -->
+    <script>
+        // Debug Panel Functions
+        function toggleDebugPanel() {
+            const panel = document.getElementById('debugPanel');
+            const toggle = document.getElementById('debugToggle');
+            
+            if (panel.classList.contains('show')) {
+                panel.classList.remove('show');
+                toggle.innerHTML = '🐛';
+            } else {
+                panel.classList.add('show');
+                toggle.innerHTML = '✖️';
+                updateDebugInfo();
+            }
+        }
+
+        function updateDebugInfo() {
+            const userSpan = document.getElementById('debugUser');
+            const permissionSpan = document.getElementById('debugPermission');
+            const productsCountSpan = document.getElementById('debugProductsCount');
+            const tokenSpan = document.getElementById('debugToken');
+
+            if (userSpan) {
+                userSpan.textContent = window.currentUser ? 
+                    `${window.currentUser.name || 'Unknown'} (${window.currentUser.email || 'No email'})` : 
+                    'None';
+            }
+
+            if (permissionSpan) {
+                permissionSpan.textContent = window.PermissionManager?.checkPostPermission() ? 'true' : 'false';
+                permissionSpan.style.color = window.PermissionManager?.checkPostPermission() ? '#4ade80' : '#f87171';
+            }
+
+            if (productsCountSpan) {
+                productsCountSpan.textContent = window.allProducts ? window.allProducts.length : '0';
+            }
+
+            if (tokenSpan) {
+                const token = localStorage.getItem('gag_token') || sessionStorage.getItem('gag_token');
+                tokenSpan.textContent = token ? token.substring(0, 10) + '...' : 'None';
+            }
+        }
+
+        // Update debug info periodically
+        setInterval(updateDebugInfo, 2000);
+
+        // Show debug panel only in development
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            document.getElementById('debugToggle').style.display = 'block';
+        } else {
+            document.getElementById('debugToggle').style.display = 'none';
+        }
+    </script>
+
     <script src="main.js"></script>
     <script src="script.js"></script>
     
     <!-- Security Scripts -->
     <script>
-        // Disable right-click context menu
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        
-        // Disable F12, Ctrl+Shift+I, Ctrl+U
-        document.addEventListener('keydown', e => {
-            if (e.key === 'F12' || 
-                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-                (e.ctrlKey && e.key === 'U')) {
-                e.preventDefault();
-                return false;
+        // Enhanced security with proper admin checking
+        function setupSecurityProtection() {
+            // Check if user is admin
+            function isAdmin() {
+                const user = window.currentUser;
+                if (!user || !user.email) return false;
+                
+                const adminEmails = [
+                    'chinhan20917976549a@gmail.com',
+                    'ryantran149@gmail.com', 
+                    'seller@shopgrowgarden.com',
+                    'greensvn@gmail.com'
+                ];
+                
+                return adminEmails.map(e => e.toLowerCase()).includes(user.email.toLowerCase());
+            }
+
+            // Only apply restrictions for non-admin users
+            if (!isAdmin()) {
+                // Disable right-click context menu
+                document.addEventListener('contextmenu', e => {
+                    e.preventDefault();
+                    if (window.Utils?.showToast) {
+                        window.Utils.showToast('Chuột phải đã bị vô hiệu hóa!', 'warning');
+                    }
+                });
+                
+                // Disable F12, Ctrl+Shift+I, Ctrl+U
+                document.addEventListener('keydown', e => {
+                    if (e.key === 'F12' || 
+                        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                        (e.ctrlKey && e.key === 'U')) {
+                        e.preventDefault();
+                        if (window.Utils?.showToast) {
+                            window.Utils.showToast('Chức năng này đã bị vô hiệu hóa!', 'warning');
+                        }
+                        return false;
+                    }
+                });
+            }
+        }
+
+        // Apply security after user authentication is checked
+        document.addEventListener('DOMContentLoaded', () => {
+            // Delay security setup to allow user authentication to complete
+            setTimeout(setupSecurityProtection, 1000);
+            
+            // Re-apply security when user logs in/out
+            const originalUpdateUI = window.AuthManager?.updateUIAfterLogin;
+            if (originalUpdateUI) {
+                window.AuthManager.updateUIAfterLogin = async function() {
+                    await originalUpdateUI.call(this);
+                    setupSecurityProtection();
+                };
             }
         });
-        
-        // Disable view source
-        document.addEventListener('keydown', e => {
-            if (e.ctrlKey && e.key === 'u') {
-                e.preventDefault();
-                return false;
+
+        // Console warning for non-admin users
+        setTimeout(() => {
+            const user = window.currentUser;
+            if (!user || !user.email || ![
+                'chinhan20917976549a@gmail.com',
+                'ryantran149@gmail.com', 
+                'seller@shopgrowgarden.com',
+                'greensvn@gmail.com'
+            ].map(e => e.toLowerCase()).includes(user.email.toLowerCase())) {
+                console.clear();
+                console.log('%c🚫 STOP!', 'color: red; font-size: 50px; font-weight: bold;');
+                console.log('%cThis is a browser feature intended for developers. If someone told you to copy and paste something here, it is a scam and will give them access to your account.', 'color: red; font-size: 16px;');
+                console.log('%cSee https://en.wikipedia.org/wiki/Self-XSS for more information.', 'color: red; font-size: 16px;');
             }
-        });
+        }, 2000);
     </script>
     
 </body>
