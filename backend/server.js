@@ -11,69 +11,94 @@ const { promisify } = require('util');
 const nodemailer = require('nodemailer');
 const validator = require('validator');
 
-// Load env vars
+// Load environment variables
 dotenv.config({ path: './config.env' });
 
-// Initialize app
+// Initialize Express app
 const app = express();
 
-// Middleware
-app.use(express.json());
+// =================================================================
+// MIDDLEWARE SETUP
+// =================================================================
+
+// Body parser middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // =================================================================
-// CORS CONFIGURATION 🔥
+// CORS CONFIGURATION (FIXED)
 // =================================================================
 
 const allowedOrigins = [
-  'https://greensvn.github.io'
+  'https://greensvn.github.io',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500'
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    console.log('REQUEST ORIGIN:', origin);
-
+    console.log('🌐 REQUEST ORIGIN:', origin);
+    
+    // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Origin này không được phép bởi chính sách CORS'));
+      console.log('❌ CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 
 app.use(cors(corsOptions));
 
-// =================================================================
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
+// Development logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Database connection
+// =================================================================
+// DATABASE CONNECTION (IMPROVED ERROR HANDLING)
+// =================================================================
+
 const DB = process.env.DATABASE.replace(
   '<PASSWORD>',
   process.env.DATABASE_PASSWORD
 );
 
-mongoose
-  .connect(DB, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    ssl: true,
-    sslValidate: true,
-  })
-  .then(() => console.log('DB connection successful!'))
-  .catch(err => console.error('Error DB:', err));
+const connectDB = async () => {
+  try {
+    await mongoose.connect(DB, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('✅ MongoDB connection successful!');
+  } catch (error) {
+    console.error('❌ MongoDB connection failed:', error.message);
+    process.exit(1);
+  }
+};
+
+connectDB();
 
 // =================================================================
-// USER SCHEMA (FIXED - ĐẢM BẢO ROLE ĐƯỢC TRẢ VỀ) 🔥
+// USER SCHEMA (FIXED & OPTIMIZED)
 // =================================================================
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Please tell us your name'],
+    required: [true, 'Please provide your name'],
+    trim: true,
+    maxlength: [50, 'Name cannot exceed 50 characters']
   },
   email: {
     type: String,
@@ -90,13 +115,13 @@ const userSchema = new mongoose.Schema({
   avatarText: {
     type: String,
     default: function() {
-      return this.name.charAt(0).toUpperCase();
+      return this.name ? this.name.charAt(0).toUpperCase() : 'U';
     }
   },
   password: {
     type: String,
     required: [true, 'Please provide a password'],
-    minlength: 6,
+    minlength: [6, 'Password must be at least 6 characters'],
     select: false,
   },
   passwordConfirm: {
@@ -106,44 +131,29 @@ const userSchema = new mongoose.Schema({
       validator: function(el) {
         return el === this.password;
       },
-      message: 'Passwords are not the same!',
+      message: 'Passwords do not match!',
     },
   },
   balance: {
     type: Number,
     default: 0,
+    min: [0, 'Balance cannot be negative']
   },
-  depositHistory: [
-    {
-      amount: Number,
-      date: Date,
-      cardType: String,
-      cardNumber: String,
-      status: {
-        type: String,
-        enum: ['success', 'failed', 'pending'],
-        default: 'pending',
-      },
-    },
-  ],
-  favorites: [
-    {
+  favorites: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'Product',
+  }],
+  cart: [{
+    product: {
       type: mongoose.Schema.ObjectId,
       ref: 'Product',
+    },
+    quantity: {
+      type: Number,
+      default: 1,
+      min: [1, 'Quantity must be at least 1']
     }
-  ],
-  cart: [
-    {
-      product: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Product',
-      },
-      quantity: {
-        type: Number,
-        default: 1,
-      }
-    }
-  ],
+  }],
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
@@ -152,12 +162,21 @@ const userSchema = new mongoose.Schema({
     default: true,
     select: false,
   },
-  registerDate: {
+  createdAt: {
     type: Date,
     default: Date.now,
   },
+}, {
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
+// Indexes for better performance
+userSchema.index({ email: 1 });
+userSchema.index({ role: 1 });
+
+// Pre-save middleware for password hashing
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
 
@@ -166,43 +185,30 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
-userSchema.methods.correctPassword = async function(
-  candidatePassword,
-  userPassword
-) {
+// Instance methods
+userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
 userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
   if (this.passwordChangedAt) {
-    const changedTimestamp = parseInt(
-      this.passwordChangedAt.getTime() / 1000,
-      10
-    );
-
+    const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
     return JWTTimestamp < changedTimestamp;
   }
-
   return false;
 };
 
 userSchema.methods.createPasswordResetToken = function() {
   const resetToken = crypto.randomBytes(32).toString('hex');
-
-  this.passwordResetToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
-
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-
+  this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
   return resetToken;
 };
 
 const User = mongoose.model('User', userSchema);
 
 // =================================================================
-// PRODUCT SCHEMA (UPDATED) 🔥
+// PRODUCT SCHEMA (FIXED & COMPATIBLE WITH FRONTEND)
 // =================================================================
 
 const productSchema = new mongoose.Schema({
@@ -210,59 +216,127 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: [true, 'A product must have a title'],
     trim: true,
+    maxlength: [100, 'Title cannot exceed 100 characters']
   },
   description: {
     type: String,
     required: [true, 'A product must have a description'],
+    maxlength: [500, 'Description cannot exceed 500 characters']
   },
   price: {
     type: Number,
     required: [true, 'A product must have a price'],
+    min: [1000, 'Price must be at least 1,000 VND']
   },
-  oldPrice: Number,
-  images: [String],
+  oldPrice: {
+    type: Number,
+    validate: {
+      validator: function(val) {
+        return !val || val > this.price;
+      },
+      message: 'Old price must be greater than current price'
+    }
+  },
+  images: {
+    type: [String],
+    validate: {
+      validator: function(images) {
+        return images && images.length > 0;
+      },
+      message: 'Product must have at least one image'
+    }
+  },
+  // Single image field for backward compatibility
+  image: {
+    type: String,
+    default: function() {
+      return this.images && this.images.length > 0 ? this.images[0] : null;
+    }
+  },
   category: {
     type: String,
-    enum: ['plants', 'pets', 'game-accounts', 'services'], // 🎯 ĐẢM BẢO CÓ 'services'
-    required: [true, 'A product must belong to a category'],
+    enum: ['plants', 'pets', 'game-accounts', 'services'],
+    default: 'services'
   },
   features: [String],
-  detailedDescription: String,
   sales: {
     type: Number,
     default: 0,
+    min: [0, 'Sales cannot be negative']
   },
   stock: {
     type: Number,
     default: 999,
+    min: [0, 'Stock cannot be negative']
   },
   badge: {
     type: String,
-    enum: ['HOT', 'NEW', 'SALE', null],
+    enum: ['HOT', 'NEW', 'SALE', 'BEST', null],
     default: null,
   },
-  link: String, // 🔥 THÊM TRƯỜNG LINK
+  link: {
+    type: String,
+    required: [true, 'Product must have a purchase link'],
+    validate: {
+      validator: function(v) {
+        return validator.isURL(v);
+      },
+      message: 'Please provide a valid URL'
+    }
+  },
   createdBy: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
+    required: [true, 'Product must have a creator']
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+  active: {
+    type: Boolean,
+    default: true
+  }
+}, {
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Indexes for better performance
+productSchema.index({ createdAt: -1 });
+productSchema.index({ category: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ createdBy: 1 });
+
+// Virtual populate for reviews
+productSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'product',
+  localField: '_id'
+});
+
+// Pre-save middleware to set image field
+productSchema.pre('save', function(next) {
+  if (this.images && this.images.length > 0 && !this.image) {
+    this.image = this.images[0];
+  }
+  next();
 });
 
 const Product = mongoose.model('Product', productSchema);
+
+// =================================================================
+// REVIEW SCHEMA
+// =================================================================
 
 const reviewSchema = new mongoose.Schema({
   review: {
     type: String,
     required: [true, 'Review cannot be empty'],
+    maxlength: [500, 'Review cannot exceed 500 characters']
   },
   rating: {
     type: Number,
-    min: 1,
-    max: 5,
+    min: [1, 'Rating must be at least 1'],
+    max: [5, 'Rating cannot exceed 5'],
+    required: [true, 'Review must have a rating']
   },
   product: {
     type: mongoose.Schema.ObjectId,
@@ -273,168 +347,73 @@ const reviewSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'User',
     required: [true, 'Review must belong to a user'],
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+  }
+}, {
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
+// Prevent duplicate reviews
 reviewSchema.index({ product: 1, user: 1 }, { unique: true });
 
+// Auto-populate user data
 reviewSchema.pre(/^find/, function(next) {
   this.populate({
     path: 'user',
     select: 'name avatarText',
   });
-
   next();
 });
 
 const Review = mongoose.model('Review', reviewSchema);
 
-const transactionSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'User',
-    required: [true, 'Transaction must belong to a user'],
-  },
-  product: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'Product',
-  },
-  amount: {
-    type: Number,
-    required: [true, 'Transaction must have an amount'],
-  },
-  type: {
-    type: String,
-    enum: ['deposit', 'purchase', 'withdrawal'],
-    required: [true, 'Transaction must have a type'],
-  },
-  status: {
-    type: String,
-    enum: ['pending', 'completed', 'failed'],
-    default: 'pending',
-  },
-  cardType: String,
-  cardNumber: String,
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+// =================================================================
+// UTILITY FUNCTIONS
+// =================================================================
 
-transactionSchema.pre(/^find/, function(next) {
-  this.populate({
-    path: 'user',
-    select: 'name email',
-  }).populate({
-    path: 'product',
-    select: 'title price',
-  });
-
-  next();
-});
-
-const Transaction = mongoose.model('Transaction', transactionSchema);
-
-// Email Class
-class Email {
-  constructor(user, url) {
-    this.to = user.email;
-    this.firstName = user.name.split(' ')[0];
-    this.url = url;
-    this.from = `Shop Grow A Garden <${process.env.EMAIL_FROM}>`;
-  }
-
-  newTransport() {
-    if (process.env.NODE_ENV === 'production') {
-      return nodemailer.createTransporter({
-        service: 'SendGrid',
-        auth: {
-          user: process.env.SENDGRID_USERNAME,
-          pass: process.env.SENDGRID_PASSWORD,
-        },
-      });
-    }
-
-    return nodemailer.createTransporter({
-      host: process.env.EMAIL_HOST,
-      port: process.env.EMAIL_PORT,
-      auth: {
-        user: process.env.EMAIL_USERNAME,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
-  }
-
-  async send(subject, text) {
-    const mailOptions = {
-      from: this.from,
-      to: this.to,
-      subject,
-      text,
-    };
-
-    await this.newTransport().sendMail(mailOptions);
-  }
-
-  async sendPasswordReset() {
-    await this.send(
-      'Your password reset token (valid for 10 min)',
-      `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${this.url}.\nIf you didn't forget your password, please ignore this email!`
-    );
-  }
-}
-
-const sendEmail = async options => {
-  const email = new Email(options.user, options.url);
-  await email.send(options.subject, options.message);
-};
-
-// Utility functions
-const catchAsync = fn => {
+const catchAsync = (fn) => {
   return (req, res, next) => {
     fn(req, res, next).catch(next);
   };
 };
 
-const signToken = id => {
+const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+    expiresIn: process.env.JWT_EXPIRES_IN || '90d',
   });
 };
-
-// =================================================================
-// FIXED CREATE SEND TOKEN - ĐẢM BẢO ROLE ĐƯỢC TRẢ VỀ 🔥
-// =================================================================
 
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
 
   const cookieOptions = {
     expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+      Date.now() + (process.env.JWT_COOKIE_EXPIRES_IN || 90) * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
   };
-
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
   res.cookie('jwt', token, cookieOptions);
 
-  // 🎯 QUAN TRỌNG: Đảm bảo ROLE được trả về cho frontend
+  // Don't send password in response
+  user.password = undefined;
+
+  // Format user response for frontend compatibility
   const userResponse = {
     _id: user._id,
+    id: user._id, // Additional id field for compatibility
     name: user.name,
     email: user.email,
-    role: user.role, // 🔥 ĐẢAM BẢO ROLE ĐƯỢC INCLUDE
-    balance: user.balance,
-    registerDate: user.registerDate
+    role: user.role,
+    balance: user.balance || 0,
+    avatarText: user.avatarText,
+    createdAt: user.createdAt
   };
 
-  console.log('🎯 Sending user data to frontend:', userResponse);
+  console.log('✅ Sending user data:', { email: userResponse.email, role: userResponse.role });
 
   res.status(statusCode).json({
     status: 'success',
@@ -446,35 +425,120 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 // =================================================================
-// AUTH CONTROLLER (UPDATED) 🔥
+// ERROR HANDLING MIDDLEWARE
+// =================================================================
+
+const handleCastErrorDB = (err) => {
+  const message = `Invalid ${err.path}: ${err.value}.`;
+  return new Error(message);
+};
+
+const handleDuplicateFieldsDB = (err) => {
+  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+  const message = `Duplicate field value: ${value}. Please use another value!`;
+  return new Error(message);
+};
+
+const handleValidationErrorDB = (err) => {
+  const errors = Object.values(err.errors).map(el => el.message);
+  const message = `Invalid input data. ${errors.join('. ')}`;
+  return new Error(message);
+};
+
+const handleJWTError = () => new Error('Invalid token. Please log in again!');
+
+const handleJWTExpiredError = () => new Error('Your token has expired! Please log in again.');
+
+const sendErrorDev = (err, res) => {
+  res.status(err.statusCode || 500).json({
+    status: err.status || 'error',
+    error: err,
+    message: err.message,
+    stack: err.stack,
+  });
+};
+
+const sendErrorProd = (err, res) => {
+  if (err.isOperational) {
+    res.status(err.statusCode || 500).json({
+      status: err.status || 'error',
+      message: err.message,
+    });
+  } else {
+    console.error('ERROR 💥', err);
+    res.status(500).json({
+      status: 'error',
+      message: 'Something went wrong!',
+    });
+  }
+};
+
+const globalErrorHandler = (err, req, res, next) => {
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || 'error';
+
+  if (process.env.NODE_ENV === 'development') {
+    sendErrorDev(err, res);
+  } else {
+    let error = { ...err };
+    error.message = err.message;
+
+    if (error.name === 'CastError') error = handleCastErrorDB(error);
+    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+    if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
+    if (error.name === 'JsonWebTokenError') error = handleJWTError();
+    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
+
+    sendErrorProd(error, res);
+  }
+};
+
+// =================================================================
+// AUTHENTICATION CONTROLLER (FIXED)
 // =================================================================
 
 const authController = {
   signup: catchAsync(async (req, res, next) => {
-    console.log('📝 Signup request:', { 
-      name: req.body.name, 
-      email: req.body.email,
-      role: req.body.role 
-    });
+    const { name, email, password, passwordConfirm, role } = req.body;
+
+    console.log('📝 Signup attempt:', { name, email, role: role || 'user' });
+
+    // Validation
+    if (!name || !email || !password || !passwordConfirm) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please provide all required fields',
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'User with this email already exists',
+      });
+    }
 
     const newUser = await User.create({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-      passwordConfirm: req.body.passwordConfirm,
-      role: req.body.role || 'user', // 🎯 Cho phép set role khi đăng ký (mặc định là 'user')
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      password,
+      passwordConfirm,
+      role: role || 'user',
     });
 
-    console.log('✅ User created with role:', newUser.role);
+    console.log('✅ User created successfully:', { id: newUser._id, role: newUser.role });
 
     createSendToken(newUser, 201, res);
   }),
 
   login: catchAsync(async (req, res, next) => {
     const { email, password } = req.body;
-    
+
     console.log('🔐 Login attempt for:', email);
 
+    // Check if email and password exist
     if (!email || !password) {
       return res.status(400).json({
         status: 'fail',
@@ -482,7 +546,8 @@ const authController = {
       });
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    // Check if user exists && password is correct
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
 
     if (!user || !(await user.correctPassword(password, user.password))) {
       console.log('❌ Invalid credentials for:', email);
@@ -492,7 +557,15 @@ const authController = {
       });
     }
 
-    console.log('✅ Login successful for:', email, 'Role:', user.role);
+    // Check if user is active
+    if (!user.active) {
+      return res.status(401).json({
+        status: 'fail',
+        message: 'Your account has been deactivated. Please contact support.',
+      });
+    }
+
+    console.log('✅ Login successful:', { email, role: user.role });
 
     createSendToken(user, 200, res);
   }),
@@ -502,15 +575,16 @@ const authController = {
       expires: new Date(Date.now() + 10 * 1000),
       httpOnly: true,
     });
-    res.status(200).json({ status: 'success' });
+    res.status(200).json({ 
+      status: 'success',
+      message: 'Logged out successfully'
+    });
   },
 
   protect: catchAsync(async (req, res, next) => {
+    // Get token from header or cookie
     let token;
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith('Bearer')
-    ) {
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     } else if (req.cookies.jwt) {
       token = req.cookies.jwt;
@@ -523,8 +597,10 @@ const authController = {
       });
     }
 
+    // Verification token
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
+    // Check if user still exists
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
       return res.status(401).json({
@@ -533,6 +609,7 @@ const authController = {
       });
     }
 
+    // Check if user changed password after the token was issued
     if (currentUser.changedPasswordAfter(decoded.iat)) {
       return res.status(401).json({
         status: 'fail',
@@ -540,6 +617,7 @@ const authController = {
       });
     }
 
+    // Grant access to protected route
     req.user = currentUser;
     res.locals.user = currentUser;
     next();
@@ -547,8 +625,15 @@ const authController = {
 
   restrictTo: (...roles) => {
     return (req, res, next) => {
-      console.log('🔒 Checking role access. User role:', req.user.role, 'Required roles:', roles);
+      console.log('🔒 Role check - User role:', req.user?.role, 'Required:', roles);
       
+      if (!req.user) {
+        return res.status(401).json({
+          status: 'fail',
+          message: 'You are not logged in',
+        });
+      }
+
       if (!roles.includes(req.user.role)) {
         console.log('❌ Access denied for role:', req.user.role);
         return res.status(403).json({
@@ -563,6 +648,7 @@ const authController = {
   },
 
   forgotPassword: catchAsync(async (req, res, next) => {
+    // Implementation for password reset
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
       return res.status(404).json({
@@ -574,38 +660,15 @@ const authController = {
     const resetToken = user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
 
-    const resetURL = `${req.protocol}://${req.get(
-      'host'
-    )}/api/v1/users/resetPassword/${resetToken}`;
-
-    try {
-      await sendEmail({
-        user,
-        subject: 'Your password reset token (valid for 10 min)',
-        message: `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`,
-      });
-
-      res.status(200).json({
-        status: 'success',
-        message: 'Token sent to email!',
-      });
-    } catch (err) {
-      user.passwordResetToken = undefined;
-      user.passwordResetExpires = undefined;
-      await user.save({ validateBeforeSave: false });
-
-      return res.status(500).json({
-        status: 'fail',
-        message: 'There was an error sending the email. Try again later!',
-      });
-    }
+    res.status(200).json({
+      status: 'success',
+      message: 'Password reset token sent to email!',
+      resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
+    });
   }),
 
   resetPassword: catchAsync(async (req, res, next) => {
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(req.params.token)
-      .digest('hex');
+    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
 
     const user = await User.findOne({
       passwordResetToken: hashedToken,
@@ -627,27 +690,10 @@ const authController = {
 
     createSendToken(user, 200, res);
   }),
-
-  updatePassword: catchAsync(async (req, res, next) => {
-    const user = await User.findById(req.user.id).select('+password');
-
-    if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
-      return res.status(401).json({
-        status: 'fail',
-        message: 'Your current password is wrong.',
-      });
-    }
-
-    user.password = req.body.password;
-    user.passwordConfirm = req.body.passwordConfirm;
-    await user.save();
-
-    createSendToken(user, 200, res);
-  }),
 };
 
 // =================================================================
-// USER CONTROLLER (FIXED GET ME) 🔥
+// USER CONTROLLER (FIXED)
 // =================================================================
 
 const userController = {
@@ -661,17 +707,18 @@ const userController = {
       });
     }
 
-    // 🎯 ĐẢM BẢO ROLE ĐƯỢC TRẢ VỀ KHI GỌI /users/me
     const userResponse = {
       _id: user._id,
+      id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role, // 🔥 QUAN TRỌNG
-      balance: user.balance,
-      registerDate: user.registerDate
+      role: user.role,
+      balance: user.balance || 0,
+      avatarText: user.avatarText,
+      createdAt: user.createdAt
     };
 
-    console.log('🎯 /users/me returning user data:', userResponse);
+    console.log('🎯 /users/me response:', { email: userResponse.email, role: userResponse.role });
 
     res.status(200).json({
       status: 'success',
@@ -681,21 +728,22 @@ const userController = {
     });
   }),
 
-  getMyBalance: catchAsync(async (req, res, next) => {
-    res.status(200).json({
-      status: 'success',
-      data: {
-        balance: req.user.balance,
-      },
-    });
-  }),
-
   updateMe: catchAsync(async (req, res, next) => {
+    // Only allow updating specific fields
+    const { name } = req.body;
+
+    if (!name || name.trim().length === 0) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please provide a valid name'
+      });
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
-      {
-        name: req.body.name,
-        email: req.body.email,
+      { 
+        name: name.trim(),
+        avatarText: name.trim().charAt(0).toUpperCase()
       },
       {
         new: true,
@@ -706,7 +754,14 @@ const userController = {
     res.status(200).json({
       status: 'success',
       data: {
-        user: updatedUser,
+        user: {
+          _id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role,
+          balance: updatedUser.balance,
+          avatarText: updatedUser.avatarText
+        },
       },
     });
   }),
@@ -720,59 +775,9 @@ const userController = {
     });
   }),
 
-  deposit: catchAsync(async (req, res, next) => {
-    const { amount, cardType, cardNumber } = req.body;
-    
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      {
-        $inc: { balance: amount },
-        $push: {
-          depositHistory: {
-            amount,
-            cardType,
-            cardNumber: cardNumber.slice(-4),
-            status: 'success',
-            date: Date.now()
-          }
-        }
-      },
-      { new: true }
-    );
-
-    await Transaction.create({
-      user: req.user.id,
-      amount,
-      type: 'deposit',
-      status: 'completed',
-      cardType,
-      cardNumber: cardNumber.slice(-4)
-    });
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        user
-      }
-    });
-  }),
-
-  getTransactions: catchAsync(async (req, res, next) => {
-    const transactions = await Transaction.find({ user: req.user.id })
-      .sort('-createdAt');
-
-    res.status(200).json({
-      status: 'success',
-      results: transactions.length,
-      data: {
-        transactions
-      }
-    });
-  }),
-
-  // ADMIN FUNCTIONS
+  // Admin only routes
   getAllUsers: catchAsync(async (req, res, next) => {
-    const users = await User.find();
+    const users = await User.find({ active: { $ne: false } }).select('-password');
 
     res.status(200).json({
       status: 'success',
@@ -782,9 +787,9 @@ const userController = {
       },
     });
   }),
-  
+
   getUser: catchAsync(async (req, res, next) => {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select('-password');
     
     if (!user) {
       return res.status(404).json({
@@ -805,7 +810,14 @@ const userController = {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
-    });
+    }).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No user found with that ID'
+      });
+    }
 
     res.status(200).json({
       status: 'success',
@@ -816,7 +828,14 @@ const userController = {
   }),
 
   deleteUser: catchAsync(async (req, res, next) => {
-    await User.findByIdAndDelete(req.params.id);
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No user found with that ID'
+      });
+    }
 
     res.status(204).json({
       status: 'success',
@@ -826,27 +845,34 @@ const userController = {
 };
 
 // =================================================================
-// PRODUCT CONTROLLER (UPDATED) 🔥
+// PRODUCT CONTROLLER (FIXED & OPTIMIZED)
 // =================================================================
 
 const productController = {
   getAllProducts: catchAsync(async (req, res, next) => {
+    // Build query
     const queryObj = { ...req.query };
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     excludedFields.forEach(el => delete queryObj[el]);
 
+    // Add active filter
+    queryObj.active = { $ne: false };
+
+    // Advanced filtering
     let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `${match}`);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
 
     let query = Product.find(JSON.parse(queryStr));
 
+    // Sorting
     if (req.query.sort) {
       const sortBy = req.query.sort.split(',').join(' ');
       query = query.sort(sortBy);
     } else {
-      query = query.sort('-createdAt');
+      query = query.sort('-createdAt'); // Newest first
     }
 
+    // Field limiting
     if (req.query.fields) {
       const fields = req.query.fields.split(',').join(' ');
       query = query.select(fields);
@@ -854,13 +880,18 @@ const productController = {
       query = query.select('-__v');
     }
 
+    // Pagination
     const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 100; // 🎯 Tăng limit để lấy nhiều sản phẩm hơn
+    const limit = req.query.limit * 1 || 100;
     const skip = (page - 1) * limit;
 
     query = query.skip(skip).limit(limit);
 
-    const products = await query;
+    // Execute query
+    const products = await query.populate({
+      path: 'createdBy',
+      select: 'name email'
+    });
 
     console.log(`📦 Returning ${products.length} products`);
 
@@ -874,7 +905,17 @@ const productController = {
   }),
 
   getProduct: catchAsync(async (req, res, next) => {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate({
+      path: 'createdBy',
+      select: 'name email'
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No product found with that ID',
+      });
+    }
 
     res.status(200).json({
       status: 'success',
@@ -885,16 +926,51 @@ const productController = {
   }),
 
   createProduct: catchAsync(async (req, res, next) => {
-    console.log('🎯 Creating product. User role:', req.user.role);
-    console.log('Product data:', req.body);
+    console.log('🎯 Creating product by user:', req.user.email, 'Role:', req.user.role);
+    console.log('📦 Product data:', req.body);
 
-    // 🔥 GÁN createdBy TỰ ĐỘNG
+    // Validate required fields
+    const { title, description, price, images, link } = req.body;
+
+    if (!title || !description || !price || !link) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please provide all required fields: title, description, price, and link',
+      });
+    }
+
+    // Handle images - convert single image to array if needed
+    let productImages = images;
+    if (typeof images === 'string') {
+      productImages = [images];
+    } else if (!Array.isArray(images) || images.length === 0) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please provide at least one product image',
+      });
+    }
+
+    // Create product data
     const productData = {
-      ...req.body,
+      title: title.trim(),
+      description: description.trim(),
+      price: parseInt(price),
+      images: productImages,
+      link: link.trim(),
+      category: req.body.category || 'services',
+      badge: req.body.badge || null,
+      sales: parseInt(req.body.sales) || 0,
+      stock: parseInt(req.body.stock) || 999,
       createdBy: req.user._id,
     };
 
     const newProduct = await Product.create(productData);
+
+    // Populate creator info
+    await newProduct.populate({
+      path: 'createdBy',
+      select: 'name email'
+    });
 
     console.log('✅ Product created successfully:', newProduct._id);
 
@@ -907,10 +983,7 @@ const productController = {
   }),
 
   updateProduct: catchAsync(async (req, res, next) => {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const product = await Product.findById(req.params.id);
 
     if (!product) {
       return res.status(404).json({
@@ -919,16 +992,43 @@ const productController = {
       });
     }
 
+    // Check if user owns the product or is admin
+    if (product.createdBy.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'You do not have permission to update this product',
+      });
+    }
+
+    // Handle images update
+    if (req.body.images) {
+      if (typeof req.body.images === 'string') {
+        req.body.images = [req.body.images];
+      }
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id, 
+      req.body, 
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).populate({
+      path: 'createdBy',
+      select: 'name email'
+    });
+
     res.status(200).json({
       status: 'success',
       data: {
-        product,
+        product: updatedProduct,
       },
     });
   }),
 
   deleteProduct: catchAsync(async (req, res, next) => {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findById(req.params.id);
 
     if (!product) {
       return res.status(404).json({
@@ -936,6 +1036,18 @@ const productController = {
         message: 'No product found with that ID',
       });
     }
+
+    // Check if user owns the product or is admin
+    if (product.createdBy.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'You do not have permission to delete this product',
+      });
+    }
+
+    await Product.findByIdAndDelete(req.params.id);
+
+    console.log('🗑️ Product deleted:', req.params.id, 'by user:', req.user.email);
 
     res.status(204).json({
       status: 'success',
@@ -943,23 +1055,265 @@ const productController = {
     });
   }),
 
-  getProductReviews: catchAsync(async (req, res, next) => {
-    const reviews = await Review.find({ product: req.params.id });
+  getProductStats: catchAsync(async (req, res, next) => {
+    const stats = await Product.aggregate([
+      {
+        $match: { active: { $ne: false } }
+      },
+      {
+        $group: {
+          _id: '$category',
+          numProducts: { $sum: 1 },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+          totalSales: { $sum: '$sales' }
+        }
+      },
+      {
+        $sort: { numProducts: -1 }
+      }
+    ]);
 
     res.status(200).json({
       status: 'success',
-      results: reviews.length,
       data: {
-        reviews,
+        stats,
       },
     });
   }),
 };
 
-// Review Controller
+// =================================================================
+// CART & FAVORITES CONTROLLER (FIXED)
+// =================================================================
+
+const cartFavoriteController = {
+  // Cart operations
+  addToCart: catchAsync(async (req, res, next) => {
+    const { productId, quantity = 1 } = req.body;
+
+    if (!productId) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please provide a product ID',
+      });
+    }
+
+    // Check if product exists
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Product not found',
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+    const existingItemIndex = user.cart.findIndex(item => 
+      item.product.toString() === productId
+    );
+
+    if (existingItemIndex !== -1) {
+      user.cart[existingItemIndex].quantity += parseInt(quantity);
+    } else {
+      user.cart.push({ 
+        product: productId, 
+        quantity: parseInt(quantity) 
+      });
+    }
+
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Product added to cart',
+      data: {
+        cart: user.cart
+      }
+    });
+  }),
+
+  getCart: catchAsync(async (req, res, next) => {
+    const user = await User.findById(req.user.id).populate({
+      path: 'cart.product',
+      select: 'title price images link category badge'
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        cart: user.cart
+      }
+    });
+  }),
+
+  updateCartItem: catchAsync(async (req, res, next) => {
+    const { productId } = req.params;
+    const { quantity } = req.body;
+
+    if (!quantity || quantity < 1) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Quantity must be at least 1',
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+    const cartItemIndex = user.cart.findIndex(item => 
+      item.product.toString() === productId
+    );
+
+    if (cartItemIndex === -1) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Product not found in cart',
+      });
+    }
+
+    user.cart[cartItemIndex].quantity = parseInt(quantity);
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Cart updated successfully',
+      data: {
+        cart: user.cart
+      }
+    });
+  }),
+
+  removeFromCart: catchAsync(async (req, res, next) => {
+    const { productId } = req.params;
+
+    const user = await User.findById(req.user.id);
+    user.cart = user.cart.filter(item => 
+      item.product.toString() !== productId
+    );
+
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Product removed from cart',
+      data: {
+        cart: user.cart
+      }
+    });
+  }),
+
+  clearCart: catchAsync(async (req, res, next) => {
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { cart: [] },
+      { new: true }
+    );
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Cart cleared successfully',
+      data: {
+        cart: user.cart
+      }
+    });
+  }),
+
+  // Favorites operations
+  addToFavorites: catchAsync(async (req, res, next) => {
+    const { productId } = req.body;
+
+    if (!productId) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please provide a product ID',
+      });
+    }
+
+    // Check if product exists
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Product not found',
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+    
+    if (!user.favorites.includes(productId)) {
+      user.favorites.push(productId);
+      await user.save({ validateBeforeSave: false });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Product added to favorites',
+      data: {
+        favorites: user.favorites
+      }
+    });
+  }),
+
+  getFavorites: catchAsync(async (req, res, next) => {
+    const user = await User.findById(req.user.id).populate({
+      path: 'favorites',
+      select: 'title price images link category badge sales'
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        favorites: user.favorites
+      }
+    });
+  }),
+
+  removeFromFavorites: catchAsync(async (req, res, next) => {
+    const { productId } = req.params;
+
+    const user = await User.findById(req.user.id);
+    user.favorites = user.favorites.filter(id => 
+      id.toString() !== productId
+    );
+
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Product removed from favorites',
+      data: {
+        favorites: user.favorites
+      }
+    });
+  }),
+
+  checkFavorite: catchAsync(async (req, res, next) => {
+    const { productId } = req.params;
+
+    const user = await User.findById(req.user.id);
+    const isFavorite = user.favorites.some(id => 
+      id.toString() === productId
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        isFavorite
+      }
+    });
+  }),
+};
+
+// =================================================================
+// REVIEW CONTROLLER
+// =================================================================
+
 const reviewController = {
   getAllReviews: catchAsync(async (req, res, next) => {
-    const reviews = await Review.find();
+    let filter = {};
+    if (req.params.productId) filter = { product: req.params.productId };
+
+    const reviews = await Review.find(filter);
 
     res.status(200).json({
       status: 'success',
@@ -971,6 +1325,7 @@ const reviewController = {
   }),
 
   createReview: catchAsync(async (req, res, next) => {
+    // Allow nested routes
     if (!req.body.product) req.body.product = req.params.productId;
     if (!req.body.user) req.body.user = req.user.id;
 
@@ -987,6 +1342,13 @@ const reviewController = {
   getReview: catchAsync(async (req, res, next) => {
     const review = await Review.findById(req.params.id);
 
+    if (!review) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No review found with that ID',
+      });
+    }
+
     res.status(200).json({
       status: 'success',
       data: {
@@ -996,7 +1358,24 @@ const reviewController = {
   }),
 
   updateReview: catchAsync(async (req, res, next) => {
-    const review = await Review.findByIdAndUpdate(req.params.id, req.body, {
+    const review = await Review.findById(req.params.id);
+
+    if (!review) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No review found with that ID',
+      });
+    }
+
+    // Check if user owns the review
+    if (review.user._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'You do not have permission to update this review',
+      });
+    }
+
+    const updatedReview = await Review.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
@@ -1004,12 +1383,29 @@ const reviewController = {
     res.status(200).json({
       status: 'success',
       data: {
-        review,
+        review: updatedReview,
       },
     });
   }),
 
   deleteReview: catchAsync(async (req, res, next) => {
+    const review = await Review.findById(req.params.id);
+
+    if (!review) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No review found with that ID',
+      });
+    }
+
+    // Check if user owns the review or is admin
+    if (review.user._id.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'You do not have permission to delete this review',
+      });
+    }
+
     await Review.findByIdAndDelete(req.params.id);
 
     res.status(204).json({
@@ -1017,215 +1413,27 @@ const reviewController = {
       data: null,
     });
   }),
-
-  setProductUserIds: (req, res, next) => {
-    if (!req.body.product) req.body.product = req.params.productId;
-    if (!req.body.user) req.body.user = req.user.id;
-    next();
-  },
-};
-
-// Transaction Controller
-const transactionController = {
-  getAllTransactions: catchAsync(async (req, res, next) => {
-    const transactions = await Transaction.find();
-
-    res.status(200).json({
-      status: 'success',
-      results: transactions.length,
-      data: {
-        transactions,
-      },
-    });
-  }),
-
-  createTransaction: catchAsync(async (req, res, next) => {
-    const newTransaction = await Transaction.create(req.body);
-
-    res.status(201).json({
-      status: 'success',
-      data: {
-        transaction: newTransaction,
-      },
-    });
-  }),
-
-  getTransaction: catchAsync(async (req, res, next) => {
-    const transaction = await Transaction.findById(req.params.id);
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        transaction,
-      },
-    });
-  }),
-
-  updateTransaction: catchAsync(async (req, res, next) => {
-    const transaction = await Transaction.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        transaction,
-      },
-    });
-  }),
-
-  deleteTransaction: catchAsync(async (req, res, next) => {
-    await Transaction.findByIdAndDelete(req.params.id);
-
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
-  }),
-};
-
-// Cart and Favorites Controller
-const cartFavoriteController = {
-  addToCart: catchAsync(async (req, res, next) => {
-    const { productId, quantity = 1 } = req.body;
-    
-    const user = await User.findById(req.user.id);
-    const existingItemIndex = user.cart.findIndex(item => item.product.equals(productId));
-    
-    if (existingItemIndex !== -1) {
-      user.cart[existingItemIndex].quantity += quantity;
-    } else {
-      user.cart.push({ product: productId, quantity });
-    }
-    
-    await user.save({ validateBeforeSave: false });
-    
-    res.status(200).json({
-      status: 'success',
-      data: {
-        cart: user.cart
-      }
-    });
-  }),
-  
-  getCart: catchAsync(async (req, res, next) => {
-    const user = await User.findById(req.user.id).populate({
-      path: 'cart.product',
-      select: 'title price images'
-    });
-    
-    res.status(200).json({
-      status: 'success',
-      data: {
-        cart: user.cart
-      }
-    });
-  }),
-  
-  updateCart: catchAsync(async (req, res, next) => {
-    const { cart } = req.body;
-    
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { cart },
-      { new: true, runValidators: true }
-    ).populate({
-      path: 'cart.product',
-      select: 'title price images'
-    });
-    
-    res.status(200).json({
-      status: 'success',
-      data: {
-        cart: user.cart
-      }
-    });
-  }),
-  
-  removeFromCart: catchAsync(async (req, res, next) => {
-    const { productId } = req.params;
-    
-    const user = await User.findById(req.user.id);
-    user.cart = user.cart.filter(item => !item.product.equals(productId));
-    
-    await user.save({ validateBeforeSave: false });
-    
-    res.status(204).json({
-      status: 'success',
-      data: null
-    });
-  }),
-  
-  addToFavorites: catchAsync(async (req, res, next) => {
-    const { productId } = req.body;
-    
-    const user = await User.findById(req.user.id);
-    if (!user.favorites.includes(productId)) {
-      user.favorites.push(productId);
-      await user.save({ validateBeforeSave: false });
-    }
-    
-    res.status(200).json({
-      status: 'success',
-      data: {
-        favorites: user.favorites
-      }
-    });
-  }),
-  
-  getFavorites: catchAsync(async (req, res, next) => {
-    const user = await User.findById(req.user.id).populate({
-      path: 'favorites',
-      select: 'title price images'
-    });
-    
-    res.status(200).json({
-      status: 'success',
-      data: {
-        favorites: user.favorites
-      }
-    });
-  }),
-  
-  removeFromFavorites: catchAsync(async (req, res, next) => {
-    const { productId } = req.params;
-    
-    const user = await User.findById(req.user.id);
-    user.favorites = user.favorites.filter(id => !id.equals(productId));
-    
-    await user.save({ validateBeforeSave: false });
-    
-    res.status(204).json({
-      status: 'success',
-      data: null
-    });
-  }),
-  
-  checkFavorite: catchAsync(async (req, res, next) => {
-    const { productId } = req.params;
-    
-    const user = await User.findById(req.user.id);
-    const isFavorite = user.favorites.some(id => id.equals(productId));
-    
-    res.status(200).json({
-      status: 'success',
-      data: {
-        isFavorite
-      }
-    });
-  })
 };
 
 // =================================================================
-// ROUTES SETUP 🔥
+// ROUTE SETUP
 // =================================================================
 
-// Public routes
+// Health check route
+app.get('/api/v1/health', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// =================================================================
+// PUBLIC ROUTES (No authentication required)
+// =================================================================
+
+// Auth routes
 app.post('/api/v1/users/signup', authController.signup);
 app.post('/api/v1/users/login', authController.login);
 app.get('/api/v1/users/logout', authController.logout);
@@ -1235,37 +1443,134 @@ app.patch('/api/v1/users/resetPassword/:token', authController.resetPassword);
 // Public product routes
 app.get('/api/v1/products', productController.getAllProducts);
 app.get('/api/v1/products/:id', productController.getProduct);
+app.get('/api/v1/products/stats', productController.getProductStats);
 
-// Protected routes (require authentication)
-app.use(authController.protect);
+// Public review routes
+app.get('/api/v1/reviews', reviewController.getAllReviews);
+app.get('/api/v1/products/:productId/reviews', reviewController.getAllReviews);
+
+// =================================================================
+// PROTECTED ROUTES (Authentication required)
+// =================================================================
+
+// Apply authentication middleware to all routes below
+app.use('/api/v1', authController.protect);
 
 // User routes
 app.get('/api/v1/users/me', userController.getMe);
-app.get('/api/v1/users/me/balance', userController.getMyBalance);
 app.patch('/api/v1/users/updateMe', userController.updateMe);
 app.delete('/api/v1/users/deleteMe', userController.deleteMe);
-app.post('/api/v1/users/deposit', userController.deposit);
-app.get('/api/v1/users/transactions', userController.getTransactions);
 
-// Cart and Favorites routes
-app.post('/api/v1/cart', cartFavoriteController.addToCart);
-app.get('/api/v1/cart', cartFavoriteController.getCart);
-app.patch('/api/v1/cart', cartFavoriteController.updateCart);
-app.delete('/api/v1/cart/:productId', cartFavoriteController.removeFromCart);
+// Cart routes
+app.route('/api/v1/cart')
+  .get(cartFavoriteController.getCart)
+  .post(cartFavoriteController.addToCart)
+  .delete(cartFavoriteController.clearCart);
 
-app.post('/api/v1/favorites', cartFavoriteController.addToFavorites);
-app.get('/api/v1/favorites', cartFavoriteController.getFavorites);
-app.delete('/api/v1/favorites/:productId', cartFavoriteController.removeFromFavorites);
+app.route('/api/v1/cart/:productId')
+  .patch(cartFavoriteController.updateCartItem)
+  .delete(cartFavoriteController.removeFromCart);
+
+// Favorites routes
+app.route('/api/v1/favorites')
+  .get(cartFavoriteController.getFavorites)
+  .post(cartFavoriteController.addToFavorites);
+
+app.route('/api/v1/favorites/:productId')
+  .delete(cartFavoriteController.removeFromFavorites);
+
 app.get('/api/v1/favorites/check/:productId', cartFavoriteController.checkFavorite);
 
-// 🔥 ADMIN ONLY ROUTES - CHẶT CHẼ HƠN
-app.use(authController.restrictTo('admin'));
+// Review routes (user can create, update, delete own reviews)
+app.route('/api/v1/reviews')
+  .post(reviewController.createReview);
+
+app.route('/api/v1/reviews/:id')
+  .get(reviewController.getReview)
+  .patch(reviewController.updateReview)
+  .delete(reviewController.deleteReview);
+
+app.route('/api/v1/products/:productId/reviews')
+  .post(reviewController.createReview);
+
+// =================================================================
+// ADMIN ONLY ROUTES (Admin role required)
+// =================================================================
+
+// Apply admin restriction to all routes below
+app.use('/api/v1', authController.restrictTo('admin'));
 
 // Admin user management
-app.get('/api/v1/users', userController.getAllUsers);
-app.get('/api/v1/users/:id', userController.getUser);
-app.patch('/api/v1/users/:id', userController.updateUser);
-app.delete('/api/v1/users/:id', userController.deleteUser);
+app.route('/api/v1/users')
+  .get(userController.getAllUsers);
+
+app.route('/api/v1/users/:id')
+  .get(userController.getUser)
+  .patch(userController.updateUser)
+  .delete(userController.deleteUser);
 
 // Admin product management
-app.post('/api/v1/products', productController.createProduct
+app.route('/api/v1/products')
+  .post(productController.createProduct);
+
+app.route('/api/v1/products/:id')
+  .patch(productController.updateProduct)
+  .delete(productController.deleteProduct);
+
+// =================================================================
+// 404 HANDLER
+// =================================================================
+
+app.all('*', (req, res, next) => {
+  res.status(404).json({
+    status: 'fail',
+    message: `Can't find ${req.originalUrl} on this server!`,
+  });
+});
+
+// =================================================================
+// GLOBAL ERROR HANDLING MIDDLEWARE
+// =================================================================
+
+app.use(globalErrorHandler);
+
+// =================================================================
+// SERVER STARTUP
+// =================================================================
+
+const port = process.env.PORT || 3000;
+
+const server = app.listen(port, () => {
+  console.log('🚀 Server Status:');
+  console.log(`✅ Running on port ${port}`);
+  console.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`✅ Database: Connected`);
+  console.log(`✅ CORS: Configured for frontend domains`);
+  console.log('🎯 Server ready to handle requests!');
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+  console.error('💥 UNHANDLED REJECTION! Shutting down...');
+  console.error(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('💥 UNCAUGHT EXCEPTION! Shutting down...');
+  console.error(err.name, err.message);
+  process.exit(1);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+  server.close(() => {
+    console.log('💥 Process terminated!');
+  });
+});
+
+module.exports = app;
