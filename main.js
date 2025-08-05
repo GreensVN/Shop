@@ -477,8 +477,14 @@ class FloatingButtonsManager {
         const container = document.createElement('div');
         container.id = 'floatingButtonsContainer';
         
+        // Luôn thêm nút Messenger
         container.appendChild(this.createMessengerButton());
-        container.appendChild(this.createPostButton());
+        
+        // Chỉ thêm nút đăng tin nếu user có quyền admin
+        const postButton = this.createPostButton();
+        if (postButton) {
+            container.appendChild(postButton);
+        }
         
         document.body.appendChild(container);
     }
@@ -495,30 +501,26 @@ class FloatingButtonsManager {
     }
 
     static createPostButton() {
-        const btn = document.createElement('button');
-        btn.className = 'floating-btn post-btn';
-        
         const hasPermission = PermissionManager.checkPostPermission();
         
-        if (hasPermission) {
-            btn.innerHTML = `<i class="fas fa-plus"></i><span>Đăng tin</span>`;
-            btn.title = 'Đăng sản phẩm mới';
-            btn.addEventListener('click', () => {
-                if (window.ProductModal?.show) {
-                    window.ProductModal.show();
-                } else {
-                    Utils.showToast('Chức năng chưa sẵn sàng!', 'error');
-                }
-            });
-        } else {
-            btn.innerHTML = `<i class="fas fa-lock"></i><span>Chỉ Admin</span>`;
-            btn.title = 'Chỉ admin mới có thể đăng sản phẩm';
-            btn.classList.add('disabled');
-            btn.addEventListener('click', () => {
-                Utils.showToast('Bạn không có quyền đăng sản phẩm!', 'warning');
-                PermissionManager.debugPermissions();
-            });
+        // Chỉ tạo nút nếu user có quyền admin
+        if (!hasPermission) {
+            console.log('🔒 User không có quyền admin - ẩn nút đăng tin');
+            return null; // Không tạo nút
         }
+        
+        const btn = document.createElement('button');
+        btn.className = 'floating-btn post-btn';
+        btn.innerHTML = `<i class="fas fa-plus"></i><span>Đăng tin</span>`;
+        btn.title = 'Đăng sản phẩm mới';
+        
+        btn.addEventListener('click', () => {
+            if (window.ProductModal?.show) {
+                window.ProductModal.show();
+            } else {
+                Utils.showToast('Chức năng chưa sẵn sàng!', 'error');
+            }
+        });
         
         return btn;
     }
