@@ -1,4 +1,4 @@
-// main.js - Enhanced Production Version with Security
+// main.js - Enhanced Production Version with Security (FIXED ADMIN SYSTEM)
 "use strict";
 
 // =================================================================
@@ -272,30 +272,55 @@ class Utils {
 }
 
 // =================================================================
-// ENHANCED STORAGE MANAGER
-// =================================================================
-
-// XÓA TOÀN BỘ StorageManager và các hàm liên quan
-
-// =================================================================
-// PERMISSION MANAGER
+// PERMISSION MANAGER (FIXED)
 // =================================================================
 
 class PermissionManager {
     static checkPostPermission() {
-        if (!currentUser?.email) return false;
-        const userEmail = currentUser.email.toLowerCase().trim();
-        return CONFIG.AUTHORIZED_EMAILS.map(email => email.toLowerCase()).includes(userEmail);
+        console.log('🔍 Checking post permission...');
+        console.log('Current user:', currentUser);
+        
+        if (!currentUser) {
+            console.log('❌ No current user');
+            return false;
+        }
+        
+        const userEmail = currentUser.email?.toLowerCase()?.trim();
+        console.log('User email:', userEmail);
+        console.log('Authorized emails:', CONFIG.AUTHORIZED_EMAILS.map(e => e.toLowerCase()));
+        
+        if (!userEmail) {
+            console.log('❌ No user email');
+            return false;
+        }
+        
+        const hasPermission = CONFIG.AUTHORIZED_EMAILS.map(email => email.toLowerCase()).includes(userEmail);
+        console.log('Has permission:', hasPermission);
+        
+        return hasPermission;
     }
 
     static checkDeletePermission(product) {
         if (!currentUser) return false;
+        
+        // Admin có thể xóa tất cả
         if (this.checkPostPermission()) return true;
+        
+        // Người tạo có thể xóa sản phẩm của mình
         return product.createdBy === currentUser._id;
     }
 
     static checkAdminPermission() {
         return this.checkPostPermission();
+    }
+
+    static debugPermissions() {
+        console.log('=== PERMISSION DEBUG ===');
+        console.log('Current User:', currentUser);
+        console.log('User Email:', currentUser?.email);
+        console.log('Authorized Emails:', CONFIG.AUTHORIZED_EMAILS);
+        console.log('Has Post Permission:', this.checkPostPermission());
+        console.log('========================');
     }
 }
 
@@ -304,31 +329,54 @@ class PermissionManager {
 // =================================================================
 
 class ApiManager {
+    static getToken() {
+        return localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN) || 
+               sessionStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
+    }
+
     static async call(endpoint, method = 'GET', body = null, requireAuth = true) {
         const headers = { 'Content-Type': 'application/json' };
-        // Lấy token từ localStorage hoặc sessionStorage
-        const token = localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN) || sessionStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
+        const token = this.getToken();
+        
         if (token && requireAuth) {
             headers['Authorization'] = `Bearer ${token}`;
         }
+        
+        console.log(`🌐 API Call: ${method} ${endpoint}`, { requireAuth, hasToken: !!token });
+        
         try {
             const response = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
                 method,
                 headers,
                 body: body ? JSON.stringify(body) : null
             });
+            
             if (response.status === 204) return { success: true };
+            
             const data = await response.json();
-            if (response.status === 401 && !requireAuth) {
-                return { data: { products: [], favorites: [], cart: [] } };
+            
+            if (response.status === 401 && requireAuth) {
+                console.log('🔒 Unauthorized - clearing auth data');
+                this.clearAuthData();
+                throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
             }
+            
             if (!response.ok) {
                 throw new Error(data.message || 'Server error occurred');
             }
+            
             return data;
         } catch (error) {
+            console.error('API Error:', error);
             throw error;
         }
+    }
+
+    static clearAuthData() {
+        localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+        sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);
+        currentUser = null;
     }
 
     static async createProduct(productData) {
@@ -344,13 +392,12 @@ class ApiManager {
     }
 
     static async getProducts() {
-        // Luôn cho phép GET sản phẩm không cần token
         return await this.call('/products', 'GET', null, false);
     }
 }
 
 // =================================================================
-// ENHANCED FLOATING BUTTONS MANAGER
+// ENHANCED FLOATING BUTTONS MANAGER (FIXED)
 // =================================================================
 
 class FloatingButtonsManager {
@@ -385,21 +432,32 @@ class FloatingButtonsManager {
                 white-space: nowrap;
                 user-select: none;
             }
+            
             .floating-btn:hover {
                 transform: translateY(-3px) scale(1.05);
                 box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
             }
+            
             .floating-btn:active {
                 transform: translateY(-1px) scale(1.02);
             }
+            
             .messenger-btn {
                 background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%) !important;
                 color: #fff !important;
             }
+            
             .post-btn {
                 background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
                 color: #fff !important;
             }
+            
+            .post-btn.disabled {
+                background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%) !important;
+                cursor: not-allowed !important;
+                opacity: 0.6;
+            }
+            
             #floatingButtonsContainer {
                 position: fixed !important;
                 bottom: 2rem !important;
@@ -409,6 +467,7 @@ class FloatingButtonsManager {
                 flex-direction: column !important;
                 gap: 1rem !important;
             }
+            
             @media (max-width: 768px) {
                 #floatingButtonsContainer {
                     bottom: 1rem !important;
@@ -431,10 +490,7 @@ class FloatingButtonsManager {
         container.id = 'floatingButtonsContainer';
         
         container.appendChild(this.createMessengerButton());
-        
-        if (PermissionManager.checkPostPermission()) {
-            container.appendChild(this.createPostButton());
-        }
+        container.appendChild(this.createPostButton());
         
         document.body.appendChild(container);
     }
@@ -453,16 +509,29 @@ class FloatingButtonsManager {
     static createPostButton() {
         const btn = document.createElement('button');
         btn.className = 'floating-btn post-btn';
-        btn.innerHTML = `<i class="fas fa-plus"></i><span>Đăng tin</span>`;
-        btn.title = 'Đăng sản phẩm mới';
         
-        btn.addEventListener('click', () => {
-            if (window.ProductModal?.show) {
-                window.ProductModal.show();
-            } else {
-                Utils.showToast('Chức năng chưa sẵn sàng!', 'error');
-            }
-        });
+        const hasPermission = PermissionManager.checkPostPermission();
+        
+        if (hasPermission) {
+            btn.innerHTML = `<i class="fas fa-plus"></i><span>Đăng tin</span>`;
+            btn.title = 'Đăng sản phẩm mới';
+            btn.addEventListener('click', () => {
+                console.log('🎯 Post button clicked');
+                if (window.ProductModal?.show) {
+                    window.ProductModal.show();
+                } else {
+                    Utils.showToast('Chức năng chưa sẵn sàng!', 'error');
+                }
+            });
+        } else {
+            btn.innerHTML = `<i class="fas fa-lock"></i><span>Chỉ Admin</span>`;
+            btn.title = 'Chỉ admin mới có thể đăng sản phẩm';
+            btn.classList.add('disabled');
+            btn.addEventListener('click', () => {
+                Utils.showToast('Bạn không có quyền đăng sản phẩm!', 'warning');
+                PermissionManager.debugPermissions();
+            });
+        }
         
         return btn;
     }
@@ -474,10 +543,6 @@ class FloatingButtonsManager {
 
 // =================================================================
 // CART & FAVORITES MANAGERS
-// =================================================================
-
-// =================================================================
-// CART MANAGER
 // =================================================================
 
 const CartManager = {
@@ -508,10 +573,6 @@ const CartManager = {
         });
     }
 };
-
-// =================================================================
-// FAVORITE MANAGER
-// =================================================================
 
 const FavoriteManager = {
     async get() {
@@ -548,13 +609,18 @@ const FavoriteManager = {
 };
 
 // =================================================================
-// ENHANCED AUTHENTICATION MANAGER
+// ENHANCED AUTHENTICATION MANAGER (FIXED)
 // =================================================================
 
 class AuthManager {
     static async login(email, password, rememberMe = true) {
+        console.log('🔐 Attempting login for:', email);
+        
         const data = await ApiManager.call('/users/login', 'POST', { email, password });
-        // Lưu token đúng nơi
+        
+        console.log('✅ Login successful, received data:', data);
+        
+        // Lưu token
         if (rememberMe) {
             localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
             sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
@@ -562,12 +628,24 @@ class AuthManager {
             sessionStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
             localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
         }
+        
+        // Tạo currentUser object với email chính xác
         currentUser = {
-            ...data.data.user,
-            email: data.data.user.email || email
+            _id: data.data.user._id || data.data.user.id,
+            name: data.data.user.name,
+            email: data.data.user.email || email, // Đảm bảo email luôn có
+            role: data.data.user.role,
+            ...data.data.user
         };
+        
+        console.log('👤 Setting currentUser:', currentUser);
+        
+        // Lưu user data
         localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
-        await AuthManager.updateUIAfterLogin();
+        
+        // Cập nhật UI
+        await this.updateUIAfterLogin();
+        
         return currentUser;
     }
 
@@ -579,13 +657,15 @@ class AuthManager {
         localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
         
         currentUser = {
-            ...data.data.user,
+            _id: data.data.user._id || data.data.user.id,
             name: data.data.user.name || name,
-            email: data.data.user.email || email
+            email: data.data.user.email || email,
+            role: data.data.user.role,
+            ...data.data.user
         };
         
         localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
-        await AuthManager.updateUIAfterLogin();
+        await this.updateUIAfterLogin();
         return currentUser;
     }
 
@@ -593,10 +673,11 @@ class AuthManager {
         if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) return;
         
         localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+        sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
         localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);
         currentUser = null;
         
-        AuthManager.updateUIAfterLogout();
+        this.updateUIAfterLogout();
         Utils.showToast('Đăng xuất thành công!', 'success');
         
         const protectedPages = ['account.html', 'cart.html', 'favorite.html'];
@@ -606,25 +687,40 @@ class AuthManager {
     }
 
     static async checkAutoLogin() {
-        // Ưu tiên lấy token từ localStorage, nếu không có thì lấy từ sessionStorage
+        console.log('🔍 Checking auto login...');
+        
         let token = localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
         if (!token) token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
+        
         if (token) {
+            console.log('🎫 Found token, verifying...');
             try {
                 const data = await ApiManager.call('/users/me');
-                currentUser = data.data.user;
-                if (!currentUser.email) throw new Error('Invalid user data');
+                
+                currentUser = {
+                    _id: data.data.user._id || data.data.user.id,
+                    name: data.data.user.name,
+                    email: data.data.user.email,
+                    role: data.data.user.role,
+                    ...data.data.user
+                };
+                
+                console.log('✅ Auto login successful:', currentUser);
+                
+                if (!currentUser.email) {
+                    throw new Error('Invalid user data - no email');
+                }
+                
                 localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
-                await AuthManager.updateUIAfterLogin();
+                await this.updateUIAfterLogin();
             } catch (error) {
-                localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
-                sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
-                localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);
-                currentUser = null;
-                AuthManager.updateUIAfterLogout();
+                console.log('❌ Auto login failed:', error);
+                ApiManager.clearAuthData();
+                this.updateUIAfterLogout();
             }
         } else {
-            AuthManager.updateUIAfterLogout();
+            console.log('📤 No token found');
+            this.updateUIAfterLogout();
         }
     }
 
@@ -638,13 +734,15 @@ class AuthManager {
     static async updateUIAfterLogin() {
         if (!currentUser) return;
         
+        console.log('🎨 Updating UI after login for:', currentUser);
+        
         const loginButton = document.getElementById('loginButton');
         const userDropdown = document.getElementById('userDropdown');
         
         if (loginButton) loginButton.style.display = 'none';
         if (userDropdown) userDropdown.style.display = 'flex';
         
-        const displayName = AuthManager.getDisplayName(currentUser);
+        const displayName = this.getDisplayName(currentUser);
         const firstLetter = displayName.charAt(0).toUpperCase();
         
         document.querySelectorAll('.user-name, #userName').forEach(el => {
@@ -657,7 +755,7 @@ class AuthManager {
         
         await CartManager.updateCount();
         FloatingButtonsManager.update();
-        updateDevToolsProtection(); // Call the new function here
+        updateDevToolsProtection();
     }
 
     static updateUIAfterLogout() {
@@ -700,25 +798,35 @@ class ProductManager {
             if (currentUser && window.updateAllFavoriteButtons) {
                 await window.updateAllFavoriteButtons();
             }
+            
+            console.log(`📦 Loaded ${products.length} products`);
         } catch (error) {
+            console.error('Failed to load products:', error);
             productsGrid.innerHTML = `
-                    <div class="auth-required-message" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
-                        <i class="fas fa-lock" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;"></i>
-                        <h3 style="color: #1f2937; margin-bottom: 1rem;">Cần đăng nhập để xem sản phẩm</h3>
-                        <p style="color: #64748b; margin-bottom: 2rem;">Vui lòng đăng nhập để truy cập danh sách sản phẩm</p>
-                        <button class="btn btn-primary" onclick="document.getElementById('loginButton').click()">
-                            <i class="fas fa-user"></i> <span>Đăng nhập ngay</span>
-                        </button>
-                    </div>
-                `;
+                <div class="auth-required-message" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ef4444; margin-bottom: 1rem;"></i>
+                    <h3 style="color: #1f2937; margin-bottom: 1rem;">Không thể tải sản phẩm</h3>
+                    <p style="color: #64748b; margin-bottom: 2rem;">${error.message}</p>
+                    <button class="btn btn-primary" onclick="window.location.reload()">
+                        <i class="fas fa-refresh"></i> <span>Thử lại</span>
+                    </button>
+                </div>
+            `;
         }
     }
 
     static async createProduct(productData) {
+        console.log('🎯 Creating product:', productData);
+        console.log('Current user:', currentUser);
+        console.log('Has permission:', PermissionManager.checkPostPermission());
+        
+        if (!PermissionManager.checkPostPermission()) {
+            throw new Error('Bạn không có quyền đăng sản phẩm!');
+        }
+        
         SecurityManager.validateProduct(productData);
         
         const product = {
-            _id: Utils.generateId(),
             title: SecurityManager.sanitizeInput(productData.title),
             description: SecurityManager.sanitizeInput(productData.description),
             price: parseInt(productData.price),
@@ -733,29 +841,26 @@ class ProductManager {
         };
 
         try {
-            const apiData = { ...product };
-            delete apiData._id;
+            const result = await ApiManager.createProduct(product);
+            console.log('✅ Product created successfully:', result);
             
-            await ApiManager.createProduct(apiData);
             Utils.showToast('Đăng sản phẩm thành công!', 'success');
             await ProductManager.loadProducts();
             return true;
         } catch (error) {
+            console.error('❌ Failed to create product:', error);
             Utils.showToast(error.message || 'Không thể lưu sản phẩm', 'error');
+            throw error;
         }
-        
-        throw new Error('Không thể lưu sản phẩm');
     }
 
     static async deleteProduct(productId) {
         if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return;
         
+        console.log('🗑️ Deleting product:', productId);
+        
         try {
-            if (productId.startsWith('local_')) {
-                // StorageManager.deleteProduct(productId); // XÓA
-            } else {
-                await ApiManager.deleteProduct(productId);
-            }
+            await ApiManager.deleteProduct(productId);
             
             allProducts = allProducts.filter(p => p._id !== productId);
             
@@ -765,19 +870,18 @@ class ProductManager {
 
             Utils.showToast('Xóa sản phẩm thành công!', 'success');
         } catch (error) {
+            console.error('❌ Failed to delete product:', error);
             Utils.showToast(error.message || 'Không thể xóa sản phẩm!', 'error');
         }
     }
 
     static async updateProduct(productId, updates) {
+        console.log('✏️ Updating product:', productId, updates);
+        
         try {
             SecurityManager.validateProduct(updates);
             
-            if (productId.startsWith('local_')) {
-                // StorageManager.updateProduct(productId, updates); // XÓA
-            } else {
-                await ApiManager.updateProduct(productId, updates);
-            }
+            await ApiManager.updateProduct(productId, updates);
             
             const index = allProducts.findIndex(p => p._id === productId);
             if (index !== -1) {
@@ -791,6 +895,7 @@ class ProductManager {
             Utils.showToast('Cập nhật sản phẩm thành công!', 'success');
             return true;
         } catch (error) {
+            console.error('❌ Failed to update product:', error);
             Utils.showToast(error.message || 'Không thể cập nhật sản phẩm!', 'error');
             return false;
         }
@@ -879,13 +984,15 @@ class ModalManager {
             try {
                 const email = form.email.value.trim();
                 const password = form.password.value;
-                const rememberMe = form.rememberMe.checked; // Get rememberMe value
+                const rememberMe = form.rememberMe?.checked || false;
                 
                 if (!email || !password) {
                     throw new Error('Vui lòng nhập đủ thông tin!');
                 }
                 
-                const user = await AuthManager.login(email, password, rememberMe); // Pass rememberMe
+                console.log('🔐 Logging in with:', { email, rememberMe });
+                
+                const user = await AuthManager.login(email, password, rememberMe);
                 Utils.showToast(`Chào mừng ${AuthManager.getDisplayName(user)}!`, 'success');
                 
                 onSuccess();
@@ -893,6 +1000,7 @@ class ModalManager {
                 
                 setTimeout(() => ProductManager.loadProducts(), 500);
             } catch (error) {
+                console.error('Login error:', error);
                 Utils.showToast(error.message || 'Đăng nhập thất bại!', 'error');
             } finally {
                 this.setLoadingState(submitBtn, spinner, false);
@@ -1004,6 +1112,8 @@ class ImageUploadHandler {
 
 class App {
     static async init() {
+        console.log('🚀 Initializing application...');
+        
         // Initialize security
         SecurityManager.obfuscateConsole();
         
@@ -1028,10 +1138,14 @@ class App {
         // Setup global error handling
         window.addEventListener('error', App.handleGlobalError);
         window.addEventListener('unhandledrejection', App.handleGlobalError);
+        
+        console.log('✅ Application initialized successfully');
     }
 
     static async initCurrentPage() {
         const path = window.location.pathname.split("/").pop() || 'index.html';
+        
+        console.log('📄 Initializing page:', path);
         
         switch (path) {
             case 'index.html':
@@ -1091,9 +1205,56 @@ class App {
     static handleGlobalError(event) {
         const error = event.error || event.reason;
         if (error && error.message && !error.message.includes('Script error')) {
+            console.error('Global error:', error);
             Utils.showToast('Đã xảy ra lỗi. Vui lòng thử lại!', 'error');
         }
     }
+}
+
+// =================================================================
+// DEVTOOLS PROTECTION
+// =================================================================
+
+let _devToolsKeydownHandler = null;
+let _devToolsContextMenuHandler = null;
+
+function isAdminEmail(email) {
+    return CONFIG.AUTHORIZED_EMAILS.map(e => e.toLowerCase()).includes(email?.toLowerCase());
+}
+
+function setupDevToolsProtection() {
+    // Remove old listeners if exist
+    if (_devToolsKeydownHandler) document.removeEventListener('keydown', _devToolsKeydownHandler);
+    if (_devToolsContextMenuHandler) document.removeEventListener('contextmenu', _devToolsContextMenuHandler);
+
+    _devToolsKeydownHandler = function(e) {
+        if (!currentUser || !isAdminEmail(currentUser.email)) {
+            if (
+                e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.key === 'U')
+            ) {
+                e.preventDefault();
+                Utils.showToast('Chức năng này đã bị vô hiệu hóa!', 'warning');
+                return false;
+            }
+        }
+    };
+    
+    _devToolsContextMenuHandler = function(e) {
+        if (!currentUser || !isAdminEmail(currentUser.email)) {
+            e.preventDefault();
+            Utils.showToast('Chuột phải đã bị vô hiệu hóa!', 'warning');
+            return false;
+        }
+    };
+    
+    document.addEventListener('keydown', _devToolsKeydownHandler);
+    document.addEventListener('contextmenu', _devToolsContextMenuHandler);
+}
+
+function updateDevToolsProtection() {
+    setupDevToolsProtection();
 }
 
 // =================================================================
@@ -1106,10 +1267,11 @@ window.CartManager = CartManager;
 window.FavoriteManager = FavoriteManager;
 window.PermissionManager = PermissionManager;
 window.ProductManager = ProductManager;
-// window.StorageManager = StorageManager; // XÓA
 window.ApiManager = ApiManager;
 window.SecurityManager = SecurityManager;
 window.ImageUploadHandler = ImageUploadHandler;
+window.AuthManager = AuthManager;
+window.currentUser = currentUser;
 
 // Export update function for favorites
 window.updateAllFavoriteButtons = async () => {
@@ -1118,64 +1280,17 @@ window.updateAllFavoriteButtons = async () => {
         const favorites = await FavoriteManager.get();
         favorites.forEach(fav => FavoriteManager.updateStatus(fav.productId, true));
     } catch (error) {
-        // Silent fail for favorites update
+        console.log('Could not update favorite buttons:', error);
     }
 };
 
+// Debug function for permissions
+window.debugPermissions = () => PermissionManager.debugPermissions();
+
 // Cleanup function for page unload
 window.addEventListener('beforeunload', () => {
-    // Clear sensitive data if needed
-    if (!currentUser) {
-        // StorageManager.clearAll(); // XÓA
-    }
+    console.log('🧹 Cleaning up...');
 });
-
-// 1. Chặn DevTools cho non-admin
-let _devToolsKeydownHandler = null;
-let _devToolsContextMenuHandler = null;
-
-function isAdminEmail(email) {
-    return CONFIG.AUTHORIZED_EMAILS.includes(email);
-}
-
-function setupDevToolsProtection() {
-    // Remove old listeners if exist
-    if (_devToolsKeydownHandler) document.removeEventListener('keydown', _devToolsKeydownHandler);
-    if (_devToolsContextMenuHandler) document.removeEventListener('contextmenu', _devToolsContextMenuHandler);
-
-    _devToolsKeydownHandler = function(e) {
-        if (!window.currentUser || !isAdminEmail(window.currentUser.email)) {
-            if (
-                e.key === 'F12' ||
-                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-                (e.ctrlKey && e.key === 'U')
-            ) {
-                e.preventDefault();
-                Utils.showToast('Chức năng này đã bị vô hiệu hóa!', 'warning');
-                return false;
-            }
-        }
-    };
-    _devToolsContextMenuHandler = function(e) {
-        if (!window.currentUser || !isAdminEmail(window.currentUser.email)) {
-            e.preventDefault();
-            Utils.showToast('Chuột phải đã bị vô hiệu hóa!', 'warning');
-            return false;
-        }
-    };
-    document.addEventListener('keydown', _devToolsKeydownHandler);
-    document.addEventListener('contextmenu', _devToolsContextMenuHandler);
-}
-
-function updateDevToolsProtection() {
-    setupDevToolsProtection();
-}
-
-// 4. Remember Me khi đăng nhập
-// Trong AuthManager.login:
-// Thêm tham số rememberMe, nếu true thì lưu token vào localStorage, nếu false thì lưu vào sessionStorage
-// Trong ModalManager.setupAuthForms, truyền giá trị rememberMe từ form đăng nhập vào AuthManager.login
-// 5. Không tự động đăng xuất trừ khi token hết hạn hoặc user logout
 
 // =================================================================
 // APPLICATION START
@@ -1183,6 +1298,7 @@ function updateDevToolsProtection() {
 
 document.addEventListener('DOMContentLoaded', () => {
     App.init().catch(error => {
+        console.error('Failed to initialize app:', error);
         Utils.showToast('Không thể khởi tạo ứng dụng!', 'error');
     });
 });
