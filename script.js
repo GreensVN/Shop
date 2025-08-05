@@ -1,4 +1,4 @@
-// script.js - Enhanced UI Controller for Index Page (FIXED VERSION)
+// script.js - FIXED UI Controller for Index Page
 "use strict";
 
 // =================================================================
@@ -16,7 +16,7 @@ const UI_CONFIG = {
 };
 
 // =================================================================
-// ENHANCED PRODUCT MODAL MANAGER (FIXED)
+// ENHANCED PRODUCT MODAL MANAGER (COMPLETELY FIXED)
 // =================================================================
 
 const ProductModal = {
@@ -105,7 +105,7 @@ const ProductModal = {
                             <span class="required">*</span>
                         </label>
                         <input type="url" id="productLink" class="form-input" required 
-                               placeholder="https://greensvn.github.io/Shop/product.html?id=123">
+                               placeholder="https://example.com/product">
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" id="cancelProductBtn">
@@ -140,15 +140,16 @@ const ProductModal = {
         });
         this.modal.querySelector('#addProductForm').addEventListener('submit', (e) => this.handleSubmit(e));
         
-        // Image URL preview
-        this.modal.querySelector('#productImage').addEventListener('blur', (e) => {
+        // Image URL preview with debouncing
+        const imageInput = this.modal.querySelector('#productImage');
+        imageInput.addEventListener('blur', (e) => {
             this.previewImage(e.target.value);
         });
 
-        // Real-time image preview
-        this.modal.querySelector('#productImage').addEventListener('input', Utils.debounce((e) => {
+        // Real-time image preview with debouncing
+        imageInput.addEventListener('input', window.Utils?.debounce((e) => {
             this.previewImage(e.target.value);
-        }, 500));
+        }, 500) || (() => {}));
     },
 
     /**
@@ -174,12 +175,20 @@ const ProductModal = {
             descCount.style.color = count > UI_CONFIG.MAX_PRODUCT_DESC * 0.9 ? '#ef4444' : '#6b7280';
         });
 
-        // Price formatting
+        // Price formatting and validation
         const priceInput = this.modal.querySelector('#productPrice');
         priceInput.addEventListener('input', (e) => {
             const value = parseInt(e.target.value);
             if (!isNaN(value)) {
                 e.target.style.color = value < UI_CONFIG.MIN_PRODUCT_PRICE || value > UI_CONFIG.MAX_PRODUCT_PRICE ? '#ef4444' : '';
+            }
+        });
+
+        // Price formatting on blur
+        priceInput.addEventListener('blur', (e) => {
+            const value = parseInt(e.target.value);
+            if (!isNaN(value)) {
+                e.target.value = value;
             }
         });
     },
@@ -190,7 +199,7 @@ const ProductModal = {
     previewImage(url) {
         const preview = this.modal.querySelector('#imagePreview');
         
-        if (!url || !Utils.validateURL(url)) {
+        if (!url || !window.Utils?.validateURL(url)) {
             preview.innerHTML = '';
             return;
         }
@@ -199,10 +208,9 @@ const ProductModal = {
             <div style="text-align: center; margin: 1rem 0;">
                 <div style="position: relative; display: inline-block;">
                     <img src="${url}" alt="Preview" 
-                         style="max-width: 200px; max-height: 200px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: opacity 0.3s;" 
+                         style="max-width: 200px; max-height: 200px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: opacity 0.3s; opacity: 0;" 
                          onload="this.style.opacity='1'; this.nextElementSibling.style.display='none';"
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-                         style="opacity: 0;">
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <div style="display: none; color: #ef4444; font-size: 0.9rem; padding: 20px; border: 2px dashed #ef4444; border-radius: 8px;">
                         <i class="fas fa-exclamation-triangle"></i> Không thể tải hình ảnh
                     </div>
@@ -213,27 +221,31 @@ const ProductModal = {
     },
 
     /**
-     * Hiển thị modal
+     * Hiển thị modal với kiểm tra quyền
      */
     show() {
         console.log('🎯 ProductModal.show() called');
         console.log('Current user:', window.currentUser);
         console.log('Permission check:', window.PermissionManager?.checkPostPermission());
         
-        // Kiểm tra quyền trước khi khởi tạo modal
+        // Kiểm tra đăng nhập
         if (!window.currentUser) {
             window.Utils?.showToast('Vui lòng đăng nhập để đăng sản phẩm!', 'warning');
             document.getElementById('loginButton')?.click();
             return;
         }
 
+        // Kiểm tra quyền admin
         if (!window.PermissionManager?.checkPostPermission()) {
             window.Utils?.showToast('Bạn không có quyền đăng sản phẩm!\nChỉ admin mới có thể đăng sản phẩm.', 'error');
             window.PermissionManager?.debugPermissions();
             return;
         }
         
+        // Khởi tạo modal nếu cần
         this.init();
+        
+        // Hiển thị modal
         this.modal.style.display = 'flex';
         setTimeout(() => this.modal.classList.add('show'), 10);
         document.body.style.overflow = 'hidden';
@@ -255,7 +267,7 @@ const ProductModal = {
         this.modal.querySelector('#titleCharCount').textContent = `0/${UI_CONFIG.MAX_PRODUCT_TITLE}`;
         this.modal.querySelector('#descCharCount').textContent = `0/${UI_CONFIG.MAX_PRODUCT_DESC}`;
         
-        // Reset input colors
+        // Reset input colors and styles
         this.modal.querySelectorAll('.form-input, .form-textarea').forEach(input => {
             input.style.color = '';
             input.style.borderColor = '';
@@ -267,6 +279,7 @@ const ProductModal = {
      */
     hide() {
         if (!this.modal) return;
+        
         this.modal.classList.remove('show');
         setTimeout(() => {
             this.modal.style.display = 'none';
@@ -276,7 +289,6 @@ const ProductModal = {
 
     /**
      * Xử lý submit form
-     * @param {Event} e 
      */
     async handleSubmit(e) {
         e.preventDefault();
@@ -290,7 +302,9 @@ const ProductModal = {
         
         const submitBtn = this.modal.querySelector('#submitProductBtn');
         const spinner = submitBtn.querySelector('.spinner');
+        const btnText = submitBtn.querySelector('span');
 
+        // Collect form data
         const formData = {
             title: this.modal.querySelector('#productTitle').value.trim(),
             description: this.modal.querySelector('#productDescription').value.trim(),
@@ -314,6 +328,7 @@ const ProductModal = {
         this.isSubmitting = true;
         submitBtn.disabled = true;
         spinner.style.display = 'inline-block';
+        btnText.textContent = 'Đang đăng...';
 
         try {
             console.log('🚀 Creating product via ProductManager...');
@@ -333,47 +348,53 @@ const ProductModal = {
             console.error('❌ Error creating product:', error);
             window.Utils?.showToast(error.message || 'Có lỗi xảy ra khi đăng sản phẩm!', 'error');
         } finally {
+            // Reset loading state
             this.isSubmitting = false;
             submitBtn.disabled = false;
             spinner.style.display = 'none';
+            btnText.textContent = 'Đăng sản phẩm';
         }
     },
 
     /**
-     * Validate form data
+     * Validate form data với kiểm tra chi tiết
      */
     validateFormData(data) {
         const errors = [];
 
+        // Title validation
         if (!data.title || data.title.length < 5) {
             errors.push('Tên sản phẩm phải có ít nhất 5 ký tự');
         }
-
         if (data.title.length > UI_CONFIG.MAX_PRODUCT_TITLE) {
             errors.push(`Tên sản phẩm không được vượt quá ${UI_CONFIG.MAX_PRODUCT_TITLE} ký tự`);
         }
 
+        // Description validation
         if (!data.description || data.description.length < 10) {
             errors.push('Mô tả phải có ít nhất 10 ký tự');
         }
-
         if (data.description.length > UI_CONFIG.MAX_PRODUCT_DESC) {
             errors.push(`Mô tả không được vượt quá ${UI_CONFIG.MAX_PRODUCT_DESC} ký tự`);
         }
 
+        // Price validation
         const price = parseInt(data.price);
         if (isNaN(price) || price < UI_CONFIG.MIN_PRODUCT_PRICE || price > UI_CONFIG.MAX_PRODUCT_PRICE) {
             errors.push(`Giá phải từ ${window.Utils?.formatPrice(UI_CONFIG.MIN_PRODUCT_PRICE)} đến ${window.Utils?.formatPrice(UI_CONFIG.MAX_PRODUCT_PRICE)}`);
         }
 
+        // Image URL validation
         if (!window.Utils?.validateURL(data.image)) {
             errors.push('URL hình ảnh không hợp lệ');
         }
 
+        // Link validation
         if (!window.Utils?.validateURL(data.link)) {
             errors.push('Link sản phẩm không hợp lệ');
         }
 
+        // Sales validation
         const sales = parseInt(data.sales);
         if (isNaN(sales) || sales < 0) {
             errors.push('Số lượng đã bán phải là số không âm');
@@ -388,8 +409,7 @@ const ProductModal = {
 // =================================================================
 
 /**
- * Hiển thị danh sách sản phẩm lên lưới sản phẩm.
- * @param {Array} products Mảng các đối tượng sản phẩm.
+ * Hiển thị danh sách sản phẩm lên lưới sản phẩm
  */
 function renderApiProducts(products) {
     console.log('🎨 Rendering products:', products?.length || 0);
@@ -501,7 +521,7 @@ function createProductCard(product, index) {
 }
 
 /**
- * Gắn các trình xử lý sự kiện cho các nút trên thẻ sản phẩm.
+ * Gắn các trình xử lý sự kiện cho các nút trên thẻ sản phẩm
  */
 function attachProductEventListeners() {
     // Nút "Yêu thích"
@@ -753,23 +773,25 @@ function setupAccessibility() {
 
 function setupPerformanceOptimizations() {
     // Lazy load images that are not visible
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                if (img.dataset.src) {
-                    img.src = img.dataset.src;
-                    img.removeAttribute('data-src');
-                    observer.unobserve(img);
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                        observer.unobserve(img);
+                    }
                 }
-            }
+            });
         });
-    });
-    
-    // Observe all product images
-    document.querySelectorAll('.product-image img[data-src]').forEach(img => {
-        imageObserver.observe(img);
-    });
+        
+        // Observe all product images
+        document.querySelectorAll('.product-image img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
 }
 
 // =================================================================
@@ -780,72 +802,7 @@ function initIndexPageScript() {
     console.log('🎨 Initializing Index Page Script...');
     
     // Add enhanced CSS
-    if (!document.getElementById('enhancedUIStyles')) {
-        const style = document.createElement('style');
-        style.id = 'enhancedUIStyles';
-        style.innerHTML = `
-            .btn-delete { 
-                color: #fff !important; 
-                background: #ef4444 !important; 
-                transition: all 0.3s ease !important;
-            } 
-            .btn-delete:hover { 
-                background: #dc2626 !important; 
-                transform: scale(1.1) !important;
-            }
-            .btn-delete:disabled {
-                opacity: 0.6 !important;
-                cursor: not-allowed !important;
-                transform: none !important;
-            }
-            .char-count {
-                font-size: 0.8rem;
-                color: #6b7280;
-                margin-left: auto;
-                font-weight: normal;
-            }
-            .image-preview {
-                margin-top: 0.5rem;
-                transition: all 0.3s ease;
-            }
-            .form-input:invalid {
-                border-color: #ef4444;
-            }
-            .form-input:valid {
-                border-color: #10b981;
-            }
-            .product-overlay {
-                opacity: 0;
-                transition: all 0.3s ease;
-            }
-            .product-card:hover .product-overlay {
-                opacity: 1;
-            }
-            .fade-in {
-                animation: fadeInUp 0.6s ease-out forwards;
-            }
-            @keyframes fadeInUp {
-                from {
-                    opacity: 0;
-                    transform: translateY(30px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-            .loading-shimmer {
-                background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-                background-size: 200% 100%;
-                animation: shimmer 2s infinite;
-            }
-            @keyframes shimmer {
-                0% { background-position: -200% 0; }
-                100% { background-position: 200% 0; }
-            }
-        `;
-        document.head.appendChild(style);
-    }
+    addEnhancedStyles();
     
     // Setup search handlers with debouncing
     setupSearchHandlers();
@@ -858,6 +815,122 @@ function initIndexPageScript() {
     
     console.log('✅ Index Page Script initialized successfully');
 }
+
+function addEnhancedStyles() {
+    if (document.getElementById('enhancedUIStyles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'enhancedUIStyles';
+    style.innerHTML = `
+        .btn-delete { 
+            color: #fff !important; 
+            background: #ef4444 !important; 
+            transition: all 0.3s ease !important;
+        } 
+        .btn-delete:hover { 
+            background: #dc2626 !important; 
+            transform: scale(1.1) !important;
+        }
+        .btn-delete:disabled {
+            opacity: 0.6 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+        }
+        .char-count {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-left: auto;
+            font-weight: normal;
+        }
+        .image-preview {
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .form-input:invalid {
+            border-color: #ef4444;
+        }
+        .form-input:valid {
+            border-color: #10b981;
+        }
+        .product-overlay {
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .product-card:hover .product-overlay {
+            opacity: 1;
+        }
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .no-products-found {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .add-product-modal-content {
+            max-width: 600px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .form-grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 768px) {
+            .form-grid-2col {
+                grid-template-columns: 1fr;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// =================================================================
+// ERROR HANDLING & DEBUGGING
+// =================================================================
+
+function debugScript() {
+    console.log('🐛 SCRIPT DEBUG INFO:');
+    console.log('- ProductModal:', !!window.ProductModal);
+    console.log('- Utils:', !!window.Utils);
+    console.log('- PermissionManager:', !!window.PermissionManager);
+    console.log('- ProductManager:', !!window.ProductManager);
+    console.log('- currentUser:', window.currentUser);
+    console.log('- allProducts:', window.allProducts?.length || 0);
+}
+
+// Add error handling for uncaught errors
+window.addEventListener('error', (e) => {
+    console.error('🚨 Script Error:', e.error);
+    if (window.Utils?.showToast) {
+        window.Utils.showToast('Có lỗi xảy ra trong ứng dụng!', 'error');
+    }
+});
 
 // =================================================================
 // GLOBAL EXPORTS
@@ -874,13 +947,25 @@ window.showFilterResult = showFilterResult;
 window.hideFilterResult = hideFilterResult;
 window.createProductCard = createProductCard;
 window.attachProductEventListeners = attachProductEventListeners;
+window.debugScript = debugScript;
+
+// =================================================================
+// AUTO INITIALIZATION
+// =================================================================
 
 // Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', initIndexPageScript);
-
-// Also initialize if already loaded
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initIndexPageScript);
 } else {
     initIndexPageScript();
 }
+
+// Wait for main.js to load
+let mainJsReady = setInterval(() => {
+    if (window.Utils && window.PermissionManager && window.ProductManager) {
+        console.log('✅ Main.js dependencies loaded, script.js ready');
+        clearInterval(mainJsReady);
+    }
+}, 100);
+
+console.log('📦 Script.js loaded successfully');
