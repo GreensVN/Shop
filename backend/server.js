@@ -21,20 +21,18 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-// --- BẮT ĐẦU CẤU HÌNH CORS ---
+// =================================================================
+// CORS CONFIGURATION 🔥
+// =================================================================
 
-// 1. Định nghĩa origin được phép (KHÔNG bao gồm đường dẫn /Shop/)
 const allowedOrigins = [
   'https://greensvn.github.io'
 ];
 
-// 2. Tạo các tùy chọn cho CORS
 const corsOptions = {
   origin: function (origin, callback) {
-    // In ra origin thực tế để debug trong log của Render
     console.log('REQUEST ORIGIN:', origin);
 
-    // Cho phép các yêu cầu từ tên miền trong danh sách hoặc các yêu cầu không có origin (như Postman)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -44,10 +42,9 @@ const corsOptions = {
   credentials: true,
 };
 
-// 3. Sử dụng CORS để xử lý tất cả các request, bao gồm cả OPTIONS (pre-flight)
 app.use(cors(corsOptions));
 
-// --- KẾT THÚC CẤU HÌNH CORS ---
+// =================================================================
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -69,7 +66,10 @@ mongoose
   .then(() => console.log('DB connection successful!'))
   .catch(err => console.error('Error DB:', err));
 
-// Models
+// =================================================================
+// USER SCHEMA (FIXED - ĐẢM BẢO ROLE ĐƯỢC TRẢ VỀ) 🔥
+// =================================================================
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -82,17 +82,11 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     validate: [validator.isEmail, 'Please provide a valid email'],
   },
-
-  // =======================================================
-  // THÊM TRƯỜNG ROLE VÀO ĐÂY
-  // =======================================================
   role: {
     type: String,
-    enum: ['user', 'admin'], // Chỉ cho phép giá trị 'user' hoặc 'admin'
-    default: 'user',        // Mặc định mọi tài khoản mới là 'user'
+    enum: ['user', 'admin'],
+    default: 'user',
   },
-  // =======================================================
-
   avatarText: {
     type: String,
     default: function() {
@@ -132,7 +126,6 @@ const userSchema = new mongoose.Schema({
       },
     },
   ],
-  // THÊM TRƯỜNG FAVORITES VÀ CART
   favorites: [
     {
       type: mongoose.Schema.ObjectId,
@@ -208,6 +201,10 @@ userSchema.methods.createPasswordResetToken = function() {
 
 const User = mongoose.model('User', userSchema);
 
+// =================================================================
+// PRODUCT SCHEMA (UPDATED) 🔥
+// =================================================================
+
 const productSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -226,7 +223,7 @@ const productSchema = new mongoose.Schema({
   images: [String],
   category: {
     type: String,
-    enum: ['plants', 'pets', 'game-accounts', 'services'],
+    enum: ['plants', 'pets', 'game-accounts', 'services'], // 🎯 ĐẢM BẢO CÓ 'services'
     required: [true, 'A product must belong to a category'],
   },
   features: [String],
@@ -235,10 +232,19 @@ const productSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  stock: {
+    type: Number,
+    default: 999,
+  },
   badge: {
     type: String,
     enum: ['HOT', 'NEW', 'SALE', null],
     default: null,
+  },
+  link: String, // 🔥 THÊM TRƯỜNG LINK
+  createdBy: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
   },
   createdAt: {
     type: Date,
@@ -344,7 +350,7 @@ class Email {
 
   newTransport() {
     if (process.env.NODE_ENV === 'production') {
-      return nodemailer.createTransport({
+      return nodemailer.createTransporter({
         service: 'SendGrid',
         auth: {
           user: process.env.SENDGRID_USERNAME,
@@ -353,7 +359,7 @@ class Email {
       });
     }
 
-    return nodemailer.createTransport({
+    return nodemailer.createTransporter({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
       auth: {
@@ -400,6 +406,10 @@ const signToken = id => {
   });
 };
 
+// =================================================================
+// FIXED CREATE SEND TOKEN - ĐẢM BẢO ROLE ĐƯỢC TRẢ VỀ 🔥
+// =================================================================
+
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
 
@@ -414,32 +424,56 @@ const createSendToken = (user, statusCode, res) => {
 
   res.cookie('jwt', token, cookieOptions);
 
-  user.password = undefined;
+  // 🎯 QUAN TRỌNG: Đảm bảo ROLE được trả về cho frontend
+  const userResponse = {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role, // 🔥 ĐẢAM BẢO ROLE ĐƯỢC INCLUDE
+    balance: user.balance,
+    registerDate: user.registerDate
+  };
+
+  console.log('🎯 Sending user data to frontend:', userResponse);
 
   res.status(statusCode).json({
     status: 'success',
     token,
     data: {
-      user,
+      user: userResponse,
     },
   });
 };
 
-// Auth Controller
+// =================================================================
+// AUTH CONTROLLER (UPDATED) 🔥
+// =================================================================
+
 const authController = {
   signup: catchAsync(async (req, res, next) => {
+    console.log('📝 Signup request:', { 
+      name: req.body.name, 
+      email: req.body.email,
+      role: req.body.role 
+    });
+
     const newUser = await User.create({
       name: req.body.name,
       email: req.body.email,
       password: req.body.password,
       passwordConfirm: req.body.passwordConfirm,
+      role: req.body.role || 'user', // 🎯 Cho phép set role khi đăng ký (mặc định là 'user')
     });
+
+    console.log('✅ User created with role:', newUser.role);
 
     createSendToken(newUser, 201, res);
   }),
 
   login: catchAsync(async (req, res, next) => {
     const { email, password } = req.body;
+    
+    console.log('🔐 Login attempt for:', email);
 
     if (!email || !password) {
       return res.status(400).json({
@@ -451,11 +485,14 @@ const authController = {
     const user = await User.findOne({ email }).select('+password');
 
     if (!user || !(await user.correctPassword(password, user.password))) {
+      console.log('❌ Invalid credentials for:', email);
       return res.status(401).json({
         status: 'fail',
         message: 'Incorrect email or password',
       });
     }
+
+    console.log('✅ Login successful for:', email, 'Role:', user.role);
 
     createSendToken(user, 200, res);
   }),
@@ -510,13 +547,17 @@ const authController = {
 
   restrictTo: (...roles) => {
     return (req, res, next) => {
+      console.log('🔒 Checking role access. User role:', req.user.role, 'Required roles:', roles);
+      
       if (!roles.includes(req.user.role)) {
+        console.log('❌ Access denied for role:', req.user.role);
         return res.status(403).json({
           status: 'fail',
           message: 'You do not have permission to perform this action',
         });
       }
 
+      console.log('✅ Access granted for role:', req.user.role);
       next();
     };
   },
@@ -605,7 +646,10 @@ const authController = {
   }),
 };
 
-// User Controller
+// =================================================================
+// USER CONTROLLER (FIXED GET ME) 🔥
+// =================================================================
+
 const userController = {
   getMe: catchAsync(async (req, res, next) => {
     const user = await User.findById(req.user.id);
@@ -617,10 +661,22 @@ const userController = {
       });
     }
 
+    // 🎯 ĐẢM BẢO ROLE ĐƯỢC TRẢ VỀ KHI GỌI /users/me
+    const userResponse = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role, // 🔥 QUAN TRỌNG
+      balance: user.balance,
+      registerDate: user.registerDate
+    };
+
+    console.log('🎯 /users/me returning user data:', userResponse);
+
     res.status(200).json({
       status: 'success',
       data: {
-        user,
+        user: userResponse,
       },
     });
   }),
@@ -714,7 +770,7 @@ const userController = {
     });
   }),
 
-  // CÁC HÀM DÀNH CHO ADMIN
+  // ADMIN FUNCTIONS
   getAllUsers: catchAsync(async (req, res, next) => {
     const users = await User.find();
 
@@ -769,7 +825,10 @@ const userController = {
   }),
 };
 
-// Product Controller
+// =================================================================
+// PRODUCT CONTROLLER (UPDATED) 🔥
+// =================================================================
+
 const productController = {
   getAllProducts: catchAsync(async (req, res, next) => {
     const queryObj = { ...req.query };
@@ -777,7 +836,7 @@ const productController = {
     excludedFields.forEach(el => delete queryObj[el]);
 
     let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `${match}`);
 
     let query = Product.find(JSON.parse(queryStr));
 
@@ -796,12 +855,14 @@ const productController = {
     }
 
     const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 10;
+    const limit = req.query.limit * 1 || 100; // 🎯 Tăng limit để lấy nhiều sản phẩm hơn
     const skip = (page - 1) * limit;
 
     query = query.skip(skip).limit(limit);
 
     const products = await query;
+
+    console.log(`📦 Returning ${products.length} products`);
 
     res.status(200).json({
       status: 'success',
@@ -824,7 +885,18 @@ const productController = {
   }),
 
   createProduct: catchAsync(async (req, res, next) => {
-    const newProduct = await Product.create(req.body);
+    console.log('🎯 Creating product. User role:', req.user.role);
+    console.log('Product data:', req.body);
+
+    // 🔥 GÁN createdBy TỰ ĐỘNG
+    const productData = {
+      ...req.body,
+      createdBy: req.user._id,
+    };
+
+    const newProduct = await Product.create(productData);
+
+    console.log('✅ Product created successfully:', newProduct._id);
 
     res.status(201).json({
       status: 'success',
@@ -840,6 +912,13 @@ const productController = {
       runValidators: true,
     });
 
+    if (!product) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No product found with that ID',
+      });
+    }
+
     res.status(200).json({
       status: 'success',
       data: {
@@ -849,7 +928,14 @@ const productController = {
   }),
 
   deleteProduct: catchAsync(async (req, res, next) => {
-    await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findByIdAndDelete(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No product found with that ID',
+      });
+    }
 
     res.status(204).json({
       status: 'success',
@@ -1135,19 +1221,25 @@ const cartFavoriteController = {
   })
 };
 
-// Routes
+// =================================================================
+// ROUTES SETUP 🔥
+// =================================================================
+
+// Public routes
 app.post('/api/v1/users/signup', authController.signup);
 app.post('/api/v1/users/login', authController.login);
 app.get('/api/v1/users/logout', authController.logout);
 app.post('/api/v1/users/forgotPassword', authController.forgotPassword);
 app.patch('/api/v1/users/resetPassword/:token', authController.resetPassword);
 
-// Public product routes (ai cũng xem được)
+// Public product routes
 app.get('/api/v1/products', productController.getAllProducts);
 app.get('/api/v1/products/:id', productController.getProduct);
 
-// Protected routes (phải đăng nhập)
+// Protected routes (require authentication)
 app.use(authController.protect);
+
+// User routes
 app.get('/api/v1/users/me', userController.getMe);
 app.get('/api/v1/users/me/balance', userController.getMyBalance);
 app.patch('/api/v1/users/updateMe', userController.updateMe);
@@ -1155,7 +1247,7 @@ app.delete('/api/v1/users/deleteMe', userController.deleteMe);
 app.post('/api/v1/users/deposit', userController.deposit);
 app.get('/api/v1/users/transactions', userController.getTransactions);
 
-// THÊM CÁC ROUTE MỚI CHO GIỎ HÀNG VÀ YÊU THÍCH
+// Cart and Favorites routes
 app.post('/api/v1/cart', cartFavoriteController.addToCart);
 app.get('/api/v1/cart', cartFavoriteController.getCart);
 app.patch('/api/v1/cart', cartFavoriteController.updateCart);
@@ -1166,57 +1258,14 @@ app.get('/api/v1/favorites', cartFavoriteController.getFavorites);
 app.delete('/api/v1/favorites/:productId', cartFavoriteController.removeFromFavorites);
 app.get('/api/v1/favorites/check/:productId', cartFavoriteController.checkFavorite);
 
-// Admin only routes
+// 🔥 ADMIN ONLY ROUTES - CHẶT CHẼ HƠN
 app.use(authController.restrictTo('admin'));
 
+// Admin user management
 app.get('/api/v1/users', userController.getAllUsers);
 app.get('/api/v1/users/:id', userController.getUser);
 app.patch('/api/v1/users/:id', userController.updateUser);
 app.delete('/api/v1/users/:id', userController.deleteUser);
 
-// Product routes
-app.post('/api/v1/products', productController.createProduct);
-app.patch('/api/v1/products/:id', productController.updateProduct);
-app.delete('/api/v1/products/:id', productController.deleteProduct);
-
-// Review routes
-app.get('/api/v1/reviews', reviewController.getAllReviews);
-app.post('/api/v1/reviews', reviewController.createReview);
-app.get('/api/v1/reviews/:id', reviewController.getReview);
-app.patch('/api/v1/reviews/:id', reviewController.updateReview);
-app.delete('/api/v1/reviews/:id', reviewController.deleteReview);
-
-// Product reviews
-app.get('/api/v1/products/:productId/reviews', productController.getProductReviews);
-app.post(
-  '/api/v1/products/:productId/reviews',
-  reviewController.setProductUserIds,
-  reviewController.createReview
-);
-
-// Transaction routes
-app.get('/api/v1/transactions', transactionController.getAllTransactions);
-app.post('/api/v1/transactions', transactionController.createTransaction);
-app.get('/api/v1/transactions/:id', transactionController.getTransaction);
-app.patch('/api/v1/transactions/:id', transactionController.updateTransaction);
-app.delete('/api/v1/transactions/:id', transactionController.deleteTransaction);
-
-// Start server
-const port = process.env.PORT || 2296;
-app.listen(port, () => {
-  console.log(`App running on port ${port}...`);
-});
-
-app.use((req, res, next) => {
-  console.log(`[REQ] ${req.method} ${req.originalUrl} - From: ${req.headers.origin || req.ip}`);
-  next();
-});
-
-// Error handling
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    status: 'error',
-    message: 'Something went wrong!',
-  });
-});
+// Admin product management
+app.post('/api/v1/products', productController.createProduct
