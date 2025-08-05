@@ -1,4 +1,4 @@
-// main.js - Enhanced Production Version with Security (FIXED ADMIN SYSTEM)
+// main.js - Enhanced Production Version with Security (FIXED AUTH SYSTEM)
 "use strict";
 
 // =================================================================
@@ -230,10 +230,13 @@ class Utils {
         };
 
         const timer = setTimeout(closeToast, duration);
-        toast.querySelector('.toast-close').addEventListener('click', () => {
-            clearTimeout(timer);
-            closeToast();
-        });
+        const closeBtn = toast.querySelector('.toast-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                clearTimeout(timer);
+                closeToast();
+            });
+        }
     }
     
     static showLoading(element, message = 'Đang tải...') {
@@ -278,7 +281,6 @@ class Utils {
 class PermissionManager {
     static checkPostPermission() {
         console.log('🔍 Checking post permission...');
-        console.log('Current user:', currentUser);
         
         if (!currentUser) {
             console.log('❌ No current user');
@@ -325,7 +327,7 @@ class PermissionManager {
 }
 
 // =================================================================
-// ENHANCED API MANAGER
+// ENHANCED API MANAGER (FIXED)
 // =================================================================
 
 class ApiManager {
@@ -342,7 +344,9 @@ class ApiManager {
             headers['Authorization'] = `Bearer ${token}`;
         }
         
-        console.log(`🌐 API Call: ${method} ${endpoint}`, { requireAuth, hasToken: !!token });
+        console.log(`🌐 API Call: ${method} ${CONFIG.API_BASE_URL}${endpoint}`);
+        console.log('Headers:', headers);
+        console.log('Body:', body);
         
         try {
             const response = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
@@ -351,9 +355,13 @@ class ApiManager {
                 body: body ? JSON.stringify(body) : null
             });
             
+            console.log('Response status:', response.status);
+            console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+            
             if (response.status === 204) return { success: true };
             
             const data = await response.json();
+            console.log('Response data:', data);
             
             if (response.status === 401 && requireAuth) {
                 console.log('🔒 Unauthorized - clearing auth data');
@@ -362,7 +370,7 @@ class ApiManager {
             }
             
             if (!response.ok) {
-                throw new Error(data.message || 'Server error occurred');
+                throw new Error(data.message || `Server error: ${response.status}`);
             }
             
             return data;
@@ -397,7 +405,7 @@ class ApiManager {
 }
 
 // =================================================================
-// ENHANCED FLOATING BUTTONS MANAGER (FIXED)
+// ENHANCED FLOATING BUTTONS MANAGER
 // =================================================================
 
 class FloatingButtonsManager {
@@ -433,15 +441,6 @@ class FloatingButtonsManager {
                 user-select: none;
             }
             
-            .floating-btn:hover {
-                transform: translateY(-3px) scale(1.05);
-                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
-            }
-            
-            .floating-btn:active {
-                transform: translateY(-1px) scale(1.02);
-            }
-            
             .messenger-btn {
                 background: linear-gradient(135deg, #0084ff 0%, #0066cc 100%) !important;
                 color: #fff !important;
@@ -466,17 +465,6 @@ class FloatingButtonsManager {
                 display: flex !important;
                 flex-direction: column !important;
                 gap: 1rem !important;
-            }
-            
-            @media (max-width: 768px) {
-                #floatingButtonsContainer {
-                    bottom: 1rem !important;
-                    right: 1rem !important;
-                }
-                .floating-btn {
-                    padding: 0.8rem 1.2rem;
-                    font-size: 13px;
-                }
             }
         `;
         document.head.appendChild(styles);
@@ -516,7 +504,6 @@ class FloatingButtonsManager {
             btn.innerHTML = `<i class="fas fa-plus"></i><span>Đăng tin</span>`;
             btn.title = 'Đăng sản phẩm mới';
             btn.addEventListener('click', () => {
-                console.log('🎯 Post button clicked');
                 if (window.ProductModal?.show) {
                     window.ProductModal.show();
                 } else {
@@ -609,64 +596,79 @@ const FavoriteManager = {
 };
 
 // =================================================================
-// ENHANCED AUTHENTICATION MANAGER (FIXED)
+// ENHANCED AUTHENTICATION MANAGER (COMPLETELY FIXED)
 // =================================================================
 
 class AuthManager {
     static async login(email, password, rememberMe = true) {
         console.log('🔐 Attempting login for:', email);
         
-        const data = await ApiManager.call('/users/login', 'POST', { email, password });
-        
-        console.log('✅ Login successful, received data:', data);
-        
-        // Lưu token
-        if (rememberMe) {
-            localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
-            sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
-        } else {
-            sessionStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
-            localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+        try {
+            const data = await ApiManager.call('/users/login', 'POST', { email, password }, false);
+            
+            console.log('✅ Login successful, received data:', data);
+            
+            // Lưu token
+            if (rememberMe) {
+                localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
+                sessionStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+            } else {
+                sessionStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
+                localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+            }
+            
+            // Tạo currentUser object
+            currentUser = {
+                _id: data.data.user._id || data.data.user.id,
+                name: data.data.user.name,
+                email: data.data.user.email || email,
+                role: data.data.user.role,
+                ...data.data.user
+            };
+            
+            console.log('👤 Setting currentUser:', currentUser);
+            
+            // Lưu user data
+            localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
+            
+            // Cập nhật UI
+            await this.updateUIAfterLogin();
+            
+            return currentUser;
+        } catch (error) {
+            console.error('❌ Login failed:', error);
+            throw new Error(error.message || 'Đăng nhập thất bại. Vui lòng thử lại!');
         }
-        
-        // Tạo currentUser object với email chính xác
-        currentUser = {
-            _id: data.data.user._id || data.data.user.id,
-            name: data.data.user.name,
-            email: data.data.user.email || email, // Đảm bảo email luôn có
-            role: data.data.user.role,
-            ...data.data.user
-        };
-        
-        console.log('👤 Setting currentUser:', currentUser);
-        
-        // Lưu user data
-        localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
-        
-        // Cập nhật UI
-        await this.updateUIAfterLogin();
-        
-        return currentUser;
     }
 
     static async register(name, email, password, passwordConfirm) {
-        const data = await ApiManager.call('/users/signup', 'POST', {
-            name, email, password, passwordConfirm
-        });
+        console.log('📝 Attempting registration for:', email);
         
-        localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
-        
-        currentUser = {
-            _id: data.data.user._id || data.data.user.id,
-            name: data.data.user.name || name,
-            email: data.data.user.email || email,
-            role: data.data.user.role,
-            ...data.data.user
-        };
-        
-        localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
-        await this.updateUIAfterLogin();
-        return currentUser;
+        try {
+            const data = await ApiManager.call('/users/signup', 'POST', {
+                name, email, password, passwordConfirm
+            }, false);
+            
+            console.log('✅ Registration successful:', data);
+            
+            localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
+            
+            currentUser = {
+                _id: data.data.user._id || data.data.user.id,
+                name: data.data.user.name || name,
+                email: data.data.user.email || email,
+                role: data.data.user.role,
+                ...data.data.user
+            };
+            
+            localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
+            await this.updateUIAfterLogin();
+            
+            return currentUser;
+        } catch (error) {
+            console.error('❌ Registration failed:', error);
+            throw new Error(error.message || 'Đăng ký thất bại. Vui lòng thử lại!');
+        }
     }
 
     static logout() {
@@ -753,9 +755,11 @@ class AuthManager {
             if (el) el.textContent = firstLetter;
         });
         
+        // Update global variable
+        window.currentUser = currentUser;
+        
         await CartManager.updateCount();
         FloatingButtonsManager.update();
-        updateDevToolsProtection();
     }
 
     static updateUIAfterLogout() {
@@ -769,6 +773,9 @@ class AuthManager {
             el.textContent = '0';
             el.style.display = 'none';
         });
+        
+        // Clear global variable
+        window.currentUser = null;
         
         FloatingButtonsManager.update();
     }
@@ -817,8 +824,6 @@ class ProductManager {
 
     static async createProduct(productData) {
         console.log('🎯 Creating product:', productData);
-        console.log('Current user:', currentUser);
-        console.log('Has permission:', PermissionManager.checkPostPermission());
         
         if (!PermissionManager.checkPostPermission()) {
             throw new Error('Bạn không có quyền đăng sản phẩm!');
@@ -903,7 +908,7 @@ class ProductManager {
 }
 
 // =================================================================
-// ENHANCED MODAL MANAGER
+// ENHANCED MODAL MANAGER (COMPLETELY FIXED)
 // =================================================================
 
 class ModalManager {
@@ -911,7 +916,12 @@ class ModalManager {
         const authModal = document.getElementById('authModal');
         const loginButton = document.getElementById('loginButton');
         
-        if (!authModal || !loginButton) return;
+        if (!authModal || !loginButton) {
+            console.error('❌ Auth modal or login button not found');
+            return;
+        }
+        
+        console.log('🎭 Initializing auth modal...');
         
         const showModal = () => {
             authModal.style.display = 'flex';
@@ -971,7 +981,12 @@ class ModalManager {
     }
 
     static setupLoginForm(form, onSuccess) {
-        if (!form) return;
+        if (!form) {
+            console.error('❌ Login form not found');
+            return;
+        }
+        
+        console.log('📝 Setting up login form');
         
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -982,15 +997,16 @@ class ModalManager {
             this.setLoadingState(submitBtn, spinner, true);
             
             try {
-                const email = form.email.value.trim();
-                const password = form.password.value;
-                const rememberMe = form.rememberMe?.checked || false;
+                const formData = new FormData(form);
+                const email = formData.get('email')?.trim();
+                const password = formData.get('password');
+                const rememberMe = formData.get('rememberMe') === 'on';
+                
+                console.log('📧 Login data:', { email, rememberMe, hasPassword: !!password });
                 
                 if (!email || !password) {
                     throw new Error('Vui lòng nhập đủ thông tin!');
                 }
-                
-                console.log('🔐 Logging in with:', { email, rememberMe });
                 
                 const user = await AuthManager.login(email, password, rememberMe);
                 Utils.showToast(`Chào mừng ${AuthManager.getDisplayName(user)}!`, 'success');
@@ -1009,7 +1025,12 @@ class ModalManager {
     }
 
     static setupRegisterForm(form, onSuccess) {
-        if (!form) return;
+        if (!form) {
+            console.error('❌ Register form not found');
+            return;
+        }
+        
+        console.log('📝 Setting up register form');
         
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1020,10 +1041,13 @@ class ModalManager {
             this.setLoadingState(submitBtn, spinner, true);
             
             try {
-                const name = form.name.value.trim();
-                const email = form.email.value.trim();
-                const password = form.password.value;
-                const confirmPassword = form.confirmPassword.value;
+                const formData = new FormData(form);
+                const name = formData.get('name')?.trim();
+                const email = formData.get('email')?.trim();
+                const password = formData.get('password');
+                const confirmPassword = formData.get('confirmPassword');
+                
+                console.log('📧 Register data:', { name, email, hasPassword: !!password, hasConfirmPassword: !!confirmPassword });
                 
                 if (!name || !email || !password || !confirmPassword) {
                     throw new Error('Vui lòng nhập đủ thông tin!');
@@ -1045,6 +1069,7 @@ class ModalManager {
                 
                 setTimeout(() => ProductManager.loadProducts(), 500);
             } catch (error) {
+                console.error('Register error:', error);
                 Utils.showToast(error.message || 'Đăng ký thất bại!', 'error');
             } finally {
                 this.setLoadingState(submitBtn, spinner, false);
@@ -1055,12 +1080,12 @@ class ModalManager {
     static setLoadingState(submitBtn, spinner, isLoading) {
         if (isLoading) {
             submitBtn.classList.add('loading');
-            if (spinner) spinner.style.display = 'inline-block';
             submitBtn.disabled = true;
+            if (spinner) spinner.style.display = 'inline-block';
         } else {
             submitBtn.classList.remove('loading');
-            if (spinner) spinner.style.display = 'none';
             submitBtn.disabled = false;
+            if (spinner) spinner.style.display = 'none';
         }
     }
 }
@@ -1107,39 +1132,51 @@ class ImageUploadHandler {
 }
 
 // =================================================================
-// APPLICATION INITIALIZATION
+// APPLICATION INITIALIZATION (FIXED)
 // =================================================================
 
 class App {
     static async init() {
         console.log('🚀 Initializing application...');
         
-        // Initialize security
-        SecurityManager.obfuscateConsole();
-        
-        // Initialize UI components
-        Utils.getToastContainer();
-        ModalManager.initAuthModal();
-        
-        // Setup logout handlers
-        document.querySelectorAll('#logoutButton, #sidebarLogoutBtn').forEach(btn => {
-            if (btn) btn.addEventListener('click', AuthManager.logout);
-        });
-        
-        // Check authentication
-        await AuthManager.checkAutoLogin();
-        
-        // Initialize current page
-        await App.initCurrentPage();
-        
-        // Initialize floating buttons
-        setTimeout(() => FloatingButtonsManager.init(), 500);
-        
-        // Setup global error handling
-        window.addEventListener('error', App.handleGlobalError);
-        window.addEventListener('unhandledrejection', App.handleGlobalError);
-        
-        console.log('✅ Application initialized successfully');
+        try {
+            // Initialize security
+            SecurityManager.obfuscateConsole();
+            
+            // Initialize UI components
+            Utils.getToastContainer();
+            
+            // Setup logout handlers
+            document.querySelectorAll('#logoutButton, #sidebarLogoutBtn').forEach(btn => {
+                if (btn) {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        AuthManager.logout();
+                    });
+                }
+            });
+            
+            // Check authentication first
+            await AuthManager.checkAutoLogin();
+            
+            // Initialize modal AFTER authentication check
+            ModalManager.initAuthModal();
+            
+            // Initialize current page
+            await App.initCurrentPage();
+            
+            // Initialize floating buttons
+            setTimeout(() => FloatingButtonsManager.init(), 500);
+            
+            // Setup global error handling
+            window.addEventListener('error', App.handleGlobalError);
+            window.addEventListener('unhandledrejection', App.handleGlobalError);
+            
+            console.log('✅ Application initialized successfully');
+        } catch (error) {
+            console.error('❌ Application initialization failed:', error);
+            Utils.showToast('Không thể khởi tạo ứng dụng!', 'error');
+        }
     }
 
     static async initCurrentPage() {
@@ -1271,7 +1308,12 @@ window.ApiManager = ApiManager;
 window.SecurityManager = SecurityManager;
 window.ImageUploadHandler = ImageUploadHandler;
 window.AuthManager = AuthManager;
-window.currentUser = currentUser;
+
+// Update global currentUser reference
+Object.defineProperty(window, 'currentUser', {
+    get: () => currentUser,
+    set: (value) => { currentUser = value; }
+});
 
 // Export update function for favorites
 window.updateAllFavoriteButtons = async () => {
@@ -1302,3 +1344,11 @@ document.addEventListener('DOMContentLoaded', () => {
         Utils.showToast('Không thể khởi tạo ứng dụng!', 'error');
     });
 });
+
+// Also initialize if already loaded
+if (document.readyState !== 'loading') {
+    App.init().catch(error => {
+        console.error('Failed to initialize app:', error);
+        Utils.showToast('Không thể khởi tạo ứng dụng!', 'error');
+    });
+}
