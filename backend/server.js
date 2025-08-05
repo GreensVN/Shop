@@ -160,7 +160,6 @@ const userSchema = new mongoose.Schema({
   active: {
     type: Boolean,
     default: true,
-    select: false,
   },
   createdAt: {
     type: Date,
@@ -547,21 +546,16 @@ const authController = {
     }
 
     // Check if user exists && password is correct
-    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
+    const user = await User.findOne({ 
+      email: email.toLowerCase().trim(),
+      active: { $ne: false } // Only get active users
+    }).select('+password');
 
     if (!user || !(await user.correctPassword(password, user.password))) {
       console.log('❌ Invalid credentials for:', email);
       return res.status(401).json({
         status: 'fail',
         message: 'Incorrect email or password',
-      });
-    }
-
-    // Check if user is active
-    if (!user.active) {
-      return res.status(401).json({
-        status: 'fail',
-        message: 'Your account has been deactivated. Please contact support.',
       });
     }
 
