@@ -402,7 +402,7 @@
         </div>
     </footer>
 
-    <!-- Auth Modal -->
+    <!-- Auth Modal (PROPERLY STRUCTURED) -->
     <div class="modal" id="authModal">
         <div class="modal-content">
             <button class="modal-close" aria-label="Đóng">×</button>
@@ -412,14 +412,15 @@
                 <div class="modal-tab" data-tab="register"><i class="fas fa-user-plus"></i> Đăng ký</div>
             </div>
             
-            <form class="modal-form active" id="loginForm">
+            <!-- LOGIN FORM -->
+            <form class="modal-form active" id="loginForm" novalidate>
                 <div class="form-group">
                     <label for="loginEmail"><i class="fas fa-envelope"></i> Email</label>
-                    <input type="email" id="loginEmail" name="email" placeholder="Nhập email của bạn" required>
+                    <input type="email" id="loginEmail" name="email" placeholder="Nhập email của bạn" required autocomplete="email">
                 </div>
                 <div class="form-group">
                     <label for="loginPassword"><i class="fas fa-lock"></i> Mật khẩu</label>
-                    <input type="password" id="loginPassword" name="password" placeholder="Nhập mật khẩu" required>
+                    <input type="password" id="loginPassword" name="password" placeholder="Nhập mật khẩu" required autocomplete="current-password">
                 </div>
                 <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
                     <input type="checkbox" id="rememberMeCheckbox" name="rememberMe" style="width: 18px; height: 18px;" checked>
@@ -431,22 +432,23 @@
                 <div class="form-footer">Chưa có tài khoản? <a href="#" class="switch-to-register">Đăng ký ngay</a></div>
             </form>
             
-            <form class="modal-form" id="registerForm">
+            <!-- REGISTER FORM -->
+            <form class="modal-form" id="registerForm" novalidate>
                 <div class="form-group">
                     <label for="registerName"><i class="fas fa-user"></i> Họ và tên</label>
-                    <input type="text" id="registerName" name="name" placeholder="Nhập họ và tên" required>
+                    <input type="text" id="registerName" name="name" placeholder="Nhập họ và tên" required autocomplete="name">
                 </div>
                 <div class="form-group">
                     <label for="registerEmail"><i class="fas fa-envelope"></i> Email</label>
-                    <input type="email" id="registerEmail" name="email" placeholder="Nhập email của bạn" required>
+                    <input type="email" id="registerEmail" name="email" placeholder="Nhập email của bạn" required autocomplete="email">
                 </div>
                 <div class="form-group">
                     <label for="registerPassword"><i class="fas fa-lock"></i> Mật khẩu</label>
-                    <input type="password" id="registerPassword" name="password" placeholder="Ít nhất 6 ký tự" required minlength="6">
+                    <input type="password" id="registerPassword" name="password" placeholder="Ít nhất 6 ký tự" required minlength="6" autocomplete="new-password">
                 </div>
                 <div class="form-group">
                     <label for="registerConfirmPassword"><i class="fas fa-key"></i> Xác nhận mật khẩu</label>
-                    <input type="password" id="registerConfirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu" required>
+                    <input type="password" id="registerConfirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu" required autocomplete="new-password">
                 </div>
                 <div class="modal-actions">
                     <button type="submit" class="btn btn-primary btn-submit"><span>Đăng ký</span><div class="spinner"></div></button>
@@ -465,6 +467,7 @@
         <p><strong>Products Count:</strong> <span id="debugProductsCount">0</span></p>
         <p><strong>Token:</strong> <span id="debugToken">None</span></p>
         <button onclick="window.debugPermissions?.()" class="btn btn-secondary" style="margin-top: 10px; font-size: 10px; padding: 5px 10px;">Check Permissions</button>
+        <button onclick="testLogin()" class="btn btn-secondary" style="margin-top: 5px; font-size: 10px; padding: 5px 10px;">Test Login</button>
     </div>
 
     <!-- Toast Container -->
@@ -514,6 +517,20 @@
             }
         }
 
+        // Test login function for debugging
+        function testLogin() {
+            console.log('🧪 Testing login functionality...');
+            console.log('Auth Modal:', document.getElementById('authModal'));
+            console.log('Login Form:', document.getElementById('loginForm'));
+            console.log('AuthManager:', window.AuthManager);
+            
+            if (window.AuthManager) {
+                console.log('✅ AuthManager is available');
+            } else {
+                console.error('❌ AuthManager not found');
+            }
+        }
+
         // Update debug info periodically
         setInterval(updateDebugInfo, 2000);
 
@@ -525,10 +542,11 @@
         }
     </script>
 
+    <!-- Load Main Scripts -->
     <script src="main.js"></script>
     <script src="script.js"></script>
     
-    <!-- Security Scripts -->
+    <!-- Enhanced Security Scripts -->
     <script>
         // Enhanced security with proper admin checking
         function setupSecurityProtection() {
