@@ -7,12 +7,7 @@
 
 const CONFIG = {
     API_BASE_URL: 'https://shop-4mlk.onrender.com/api/v1',
-    AUTHORIZED_EMAILS: [
-        'chinhan20917976549a@gmail.com',
-        'ryantran149@gmail.com', 
-        'seller@shopgrowgarden.com',
-        'greensvn@gmail.com'
-    ],
+    // 🔥 BỎ DANH SÁCH EMAIL CỨNG - SỬ DỤNG ROLE TỪ BACKEND
     STORAGE_KEYS: {
         TOKEN: 'gag_token',
         USER: 'gag_user',
@@ -275,7 +270,7 @@ class Utils {
 }
 
 // =================================================================
-// PERMISSION MANAGER (FIXED)
+// PERMISSION MANAGER (COMPLETELY FIXED) 🔥
 // =================================================================
 
 class PermissionManager {
@@ -287,17 +282,18 @@ class PermissionManager {
             return false;
         }
         
-        const userEmail = currentUser.email?.toLowerCase()?.trim();
-        console.log('User email:', userEmail);
-        console.log('Authorized emails:', CONFIG.AUTHORIZED_EMAILS.map(e => e.toLowerCase()));
+        // 🎯 SỬ DỤNG ROLE TỪ BACKEND THAY VÌ EMAIL LIST
+        const userRole = currentUser.role;
+        console.log('User role:', userRole);
+        console.log('Current user:', currentUser);
         
-        if (!userEmail) {
-            console.log('❌ No user email');
+        if (!userRole) {
+            console.log('❌ No user role found');
             return false;
         }
         
-        const hasPermission = CONFIG.AUTHORIZED_EMAILS.map(email => email.toLowerCase()).includes(userEmail);
-        console.log('Has permission:', hasPermission);
+        const hasPermission = userRole === 'admin';
+        console.log('Has admin permission:', hasPermission);
         
         return hasPermission;
     }
@@ -317,17 +313,17 @@ class PermissionManager {
     }
 
     static debugPermissions() {
-        console.log('=== PERMISSION DEBUG ===');
+        console.log('=== PERMISSION DEBUG (FIXED) ===');
         console.log('Current User:', currentUser);
-        console.log('User Email:', currentUser?.email);
-        console.log('Authorized Emails:', CONFIG.AUTHORIZED_EMAILS);
+        console.log('User Role:', currentUser?.role);
         console.log('Has Post Permission:', this.checkPostPermission());
-        console.log('========================');
+        console.log('Is Admin:', currentUser?.role === 'admin');
+        console.log('================================');
     }
 }
 
 // =================================================================
-// ENHANCED API MANAGER (FIXED)
+// ENHANCED API MANAGER
 // =================================================================
 
 class ApiManager {
@@ -503,9 +499,9 @@ class FloatingButtonsManager {
     static createPostButton() {
         const hasPermission = PermissionManager.checkPostPermission();
         
-        // Chỉ tạo nút nếu user có quyền admin
+        // 🎯 KIỂM TRA ROLE THAY VÌ EMAIL
         if (!hasPermission) {
-            console.log('🔒 User không có quyền admin - ẩn nút đăng tin');
+            console.log('🔒 User không có role admin - ẩn nút đăng tin');
             return null; // Không tạo nút
         }
         
@@ -598,7 +594,7 @@ const FavoriteManager = {
 };
 
 // =================================================================
-// ENHANCED AUTHENTICATION MANAGER (COMPLETELY FIXED)
+// ENHANCED AUTHENTICATION MANAGER (COMPLETELY FIXED) 🔥
 // =================================================================
 
 class AuthManager {
@@ -619,16 +615,16 @@ class AuthManager {
                 localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
             }
             
-            // Tạo currentUser object
+            // 🎯 ĐẢM BẢO LẤY ĐÚNG ROLE TỪ BACKEND
             currentUser = {
                 _id: data.data.user._id || data.data.user.id,
                 name: data.data.user.name,
                 email: data.data.user.email || email,
-                role: data.data.user.role,
+                role: data.data.user.role || 'user', // 🔥 QUAN TRỌNG: Lấy role từ backend
                 ...data.data.user
             };
             
-            console.log('👤 Setting currentUser:', currentUser);
+            console.log('👤 Setting currentUser with role:', currentUser);
             
             // Lưu user data
             localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(currentUser));
@@ -655,11 +651,12 @@ class AuthManager {
             
             localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, data.token);
             
+            // 🎯 ĐẢM BẢO LẤY ĐÚNG ROLE TỪ BACKEND
             currentUser = {
                 _id: data.data.user._id || data.data.user.id,
                 name: data.data.user.name || name,
                 email: data.data.user.email || email,
-                role: data.data.user.role,
+                role: data.data.user.role || 'user', // 🔥 QUAN TRỌNG: Lấy role từ backend
                 ...data.data.user
             };
             
@@ -701,15 +698,16 @@ class AuthManager {
             try {
                 const data = await ApiManager.call('/users/me');
                 
+                // 🎯 ĐẢM BẢO LẤY ĐÚNG ROLE TỪ BACKEND
                 currentUser = {
                     _id: data.data.user._id || data.data.user.id,
                     name: data.data.user.name,
                     email: data.data.user.email,
-                    role: data.data.user.role,
+                    role: data.data.user.role || 'user', // 🔥 QUAN TRỌNG: Lấy role từ backend
                     ...data.data.user
                 };
                 
-                console.log('✅ Auto login successful:', currentUser);
+                console.log('✅ Auto login successful with role:', currentUser);
                 
                 if (!currentUser.email) {
                     throw new Error('Invalid user data - no email');
@@ -739,6 +737,7 @@ class AuthManager {
         if (!currentUser) return;
         
         console.log('🎨 Updating UI after login for:', currentUser);
+        console.log('🔑 User role:', currentUser.role);
         
         const loginButton = document.getElementById('loginButton');
         const userDropdown = document.getElementById('userDropdown');
@@ -800,588 +799,3 @@ class ProductManager {
         try {
             const data = await ApiManager.getProducts();
             let products = data.data?.products || [];
-            
-            allProducts = products;
-            
-            if (window.renderApiProducts) {
-                window.renderApiProducts(allProducts);
-            }
-            
-            if (currentUser && window.updateAllFavoriteButtons) {
-                await window.updateAllFavoriteButtons();
-            }
-            
-            console.log(`📦 Loaded ${products.length} products`);
-        } catch (error) {
-            console.error('Failed to load products:', error);
-            productsGrid.innerHTML = `
-                <div class="auth-required-message" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ef4444; margin-bottom: 1rem;"></i>
-                    <h3 style="color: #1f2937; margin-bottom: 1rem;">Không thể tải sản phẩm</h3>
-                    <p style="color: #64748b; margin-bottom: 2rem;">${error.message}</p>
-                    <button class="btn btn-primary" onclick="window.location.reload()">
-                        <i class="fas fa-refresh"></i> <span>Thử lại</span>
-                    </button>
-                </div>
-            `;
-        }
-    }
-
-    static async createProduct(productData) {
-        console.log('🎯 Creating product:', productData);
-        console.log('Current user:', currentUser);
-        console.log('Has permission:', PermissionManager.checkPostPermission());
-        
-        if (!PermissionManager.checkPostPermission()) {
-            const errorMsg = 'Bạn không có quyền đăng sản phẩm!';
-            console.error('❌ Permission denied:', errorMsg);
-            throw new Error(errorMsg);
-        }
-        
-        try {
-            SecurityManager.validateProduct(productData);
-            console.log('✅ Product validation passed');
-        } catch (validationError) {
-            console.error('❌ Product validation failed:', validationError);
-            throw validationError;
-        }
-        
-        const product = {
-            title: SecurityManager.sanitizeInput(productData.title),
-            description: SecurityManager.sanitizeInput(productData.description),
-            price: parseInt(productData.price),
-            images: [productData.image],
-            badge: productData.badge || null,
-            sales: parseInt(productData.sales) || 0,
-            stock: parseInt(productData.stock) || 999,
-            category: productData.category || 'custom',
-            link: productData.link,
-            createdAt: new Date().toISOString(),
-            createdBy: currentUser?._id
-        };
-
-        console.log('📦 Final product object:', product);
-
-        try {
-            console.log('🚀 Sending API request...');
-            const result = await ApiManager.createProduct(product);
-            console.log('✅ Product created successfully:', result);
-            
-            Utils.showToast('Đăng sản phẩm thành công!', 'success');
-            await ProductManager.loadProducts();
-            return true;
-        } catch (error) {
-            console.error('❌ Failed to create product:', error);
-            console.error('Error details:', {
-                message: error.message,
-                stack: error.stack,
-                response: error.response
-            });
-            Utils.showToast(error.message || 'Không thể lưu sản phẩm', 'error');
-            throw error;
-        }
-    }
-
-    static async deleteProduct(productId) {
-        if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return;
-        
-        console.log('🗑️ Deleting product:', productId);
-        
-        try {
-            await ApiManager.deleteProduct(productId);
-            
-            allProducts = allProducts.filter(p => p._id !== productId);
-            
-            if (window.renderApiProducts) {
-                window.renderApiProducts(allProducts);
-            }
-
-            Utils.showToast('Xóa sản phẩm thành công!', 'success');
-        } catch (error) {
-            console.error('❌ Failed to delete product:', error);
-            Utils.showToast(error.message || 'Không thể xóa sản phẩm!', 'error');
-        }
-    }
-
-    static async updateProduct(productId, updates) {
-        console.log('✏️ Updating product:', productId, updates);
-        
-        try {
-            SecurityManager.validateProduct(updates);
-            
-            await ApiManager.updateProduct(productId, updates);
-            
-            const index = allProducts.findIndex(p => p._id === productId);
-            if (index !== -1) {
-                allProducts[index] = { ...allProducts[index], ...updates };
-            }
-            
-            if (window.renderApiProducts) {
-                window.renderApiProducts(allProducts);
-            }
-            
-            Utils.showToast('Cập nhật sản phẩm thành công!', 'success');
-            return true;
-        } catch (error) {
-            console.error('❌ Failed to update product:', error);
-            Utils.showToast(error.message || 'Không thể cập nhật sản phẩm!', 'error');
-            return false;
-        }
-    }
-}
-
-// =================================================================
-// ENHANCED MODAL MANAGER (COMPLETELY FIXED)
-// =================================================================
-
-class ModalManager {
-    static initAuthModal() {
-        const authModal = document.getElementById('authModal');
-        const loginButton = document.getElementById('loginButton');
-        
-        if (!authModal || !loginButton) {
-            console.error('❌ Auth modal or login button not found');
-            return;
-        }
-        
-        console.log('🎭 Initializing auth modal...');
-        
-        const showModal = () => {
-            authModal.style.display = 'flex';
-            setTimeout(() => authModal.classList.add('show'), 10);
-            document.body.style.overflow = 'hidden';
-        };
-        
-        const hideModal = () => {
-            authModal.classList.remove('show');
-            setTimeout(() => {
-                authModal.style.display = 'none';
-                document.body.style.overflow = '';
-            }, 300);
-        };
-        
-        loginButton.addEventListener('click', showModal);
-        
-        authModal.querySelectorAll('.modal-close').forEach(btn => {
-            btn.addEventListener('click', hideModal);
-        });
-        
-        authModal.addEventListener('click', (e) => {
-            if (e.target === authModal) hideModal();
-        });
-        
-        this.setupAuthTabs(authModal);
-        this.setupAuthForms(authModal, hideModal);
-    }
-
-    static setupAuthTabs(authModal) {
-        const tabs = authModal.querySelectorAll('.modal-tab');
-        const forms = authModal.querySelectorAll('.modal-form');
-        
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                
-                forms.forEach(f => {
-                    f.classList.toggle('active', f.id === `${tab.dataset.tab}Form`);
-                });
-            });
-        });
-        
-        authModal.querySelectorAll('.switch-to-register, .switch-to-login').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetTab = e.target.classList.contains('switch-to-register') ? 'register' : 'login';
-                authModal.querySelector(`.modal-tab[data-tab="${targetTab}"]`)?.click();
-            });
-        });
-    }
-
-    static setupAuthForms(authModal, hideModal) {
-        this.setupLoginForm(authModal.querySelector('#loginForm'), hideModal);
-        this.setupRegisterForm(authModal.querySelector('#registerForm'), hideModal);
-    }
-
-    static setupLoginForm(form, onSuccess) {
-        if (!form) {
-            console.error('❌ Login form not found');
-            return;
-        }
-        
-        console.log('📝 Setting up login form');
-        
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const submitBtn = form.querySelector('.btn-submit');
-            const spinner = submitBtn.querySelector('.spinner');
-            
-            this.setLoadingState(submitBtn, spinner, true);
-            
-            try {
-                const formData = new FormData(form);
-                const email = formData.get('email')?.trim();
-                const password = formData.get('password');
-                const rememberMe = formData.get('rememberMe') === 'on';
-                
-                console.log('📧 Login data:', { email, rememberMe, hasPassword: !!password });
-                
-                if (!email || !password) {
-                    throw new Error('Vui lòng nhập đủ thông tin!');
-                }
-                
-                const user = await AuthManager.login(email, password, rememberMe);
-                Utils.showToast(`Chào mừng ${AuthManager.getDisplayName(user)}!`, 'success');
-                
-                onSuccess();
-                form.reset();
-                
-                setTimeout(() => ProductManager.loadProducts(), 500);
-            } catch (error) {
-                console.error('Login error:', error);
-                Utils.showToast(error.message || 'Đăng nhập thất bại!', 'error');
-            } finally {
-                this.setLoadingState(submitBtn, spinner, false);
-            }
-        });
-    }
-
-    static setupRegisterForm(form, onSuccess) {
-        if (!form) {
-            console.error('❌ Register form not found');
-            return;
-        }
-        
-        console.log('📝 Setting up register form');
-        
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const submitBtn = form.querySelector('.btn-submit');
-            const spinner = submitBtn.querySelector('.spinner');
-            
-            this.setLoadingState(submitBtn, spinner, true);
-            
-            try {
-                const formData = new FormData(form);
-                const name = formData.get('name')?.trim();
-                const email = formData.get('email')?.trim();
-                const password = formData.get('password');
-                const confirmPassword = formData.get('confirmPassword');
-                
-                console.log('📧 Register data:', { name, email, hasPassword: !!password, hasConfirmPassword: !!confirmPassword });
-                
-                if (!name || !email || !password || !confirmPassword) {
-                    throw new Error('Vui lòng nhập đủ thông tin!');
-                }
-                
-                if (password.length < 6) {
-                    throw new Error('Mật khẩu ít nhất 6 ký tự!');
-                }
-                
-                if (password !== confirmPassword) {
-                    throw new Error('Mật khẩu không khớp!');
-                }
-                
-                const user = await AuthManager.register(name, email, password, confirmPassword);
-                Utils.showToast(`Chào mừng ${AuthManager.getDisplayName(user)}!`, 'success');
-                
-                onSuccess();
-                form.reset();
-                
-                setTimeout(() => ProductManager.loadProducts(), 500);
-            } catch (error) {
-                console.error('Register error:', error);
-                Utils.showToast(error.message || 'Đăng ký thất bại!', 'error');
-            } finally {
-                this.setLoadingState(submitBtn, spinner, false);
-            }
-        });
-    }
-
-    static setLoadingState(submitBtn, spinner, isLoading) {
-        if (isLoading) {
-            submitBtn.classList.add('loading');
-            submitBtn.disabled = true;
-            if (spinner) spinner.style.display = 'inline-block';
-        } else {
-            submitBtn.classList.remove('loading');
-            submitBtn.disabled = false;
-            if (spinner) spinner.style.display = 'none';
-        }
-    }
-}
-
-// =================================================================
-// IMAGE UPLOAD HANDLER
-// =================================================================
-
-class ImageUploadHandler {
-    static async uploadToImgBB(file) {
-        const formData = new FormData();
-        formData.append('image', file);
-        
-        try {
-            const response = await fetch('https://api.imgbb.com/1/upload?key=YOUR_IMGBB_API_KEY', {
-                method: 'POST',
-                body: formData
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                return data.data.url;
-            } else {
-                throw new Error('Upload failed');
-            }
-        } catch (error) {
-            throw new Error('Không thể upload hình ảnh!');
-        }
-    }
-
-    static createImagePreview(file, container) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            container.innerHTML = `
-                <div style="text-align: center; margin: 1rem 0;">
-                    <img src="${e.target.result}" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                    <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">Preview</p>
-                </div>
-            `;
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-// =================================================================
-// APPLICATION INITIALIZATION (FIXED)
-// =================================================================
-
-class App {
-    static async init() {
-        console.log('🚀 Initializing application...');
-        
-        try {
-            // Initialize security
-            SecurityManager.obfuscateConsole();
-            
-            // Initialize UI components
-            Utils.getToastContainer();
-            
-            // Setup logout handlers
-            document.querySelectorAll('#logoutButton, #sidebarLogoutBtn').forEach(btn => {
-                if (btn) {
-                    btn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        AuthManager.logout();
-                    });
-                }
-            });
-            
-            // Check authentication first
-            await AuthManager.checkAutoLogin();
-            
-            // Initialize modal AFTER authentication check
-            ModalManager.initAuthModal();
-            
-            // Initialize current page
-            await App.initCurrentPage();
-            
-            // Initialize floating buttons
-            setTimeout(() => FloatingButtonsManager.init(), 500);
-            
-            // Setup global error handling
-            window.addEventListener('error', App.handleGlobalError);
-            window.addEventListener('unhandledrejection', App.handleGlobalError);
-            
-            console.log('✅ Application initialized successfully');
-        } catch (error) {
-            console.error('❌ Application initialization failed:', error);
-            Utils.showToast('Không thể khởi tạo ứng dụng!', 'error');
-        }
-    }
-
-    static async initCurrentPage() {
-        const path = window.location.pathname.split("/").pop() || 'index.html';
-        
-        console.log('📄 Initializing page:', path);
-        
-        switch (path) {
-            case 'index.html':
-            case '':
-                await App.initIndexPage();
-                break;
-            case 'account.html':
-                await App.initAccountPage();
-                break;
-            case 'cart.html':
-                await App.initCartPage();
-                break;
-            case 'favorite.html':
-                await App.initFavoritePage();
-                break;
-        }
-    }
-
-    static async initIndexPage() {
-        await ProductManager.loadProducts();
-        
-        const filterButton = document.getElementById('filterButton');
-        const resetButton = document.getElementById('resetButton');
-        
-        if (filterButton) {
-            filterButton.addEventListener('click', Utils.debounce(() => {
-                window.filterProducts?.();
-            }, 300));
-        }
-        
-        if (resetButton) {
-            resetButton.addEventListener('click', () => window.resetFilters?.());
-        }
-    }
-
-    static async initAccountPage() {
-        if (!currentUser) {
-            Utils.showToast('Vui lòng đăng nhập để truy cập trang này!', 'warning');
-            setTimeout(() => window.location.href = 'index.html', 1000);
-        }
-    }
-
-    static async initCartPage() {
-        if (!currentUser) {
-            Utils.showToast('Vui lòng đăng nhập để truy cập giỏ hàng!', 'warning');
-            setTimeout(() => window.location.href = 'index.html', 1000);
-        }
-    }
-
-    static async initFavoritePage() {
-        if (!currentUser) {
-            Utils.showToast('Vui lòng đăng nhập để xem danh sách yêu thích!', 'warning');
-            setTimeout(() => window.location.href = 'index.html', 1000);
-        }
-    }
-
-    static handleGlobalError(event) {
-        const error = event.error || event.reason;
-        if (error && error.message && !error.message.includes('Script error')) {
-            console.error('Global error:', error);
-            Utils.showToast('Đã xảy ra lỗi. Vui lòng thử lại!', 'error');
-        }
-    }
-}
-
-// =================================================================
-// DEVTOOLS PROTECTION
-// =================================================================
-
-let _devToolsKeydownHandler = null;
-let _devToolsContextMenuHandler = null;
-
-function isAdminEmail(email) {
-    return CONFIG.AUTHORIZED_EMAILS.map(e => e.toLowerCase()).includes(email?.toLowerCase());
-}
-
-function setupDevToolsProtection() {
-    // Remove old listeners if exist
-    if (_devToolsKeydownHandler) document.removeEventListener('keydown', _devToolsKeydownHandler);
-    if (_devToolsContextMenuHandler) document.removeEventListener('contextmenu', _devToolsContextMenuHandler);
-
-    // Check if current user is admin
-    const isCurrentUserAdmin = currentUser && isAdminEmail(currentUser.email);
-    
-    console.log('🔒 Setting up DevTools protection...');
-    console.log('Current user:', currentUser);
-    console.log('Is admin:', isCurrentUserAdmin);
-    
-    // Only apply restrictions for NON-admin users
-    if (!isCurrentUserAdmin) {
-        console.log('❌ Applying DevTools restrictions for non-admin user');
-        
-        _devToolsKeydownHandler = function(e) {
-            if (
-                e.key === 'F12' ||
-                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-                (e.ctrlKey && e.key === 'U')
-            ) {
-                e.preventDefault();
-                Utils.showToast('Chức năng này đã bị vô hiệu hóa!', 'warning');
-                return false;
-            }
-        };
-        
-        _devToolsContextMenuHandler = function(e) {
-            e.preventDefault();
-            Utils.showToast('Chuột phải đã bị vô hiệu hóa!', 'warning');
-            return false;
-        };
-        
-        document.addEventListener('keydown', _devToolsKeydownHandler);
-        document.addEventListener('contextmenu', _devToolsContextMenuHandler);
-    } else {
-        console.log('✅ Admin user detected - DevTools restrictions DISABLED');
-    }
-}
-
-function updateDevToolsProtection() {
-    setupDevToolsProtection();
-}
-
-// =================================================================
-// GLOBAL EXPORTS AND CLEANUP
-// =================================================================
-
-// Export essential classes and functions to window
-window.Utils = Utils;
-window.CartManager = CartManager;
-window.FavoriteManager = FavoriteManager;
-window.PermissionManager = PermissionManager;
-window.ProductManager = ProductManager;
-window.ApiManager = ApiManager;
-window.SecurityManager = SecurityManager;
-window.ImageUploadHandler = ImageUploadHandler;
-window.AuthManager = AuthManager;
-
-// Update global currentUser reference
-Object.defineProperty(window, 'currentUser', {
-    get: () => currentUser,
-    set: (value) => { currentUser = value; }
-});
-
-// Export update function for favorites
-window.updateAllFavoriteButtons = async () => {
-    if (!currentUser) return;
-    try {
-        const favorites = await FavoriteManager.get();
-        favorites.forEach(fav => FavoriteManager.updateStatus(fav.productId, true));
-    } catch (error) {
-        console.log('Could not update favorite buttons:', error);
-    }
-};
-
-// Debug function for permissions
-window.debugPermissions = () => PermissionManager.debugPermissions();
-
-// Cleanup function for page unload
-window.addEventListener('beforeunload', () => {
-    console.log('🧹 Cleaning up...');
-});
-
-// =================================================================
-// APPLICATION START
-// =================================================================
-
-document.addEventListener('DOMContentLoaded', () => {
-    App.init().catch(error => {
-        console.error('Failed to initialize app:', error);
-        Utils.showToast('Không thể khởi tạo ứng dụng!', 'error');
-    });
-});
-
-// Also initialize if already loaded
-if (document.readyState !== 'loading') {
-    App.init().catch(error => {
-        console.error('Failed to initialize app:', error);
-        Utils.showToast('Không thể khởi tạo ứng dụng!', 'error');
-    });
-}
