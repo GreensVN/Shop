@@ -577,6 +577,7 @@ class AuthManager {
         return user ? (user.name || user.email || 'User') : 'User';
     }
 
+    // 1. Sửa AuthManager.updateUIAfterLogin để cập nhật tên, role, body class, và render lại sản phẩm
     static async updateUIAfterLogin() {
         const userDropdown = document.getElementById('userDropdown');
         const loginButton = document.getElementById('loginButton');
@@ -585,26 +586,45 @@ class AuthManager {
 
         if (userDropdown) userDropdown.style.display = 'flex';
         if (loginButton) loginButton.style.display = 'none';
-        
-        if (userAvatar && userName) {
-            const firstLetter = currentUser.name ? currentUser.name[0].toUpperCase() : 'U';
-            userAvatar.textContent = firstLetter;
-            userName.textContent = currentUser.name || 'User';
-        }
 
+        if (userAvatar && userName) {
+            const name = currentUser?.name || currentUser?.email || '';
+            const firstLetter = name ? name[0].toUpperCase() : 'U';
+            userAvatar.textContent = firstLetter;
+            userName.textContent = name || 'User';
+        }
+        // Cập nhật body class admin-user
+        if (currentUser && currentUser.role === 'admin') {
+            document.body.classList.add('admin-user');
+        } else {
+            document.body.classList.remove('admin-user');
+        }
+        // Render lại sản phẩm
+        if (window.ProductManager && ProductManager.loadProducts) {
+            await ProductManager.loadProducts();
+            const grid = document.getElementById('productsGrid');
+            if (grid) ProductManager.renderProductsBasic(window.allProducts, grid);
+        }
         // Update floating buttons
         if (window.FloatingButtonsManager) {
             window.FloatingButtonsManager.update();
         }
     }
 
+    // 2. Sửa updateUIAfterLogout để cập nhật body class
     static updateUIAfterLogout() {
         const userDropdown = document.getElementById('userDropdown');
         const loginButton = document.getElementById('loginButton');
-
         if (userDropdown) userDropdown.style.display = 'none';
         if (loginButton) loginButton.style.display = 'flex';
-
+        document.body.classList.remove('admin-user');
+        // Render lại sản phẩm (ẩn các nút admin nếu có)
+        if (window.ProductManager && ProductManager.loadProducts) {
+            ProductManager.loadProducts().then(() => {
+                const grid = document.getElementById('productsGrid');
+                if (grid) ProductManager.renderProductsBasic(window.allProducts, grid);
+            });
+        }
         // Update floating buttons
         if (window.FloatingButtonsManager) {
             window.FloatingButtonsManager.update();
@@ -1041,9 +1061,13 @@ class ProductManager {
         }
     }
 
+    // 3. Sửa ProductManager.renderProductsBasic để hiển thị thông báo nếu không có sản phẩm
     static renderProductsBasic(products, container) {
         if (!container) return;
-        
+        if (!products || products.length === 0) {
+            container.innerHTML = '<div class="no-products-found">Chưa có sản phẩm nào.</div>';
+            return;
+        }
         container.innerHTML = products.map(product => this.createBasicProductCard(product)).join('');
     }
 
