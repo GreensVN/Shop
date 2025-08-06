@@ -1,4 +1,4 @@
-
+// main.js - ENHANCED Authentication & Protection System
 "use strict";
 
 // =================================================================
