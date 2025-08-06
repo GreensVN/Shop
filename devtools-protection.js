@@ -1,43 +1,49 @@
-// devtools-protection.js - Fixed DevTools Protection System
+// devtools-protection.js - Enhanced DevTools Protection System
 "use strict";
 
 /**
- * DevTools Protection System - Chỉ cho phép Admin sử dụng DevTools
+ * Enhanced DevTools Protection System
+ * Provides comprehensive protection against unauthorized DevTools usage
+ * Only allows admin users to use DevTools
  */
 class DevToolsProtection {
     constructor() {
         this.isDevToolsOpen = false;
         this.checkInterval = null;
-        this.protectedPages = ['account.html', 'index.html', 'product.html'];
+        this.protectedPages = ['account.html', 'index.html', 'product.html', 'cart.html', 'favorite.html'];
         this.warningCount = 0;
         this.maxWarnings = 3;
         this.isBlocked = false;
-        this.threshold = 160; // DevTools detection threshold
+        this.threshold = 160;
+        this.isInitialized = false;
         
-        console.log('🛡️ DevTools Protection constructor called');
+        console.log('🛡️ DevTools Protection System initialized');
         this.init();
     }
 
     /**
-     * Khởi tạo hệ thống bảo vệ
+     * Initialize the protection system
      */
     init() {
-        console.log('🛡️ DevTools Protection init started');
+        if (this.isInitialized) return;
         
-        // Chỉ khởi động bảo vệ trên các trang được chỉ định
+        console.log('🔄 Starting DevTools Protection...');
+        
+        // Check if protection should be enabled for this page
         if (this.shouldProtect()) {
-            console.log('✅ Protection activated for this page');
+            console.log('✅ Protection activated for current page');
             this.startProtection();
             this.addAntiDebugMethods();
             this.blockCommonShortcuts();
             this.addVisibilityChangeHandler();
+            this.isInitialized = true;
         } else {
             console.log('ℹ️ No protection needed for this page');
         }
     }
 
     /**
-     * Kiểm tra xem trang hiện tại có cần bảo vệ không
+     * Check if current page needs protection
      */
     shouldProtect() {
         const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -45,27 +51,23 @@ class DevToolsProtection {
             currentPage.includes(page.replace('.html', ''))
         ) || currentPage === '' || currentPage === 'index.html';
         
-        console.log('📄 Current page:', currentPage, '| Needs protection:', needsProtection);
+        console.log(`📄 Current page: ${currentPage} | Protection needed: ${needsProtection}`);
         return needsProtection;
     }
 
     /**
-     * Kiểm tra quyền admin
+     * Check if current user is admin
      */
     isAdmin() {
         try {
-            // Kiểm tra từ window.currentUser trước
-            if (window.currentUser) {
-                const isAdminUser = window.currentUser.role === 'admin';
-                console.log('👤 Admin check (window.currentUser):', isAdminUser);
-                return isAdminUser;
+            // Check from main.js global variables first
+            if (window.currentUser && window.currentUser.role === 'admin') {
+                return true;
             }
             
-            // Fallback: kiểm tra từ localStorage
+            // Fallback to localStorage
             const user = JSON.parse(localStorage.getItem('gag_user') || '{}');
-            const isAdminUser = user && user.role === 'admin';
-            console.log('👤 Admin check (localStorage):', isAdminUser, '| User role:', user?.role);
-            return isAdminUser;
+            return user && user.role === 'admin';
         } catch (error) {
             console.error('❌ Error checking admin status:', error);
             return false;
@@ -73,29 +75,27 @@ class DevToolsProtection {
     }
 
     /**
-     * Bắt đầu hệ thống bảo vệ
+     * Start the protection monitoring
      */
     startProtection() {
-        console.log('🚀 Starting protection systems...');
-        
-        // Kiểm tra liên tục DevTools
+        // Continuous DevTools detection
         this.checkInterval = setInterval(() => {
             this.detectDevTools();
         }, 500);
 
-        console.log('✅ DevTools detection interval started');
+        console.log('✅ DevTools detection started');
     }
 
     /**
-     * Phát hiện DevTools
+     * Detect if DevTools is open
      */
     detectDevTools() {
         if (this.isAdmin()) {
-            // Admin được phép - không làm gì cả
+            // Admin is allowed - no restrictions
             return;
         }
 
-        // Phương pháp 1: Kiểm tra kích thước window
+        // Method 1: Window size difference
         const widthDiff = window.outerWidth - window.innerWidth;
         const heightDiff = window.outerHeight - window.innerHeight;
         
@@ -108,29 +108,28 @@ class DevToolsProtection {
             this.isDevToolsOpen = false;
         }
 
-        // Phương pháp 2: Kiểm tra console timing
+        // Method 2: Console timing detection
         this.checkConsoleDebugging();
     }
 
     /**
-     * Kiểm tra console debugging
+     * Check for console debugging
      */
     checkConsoleDebugging() {
         if (this.isAdmin()) return;
 
-        // Kiểm tra timing để phát hiện DevTools
         const start = performance.now();
         console.log(''); // Dummy log
         const end = performance.now();
         
-        // Nếu console.log chậm hơn bình thường -> DevTools đang mở
+        // If console.log is slower than normal -> DevTools is open
         if (end - start > 1) {
             this.handleDevToolsDetected();
         }
     }
 
     /**
-     * Xử lý khi phát hiện DevTools
+     * Handle DevTools detection
      */
     handleDevToolsDetected() {
         if (this.isAdmin()) {
@@ -140,12 +139,13 @@ class DevToolsProtection {
 
         this.warningCount++;
         
+        // Clear console and show warning
         console.clear();
         console.log('%c🚫 CẢNH BÁO BẢO MẬT', 'color: red; font-size: 20px; font-weight: bold;');
         console.log('%cViệc mở Developer Tools không được phép!', 'color: red; font-size: 14px;');
         console.log(`%cCảnh báo ${this.warningCount}/${this.maxWarnings}`, 'color: orange; font-size: 12px;');
 
-        // Hiển thị modal cảnh báo
+        // Show warning modal
         this.showWarningModal();
 
         if (this.warningCount >= this.maxWarnings) {
@@ -154,12 +154,12 @@ class DevToolsProtection {
     }
 
     /**
-     * Hiển thị modal cảnh báo
+     * Show warning modal
      */
     showWarningModal() {
         if (this.isAdmin()) return;
 
-        // Xóa modal cũ nếu có
+        // Remove existing modal
         const existingModal = document.getElementById('devtools-warning-modal');
         if (existingModal) existingModal.remove();
 
@@ -177,19 +177,21 @@ class DevToolsProtection {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-family: Arial, sans-serif;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                animation: fadeIn 0.3s ease;
             ">
                 <div style="
                     background: white;
                     padding: 30px;
-                    border-radius: 10px;
+                    border-radius: 16px;
                     text-align: center;
                     max-width: 400px;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                    animation: slideIn 0.3s ease;
                 ">
                     <div style="color: #e74c3c; font-size: 48px; margin-bottom: 20px;">⚠️</div>
-                    <h2 style="color: #e74c3c; margin-bottom: 15px;">CẢNH BÁO BẢO MẬT</h2>
-                    <p style="color: #333; margin-bottom: 20px; line-height: 1.5;">
+                    <h2 style="color: #e74c3c; margin-bottom: 15px; font-size: 24px;">CẢNH BÁO BẢO MẬT</h2>
+                    <p style="color: #333; margin-bottom: 20px; line-height: 1.6; font-size: 16px;">
                         Việc mở Developer Tools không được phép trên trang này.<br>
                         <strong>Cảnh báo: ${this.warningCount}/${this.maxWarnings}</strong>
                     </p>
@@ -197,23 +199,29 @@ class DevToolsProtection {
                         background: #e74c3c;
                         color: white;
                         border: none;
-                        padding: 10px 20px;
-                        border-radius: 5px;
+                        padding: 12px 24px;
+                        border-radius: 8px;
                         cursor: pointer;
                         font-size: 16px;
-                    ">Đã hiểu</button>
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='#e74c3c'">Đã hiểu</button>
                 </div>
             </div>
+            <style>
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes slideIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+            </style>
         `;
 
         document.body.appendChild(modal);
 
-        // Tự động đóng sau 3 giây
+        // Auto close after 3 seconds
         setTimeout(() => {
             if (modal && modal.parentNode) modal.remove();
         }, 3000);
 
-        // Đóng khi click nút
+        // Close button handler
         const closeBtn = modal.querySelector('#close-warning');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
@@ -223,7 +231,7 @@ class DevToolsProtection {
     }
 
     /**
-     * Chặn hoàn toàn truy cập
+     * Block access completely
      */
     blockAccess() {
         if (this.isAdmin()) return;
@@ -232,13 +240,13 @@ class DevToolsProtection {
         
         console.log('🚫 Blocking access due to repeated violations');
         
-        // Clear tất cả intervals
+        // Clear intervals
         if (this.checkInterval) {
             clearInterval(this.checkInterval);
             this.checkInterval = null;
         }
 
-        // Block toàn bộ trang
+        // Block entire page
         document.body.innerHTML = `
             <div style="
                 position: fixed;
@@ -251,46 +259,48 @@ class DevToolsProtection {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-family: Arial, sans-serif;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
                 color: white;
+                text-align: center;
             ">
-                <div style="text-align: center;">
+                <div>
                     <div style="font-size: 72px; margin-bottom: 30px;">🚫</div>
-                    <h1 style="font-size: 2.5rem; margin-bottom: 20px;">TRUY CẬP BỊ CHẶN</h1>
-                    <p style="font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9;">
-                        Bạn đã vi phạm chính sách bảo mật của website
+                    <h1 style="font-size: 2.5rem; margin-bottom: 20px; font-weight: 700;">TRUY CẬP BỊ CHẶN</h1>
+                    <p style="font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9; line-height: 1.6;">
+                        Bạn đã vi phạm chính sách bảo mật của website<br>
+                        và bị chặn truy cập tạm thời
                     </p>
-                    <p style="opacity: 0.7;">Đang chuyển hướng về trang chủ...</p>
+                    <p style="opacity: 0.7; font-size: 1rem;">Đang chuyển hướng về trang chủ...</p>
                 </div>
             </div>
         `;
 
-        // Chuyển hướng về trang chủ sau 2 giây
+        // Redirect to home page after 2 seconds
         setTimeout(() => {
             window.location.href = 'index.html';
         }, 2000);
     }
 
     /**
-     * Chặn các phím tắt phổ biến
+     * Block common shortcuts
      */
     blockCommonShortcuts() {
         console.log('⌨️ Blocking common shortcuts...');
         
-        // Ngăn phím tắt
+        // Prevent keyboard shortcuts
         document.addEventListener('keydown', (e) => this.handleKeyDown(e), { passive: false, capture: true });
         
-        // Ngăn chuột phải
+        // Prevent right-click
         document.addEventListener('contextmenu', (e) => this.handleContextMenu(e), { passive: false, capture: true });
         
-        // Ngăn select text
+        // Prevent text selection
         document.addEventListener('selectstart', (e) => this.handleSelectStart(e), { passive: false, capture: true });
         
         console.log('✅ Shortcut blocking activated');
     }
 
     /**
-     * Xử lý phím tắt
+     * Handle keyboard shortcuts
      */
     handleKeyDown(e) {
         if (this.isAdmin()) return;
@@ -298,40 +308,26 @@ class DevToolsProtection {
         let blocked = false;
         let message = '';
 
-        // F12
-        if (e.keyCode === 123) {
+        // Common DevTools shortcuts
+        const shortcuts = {
+            123: 'F12 không được phép!', // F12
+            73: 'Ctrl+Shift+I không được phép!', // Ctrl+Shift+I
+            85: 'Ctrl+U không được phép!', // Ctrl+U (View Source)
+            83: 'Ctrl+S không được phép!', // Ctrl+S (Save)
+            65: 'Ctrl+A không được phép!', // Ctrl+A (Select All)
+            80: 'Ctrl+P không được phép!', // Ctrl+P (Print)
+            67: 'Ctrl+Shift+C không được phép!' // Ctrl+Shift+C (Inspect Element)
+        };
+
+        if (e.ctrlKey && e.shiftKey && shortcuts[e.keyCode]) {
             blocked = true;
-            message = 'F12 không được phép!';
-        }
-        // Ctrl+Shift+I (Dev Tools)
-        else if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+            message = shortcuts[e.keyCode];
+        } else if (e.ctrlKey && shortcuts[e.keyCode]) {
             blocked = true;
-            message = 'Ctrl+Shift+I không được phép!';
-        }
-        // Ctrl+U (View Source)
-        else if (e.ctrlKey && e.keyCode === 85) {
+            message = shortcuts[e.keyCode];
+        } else if (shortcuts[e.keyCode]) {
             blocked = true;
-            message = 'Ctrl+U không được phép!';
-        }
-        // Ctrl+S (Save)
-        else if (e.ctrlKey && e.keyCode === 83) {
-            blocked = true;
-            message = 'Ctrl+S không được phép!';
-        }
-        // Ctrl+A (Select All)
-        else if (e.ctrlKey && e.keyCode === 65) {
-            blocked = true;
-            message = 'Ctrl+A không được phép!';
-        }
-        // Ctrl+P (Print)
-        else if (e.ctrlKey && e.keyCode === 80) {
-            blocked = true;
-            message = 'Ctrl+P không được phép!';
-        }
-        // Ctrl+Shift+C (Inspect Element)
-        else if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
-            blocked = true;
-            message = 'Ctrl+Shift+C không được phép!';
+            message = shortcuts[e.keyCode];
         }
 
         if (blocked) {
@@ -343,7 +339,7 @@ class DevToolsProtection {
     }
 
     /**
-     * Xử lý chuột phải
+     * Handle right-click
      */
     handleContextMenu(e) {
         if (this.isAdmin()) return;
@@ -355,12 +351,12 @@ class DevToolsProtection {
     }
 
     /**
-     * Xử lý select text
+     * Handle text selection
      */
     handleSelectStart(e) {
         if (this.isAdmin()) return;
 
-        // Cho phép select trong input và textarea
+        // Allow selection in input and textarea
         if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
             return;
         }
@@ -371,14 +367,14 @@ class DevToolsProtection {
     }
 
     /**
-     * Hiển thị cảnh báo nhanh
+     * Show quick warning message
      */
     showQuickWarning(message) {
-        // Xóa warning cũ nếu có
+        // Remove existing warning
         const existingWarning = document.getElementById('quick-warning');
         if (existingWarning) existingWarning.remove();
 
-        // Tạo thông báo nhanh
+        // Create warning element
         const warning = document.createElement('div');
         warning.id = 'quick-warning';
         warning.style.cssText = `
@@ -388,16 +384,18 @@ class DevToolsProtection {
             background: #e74c3c;
             color: white;
             padding: 15px 20px;
-            border-radius: 5px;
+            border-radius: 8px;
             z-index: 99999;
-            font-family: Arial, sans-serif;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
             animation: slideInWarning 0.3s ease;
             pointer-events: none;
+            font-weight: 600;
+            font-size: 14px;
         `;
         warning.textContent = message;
 
-        // Thêm animation CSS nếu chưa có
+        // Add animation CSS if not exists
         if (!document.getElementById('warning-animation-style')) {
             const style = document.createElement('style');
             style.id = 'warning-animation-style';
@@ -412,7 +410,7 @@ class DevToolsProtection {
 
         document.body.appendChild(warning);
 
-        // Tự động xóa sau 2 giây
+        // Auto remove after 2 seconds
         setTimeout(() => {
             if (warning && warning.parentNode) {
                 warning.remove();
@@ -421,14 +419,14 @@ class DevToolsProtection {
     }
 
     /**
-     * Thêm các phương pháp chống debug
+     * Add anti-debug methods
      */
     addAntiDebugMethods() {
         if (this.isAdmin()) return;
 
         console.log('🔒 Adding anti-debug methods...');
 
-        // Làm rối console
+        // Console clearing
         setInterval(() => {
             if (this.isAdmin()) return;
             
@@ -437,7 +435,7 @@ class DevToolsProtection {
             console.log('%cĐây là tính năng dành cho Developer. Nếu bạn không phải admin, việc sử dụng có thể vi phạm bảo mật.', 'color: red; font-size: 16px;');
         }, 2000);
 
-        // Ngăn debug (but don't overuse to avoid performance issues)
+        // Debugger statement (limited to avoid performance issues)
         let debugCounter = 0;
         const debugInterval = setInterval(() => {
             if (this.isAdmin()) {
@@ -445,7 +443,7 @@ class DevToolsProtection {
                 return;
             }
             
-            if (debugCounter < 10) { // Only run 10 times to avoid blocking page
+            if (debugCounter < 10) {
                 debugger;
                 debugCounter++;
             } else {
@@ -455,12 +453,11 @@ class DevToolsProtection {
     }
 
     /**
-     * Thêm handler cho visibility change
+     * Add visibility change handler
      */
     addVisibilityChangeHandler() {
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && this.isBlocked) {
-                // Nếu user quay lại tab sau khi bị block
                 console.log('🚫 User returned to blocked tab - redirecting...');
                 window.location.href = 'index.html';
             }
@@ -468,7 +465,7 @@ class DevToolsProtection {
     }
 
     /**
-     * Hủy bỏ protection (chỉ admin có thể gọi)
+     * Destroy protection (admin only)
      */
     destroy() {
         if (!this.isAdmin()) {
@@ -488,6 +485,8 @@ class DevToolsProtection {
         document.removeEventListener('contextmenu', this.handleContextMenu);
         document.removeEventListener('selectstart', this.handleSelectStart);
         
+        this.isInitialized = false;
+        
         console.log('✅ DevTools protection destroyed');
         return true;
     }
@@ -499,7 +498,7 @@ class DevToolsProtection {
 
 class AdminDevToolsManager {
     /**
-     * Kích hoạt DevTools cho admin
+     * Enable DevTools for admin
      */
     static enableDevTools() {
         const user = window.currentUser || JSON.parse(localStorage.getItem('gag_user') || '{}');
@@ -509,7 +508,7 @@ class AdminDevToolsManager {
             return false;
         }
 
-        // Hủy bỏ protection
+        // Destroy protection
         if (window.devToolsProtection) {
             const destroyed = window.devToolsProtection.destroy();
             if (destroyed) {
@@ -525,7 +524,7 @@ class AdminDevToolsManager {
     }
 
     /**
-     * Tắt DevTools protection (khởi tạo lại)
+     * Disable DevTools protection (reinitialize)
      */
     static disableDevTools() {
         const user = window.currentUser || JSON.parse(localStorage.getItem('gag_user') || '{}');
@@ -535,7 +534,7 @@ class AdminDevToolsManager {
             return false;
         }
 
-        // Khởi tạo lại protection
+        // Reinitialize protection
         if (!window.devToolsProtection) {
             window.devToolsProtection = new DevToolsProtection();
             console.log('🛡️ DevTools protection đã được kích hoạt lại');
@@ -547,7 +546,7 @@ class AdminDevToolsManager {
     }
 
     /**
-     * Kiểm tra trạng thái protection
+     * Get protection status
      */
     static getStatus() {
         const user = window.currentUser || JSON.parse(localStorage.getItem('gag_user') || '{}');
@@ -597,13 +596,13 @@ function initDevToolsProtection() {
     console.log('🔄 Initializing DevTools Protection System...');
     
     const checkUser = () => {
-        // Đợi main.js load xong (có thể mất 1-2 giây)
+        // Wait for main.js to load (may take 1-2 seconds)
         if (window.Utils && (window.currentUser !== undefined || Date.now() - startTime > 3000)) {
             console.log('🔍 User data available, proceeding with protection init...');
             console.log('👤 Current user role:', window.currentUser?.role || 'none');
             
             try {
-                // Khởi tạo protection system
+                // Initialize protection system
                 window.devToolsProtection = new DevToolsProtection();
                 window.AdminDevToolsManager = AdminDevToolsManager;
                 
@@ -615,7 +614,7 @@ function initDevToolsProtection() {
                 console.error('❌ Failed to initialize DevTools Protection:', error);
             }
         } else {
-            // Chờ 200ms và thử lại
+            // Wait 200ms and try again
             setTimeout(checkUser, 200);
         }
     };
